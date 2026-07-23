@@ -1,0 +1,19 @@
+<mat-toolbar color="primary">
+  <mat-icon>show_chart</mat-icon>
+  <span style="margin-left: 8px">Trade Signal</span>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav mode="side" opened class="sidenav">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/signals" routerLinkActive="active">
+        <mat-icon matListItemIcon>table_chart</mat-icon>
+        <span matListItemTitle>Signals</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>

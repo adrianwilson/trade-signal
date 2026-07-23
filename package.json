@@ -2,7 +2,14 @@
   "name": "@org/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start": "npx nx run-many -t serve -p dashboard api --output-style=stream",
+    "start:dashboard": "npx nx serve dashboard",
+    "start:api": "npx nx serve api",
+    "build": "npx nx run-many -t build",
+    "test": "npx nx run-many -t test",
+    "lint": "npx nx run-many -t lint"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~22.0.4",
@@ -48,10 +55,13 @@
     "libs/*"
   ],
   "dependencies": {
+    "@angular/animations": "^22.0.8",
+    "@angular/cdk": "^22.0.6",
     "@angular/common": "~22.0.4",
     "@angular/compiler": "~22.0.4",
     "@angular/core": "~22.0.4",
     "@angular/forms": "~22.0.4",
+    "@angular/material": "^22.0.6",
     "@angular/platform-browser": "~22.0.4",
     "@angular/router": "~22.0.4",
     "@nestjs/common": "^11.0.0",

@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start All",
+      "type": "shell",
+      "command": "npx nx run-many -t serve -p dashboard api --output-style=stream",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Start Dashboard",
+      "type": "shell",
+      "command": "npx nx serve dashboard",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Start API",
+      "type": "shell",
+      "command": "npx nx serve api",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Build All",
+      "type": "shell",
+      "command": "npx nx run-many -t build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Test All",
+      "type": "shell",
+      "command": "npx nx run-many -t test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Lint All",
+      "type": "shell",
+      "command": "npx nx run-many -t lint",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      },
+      "group": "test"
+    }
+  ]
+}

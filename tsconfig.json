@@ -8,6 +8,9 @@
     },
     {
       "path": "./libs/signals"
+    },
+    {
+      "path": "./apps/dashboard"
     }
   ],
   "compilerOptions": {}
