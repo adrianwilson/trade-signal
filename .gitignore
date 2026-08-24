@@ -55,3 +55,9 @@ __screenshots__/
 # Environment
 .env
 .env.local
+
+# Claude hooks session logs
+logs/
+
+# ADW agent output
+agents/
