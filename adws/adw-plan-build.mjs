@@ -126,7 +126,7 @@ const planResponse = executeTemplate({
   slashCommand: issueCommand,
   args: [`${issue.title}: ${issue.body}`],
   adwId,
-  model: 'sonnet',
+  model: 'opus',
 });
 checkError(planResponse, issueNumber, adwId, AGENT_PLANNER, 'Error building plan', logger);
 makeIssueComment(issueNumber, formatMsg(adwId, AGENT_PLANNER, '\u2705 Implementation plan created'));
@@ -170,7 +170,7 @@ const implementResponse = executeTemplate({
   slashCommand: '/implement',
   args: [planFilePath],
   adwId,
-  model: 'sonnet',
+  model: 'opus',
 });
 checkError(implementResponse, issueNumber, adwId, AGENT_IMPLEMENTOR, 'Error implementing', logger);
 makeIssueComment(issueNumber, formatMsg(adwId, AGENT_IMPLEMENTOR, '\u2705 Solution implemented'));
