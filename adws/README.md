@@ -1,6 +1,6 @@
 # AI Developer Workflow (ADW) System
 
-ADW automates software development by integrating GitHub issues with Claude Code CLI to classify issues, generate plans, implement solutions, run tests, and create pull requests.
+ADW automates the full software development life cycle by integrating GitHub issues with Claude Code CLI to classify issues, generate plans, implement solutions, run tests, review against specs, and generate documentation.
 
 ## Quick Start
 
@@ -32,8 +32,14 @@ The ADW system is built from composable scripts that can run independently or ch
 | `adw-plan.mjs` | Classify issue, create branch, generate spec, commit | Issue number |
 | `adw-build.mjs` | Implement the spec, commit | Issue number + ADW ID |
 | `adw-test.mjs` | Run tests, auto-fix failures, retry up to 4x | Issue number |
-| `adw-plan-build.mjs` | Plan + Build (legacy monolithic) | Issue number |
-| `adw-plan-build-test.mjs` | Plan + Build + Test (full pipeline) | Issue number |
+| `adw-review.mjs` | Review implementation against spec, auto-patch blockers | Issue number + ADW ID |
+| `adw-document.mjs` | Generate documentation from diff + spec | Issue number + ADW ID |
+| `adw-patch.mjs` | Apply focused patch from issue comment ("adw_patch") | Issue number |
+| `adw-plan-build.mjs` | Plan + Build | Issue number |
+| `adw-plan-build-test.mjs` | Plan + Build + Test | Issue number |
+| `adw-plan-build-review.mjs` | Plan + Build + Review | Issue number |
+| `adw-plan-build-test-review.mjs` | Plan + Build + Test + Review | Issue number |
+| `adw-sdlc.mjs` | **Full SDLC**: Plan + Build + Test + Review + Document | Issue number |
 
 ### State Management
 
@@ -77,6 +83,10 @@ State is persisted in `agents/{adw-id}/adw_state.json` between steps:
 | `/test` | Run full Nx test suite, return structured JSON |
 | `/resolve_failed_test` | Autonomously fix a failing test |
 | `/classify_adw` | Extract ADW workflow + ID from text |
+| `/review` | Review implementation against spec, report issues with severity |
+| `/document` | Generate feature documentation from git diff + spec |
+| `/patch` | Create focused mini-plan for a specific review issue |
+| `/conditional_docs` | Smart doc routing -- tells agents which docs to read |
 
 ## Output Structure
 
