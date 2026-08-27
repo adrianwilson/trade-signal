@@ -1,94 +1,74 @@
 /**
- * Claude Code agent module for executing prompts programmatically.
+ * Claude Code agent module using the official SDK.
+ *
+ * Replaces subprocess-based execution with native SDK calls.
  */
 
-import { execFileSync } from 'child_process';
-import { mkdirSync, writeFileSync, readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { query } from '@anthropic-ai/claude-code';
+import { mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
 import { getProjectRoot } from './utils.mjs';
 
-const CLAUDE_PATH = process.env.CLAUDE_CODE_PATH || 'claude';
-
-export function checkClaudeInstalled() {
-  try {
-    execFileSync(CLAUDE_PATH, ['--version'], { encoding: 'utf8' });
-    return null;
-  } catch {
-    return `Claude Code CLI not found at '${CLAUDE_PATH}'`;
-  }
-}
-
-function parseJsonlOutput(outputFile) {
-  try {
-    const content = readFileSync(outputFile, 'utf8');
-    const messages = content
-      .split('\n')
-      .filter((line) => line.trim())
-      .map((line) => JSON.parse(line));
-
-    let resultMessage = null;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].type === 'result') {
-        resultMessage = messages[i];
-        break;
-      }
-    }
-    return { messages, resultMessage };
-  } catch {
-    return { messages: [], resultMessage: null };
-  }
-}
-
-function convertJsonlToJson(jsonlFile) {
-  const { messages } = parseJsonlOutput(jsonlFile);
-  const jsonFile = jsonlFile.replace('.jsonl', '.json');
-  writeFileSync(jsonFile, JSON.stringify(messages, null, 2));
-  return jsonFile;
-}
-
-function savePrompt(prompt, adwId, agentName = 'ops') {
-  const match = prompt.match(/^(\/\w+)/);
-  if (!match) return;
-  const commandName = match[1].slice(1);
-  const promptDir = join(getProjectRoot(), 'agents', adwId, agentName, 'prompts');
-  mkdirSync(promptDir, { recursive: true });
-  writeFileSync(join(promptDir, `${commandName}.txt`), prompt);
-}
-
 /**
- * Execute Claude Code with the given prompt configuration.
+ * Execute a Claude Code prompt using the SDK.
+ *
+ * @param {Object} request
+ * @param {string} request.prompt
+ * @param {string} request.adwId
+ * @param {string} request.agentName
+ * @param {'sonnet'|'opus'} request.model
+ * @returns {Promise<{output: string, success: boolean, sessionId: string|null}>}
  */
-export function promptClaudeCode(request) {
-  const error = checkClaudeInstalled();
-  if (error) return { output: error, success: false, sessionId: null };
-
-  savePrompt(request.prompt, request.adwId, request.agentName);
-
-  const outputDir = dirname(request.outputFile);
-  if (outputDir) mkdirSync(outputDir, { recursive: true });
-
-  const cmd = [
-    CLAUDE_PATH, '-p', request.prompt,
-    '--model', request.model,
-    '--output-format', 'stream-json',
-    '--verbose',
-  ];
-
-  if (request.dangerouslySkipPermissions) {
-    cmd.push('--dangerously-skip-permissions');
+export async function promptClaudeCode(request) {
+  // Save the prompt for logging
+  const match = request.prompt.match(/^(\/\w+)/);
+  if (match) {
+    const commandName = match[1].slice(1);
+    const promptDir = join(
+      getProjectRoot(),
+      'agents',
+      request.adwId,
+      request.agentName,
+      'prompts',
+    );
+    mkdirSync(promptDir, { recursive: true });
+    writeFileSync(join(promptDir, `${commandName}.txt`), request.prompt);
   }
 
+  // Save raw output for debugging
+  const outputDir = join(
+    getProjectRoot(),
+    'agents',
+    request.adwId,
+    request.agentName,
+  );
+  mkdirSync(outputDir, { recursive: true });
+
   try {
-    const stdout = execFileSync(cmd[0], cmd.slice(1), {
-      encoding: 'utf8',
-      maxBuffer: 50 * 1024 * 1024,
-      timeout: 5 * 60 * 1000,
-    });
+    const messages = [];
+    const abortController = new AbortController();
 
-    writeFileSync(request.outputFile, stdout);
-    convertJsonlToJson(request.outputFile);
+    for await (const message of query({
+      prompt: request.prompt,
+      abortController,
+      options: {
+        model: request.model === 'opus' ? 'claude-opus-4-6' : 'claude-sonnet-4-6',
+        maxTurns: 30,
+        permissionMode: 'bypassPermissions',
+        cwd: getProjectRoot(),
+      },
+    })) {
+      messages.push(message);
+    }
 
-    const { resultMessage } = parseJsonlOutput(request.outputFile);
+    // Save all messages for debugging
+    writeFileSync(
+      join(outputDir, 'raw_output.json'),
+      JSON.stringify(messages, null, 2),
+    );
+
+    // Find the result message
+    const resultMessage = messages.findLast((m) => m.type === 'result');
 
     if (resultMessage) {
       return {
@@ -98,10 +78,27 @@ export function promptClaudeCode(request) {
       };
     }
 
-    return { output: stdout, success: true, sessionId: null };
+    // Extract text from assistant messages as fallback
+    const assistantText = messages
+      .filter((m) => m.type === 'assistant')
+      .map((m) => {
+        const content = m.message?.content;
+        if (!content) return '';
+        return content
+          .filter((c) => c.type === 'text')
+          .map((c) => c.text)
+          .join('\n');
+      })
+      .join('\n');
+
+    return {
+      output: assistantText || 'No output',
+      success: true,
+      sessionId: null,
+    };
   } catch (e) {
-    const msg = e.killed
-      ? 'Claude Code command timed out after 5 minutes'
+    const msg = e.name === 'AbortError'
+      ? 'Claude Code query was aborted'
       : `Error executing Claude Code: ${e.message}`;
     return { output: msg, success: false, sessionId: null };
   }
@@ -109,21 +106,22 @@ export function promptClaudeCode(request) {
 
 /**
  * Execute a Claude Code template with slash command and arguments.
+ *
+ * @param {Object} request
+ * @param {string} request.agentName
+ * @param {string} request.slashCommand
+ * @param {string[]} request.args
+ * @param {string} request.adwId
+ * @param {'sonnet'|'opus'} request.model
+ * @returns {Promise<{output: string, success: boolean, sessionId: string|null}>}
  */
-export function executeTemplate(request) {
+export async function executeTemplate(request) {
   const prompt = `${request.slashCommand} ${request.args.join(' ')}`;
-  const outputDir = join(
-    getProjectRoot(), 'agents', request.adwId, request.agentName,
-  );
-  mkdirSync(outputDir, { recursive: true });
-  const outputFile = join(outputDir, 'raw_output.jsonl');
 
   return promptClaudeCode({
     prompt,
     adwId: request.adwId,
     agentName: request.agentName,
     model: request.model,
-    dangerouslySkipPermissions: true,
-    outputFile,
   });
 }

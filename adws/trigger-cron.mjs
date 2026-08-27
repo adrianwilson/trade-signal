@@ -3,31 +3,28 @@
 /**
  * Cron-based ADW trigger -- polls GitHub issues every 20 seconds.
  *
- * Triggers the ADW pipeline when:
+ * Triggers the /sdlc command via Claude Code SDK when:
  * 1. A new issue has no comments
  * 2. The latest comment on an issue is exactly "adw"
  *
  * Usage: node adws/trigger-cron.mjs
  */
 
+import { query } from '@anthropic-ai/claude-code';
+import { fetchOpenIssues, fetchIssueComments } from './adw-modules/github.mjs';
+import { getProjectRoot } from './adw-modules/utils.mjs';
 import { execFileSync } from 'child_process';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import {
-  getRepoUrl,
-  extractRepoPath,
-  fetchOpenIssues,
-  fetchIssueComments,
-} from './github.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const POLL_INTERVAL_MS = 20_000;
 
 let repoPath;
 try {
-  repoPath = extractRepoPath(getRepoUrl());
-} catch (e) {
-  console.error(`ERROR: ${e.message}`);
+  const url = execFileSync('git', ['remote', 'get-url', 'origin'], {
+    encoding: 'utf8',
+  }).trim();
+  repoPath = url.replace('https://github.com/', '').replace('.git', '');
+} catch {
+  console.error('ERROR: No git remote found');
   process.exit(1);
 }
 
@@ -67,14 +64,39 @@ function shouldProcessIssue(issueNumber) {
   return false;
 }
 
-function triggerWorkflow(issueNumber) {
+async function triggerWorkflow(issueNumber) {
+  console.log(`Triggering /sdlc for issue #${issueNumber}`);
+
   try {
-    const script = join(__dirname, 'adw-plan-build.mjs');
-    console.log(`Triggering ADW for issue #${issueNumber}`);
-    execFileSync('node', [script, String(issueNumber)], {
-      encoding: 'utf8',
-      stdio: 'inherit',
-    });
+    const messages = [];
+    for await (const message of query({
+      prompt: `/sdlc ${issueNumber}`,
+      abortController: new AbortController(),
+      options: {
+        maxTurns: 50,
+        permissionMode: 'bypassPermissions',
+        cwd: getProjectRoot(),
+      },
+    })) {
+      messages.push(message);
+
+      // Log assistant text as it streams
+      if (message.type === 'assistant' && message.message?.content) {
+        for (const block of message.message.content) {
+          if (block.type === 'text') {
+            process.stdout.write(block.text);
+          }
+        }
+      }
+    }
+
+    const result = messages.findLast((m) => m.type === 'result');
+    if (result?.is_error) {
+      console.error(`SDLC failed for issue #${issueNumber}: ${result.result}`);
+      return false;
+    }
+
+    console.log(`\nSDLC completed for issue #${issueNumber}`);
     return true;
   } catch (e) {
     console.error(`Failed to process issue #${issueNumber}: ${e.message}`);
@@ -82,7 +104,7 @@ function triggerWorkflow(issueNumber) {
   }
 }
 
-function checkCycle() {
+async function checkCycle() {
   if (shutdownRequested) return;
 
   const start = Date.now();
@@ -104,7 +126,7 @@ function checkCycle() {
     console.log(`Found ${qualifying.length} qualifying issue(s): ${qualifying}`);
     for (const num of qualifying) {
       if (shutdownRequested) break;
-      if (triggerWorkflow(num)) processedIssues.add(num);
+      if (await triggerWorkflow(num)) processedIssues.add(num);
     }
   } else {
     console.log('No new qualifying issues');
@@ -115,13 +137,13 @@ function checkCycle() {
 
 // Main
 console.log(`ADW cron trigger -- repo: ${repoPath}, interval: ${POLL_INTERVAL_MS / 1000}s`);
-checkCycle();
+await checkCycle();
 
-const timer = setInterval(() => {
+const timer = setInterval(async () => {
   if (shutdownRequested) {
     clearInterval(timer);
     console.log('Shutdown complete');
     process.exit(0);
   }
-  checkCycle();
+  await checkCycle();
 }, POLL_INTERVAL_MS);

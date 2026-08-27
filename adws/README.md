@@ -1,110 +1,86 @@
 # AI Developer Workflow (ADW) System
 
-ADW automates the full software development life cycle by integrating GitHub issues with Claude Code CLI to classify issues, generate plans, implement solutions, run tests, review against specs, and generate documentation.
+ADW automates the full software development life cycle by integrating GitHub issues with Claude Code commands to classify issues, generate plans, implement solutions, run tests, review against specs, and generate documentation.
+
+## Architecture
+
+Workflows are defined as `.md` command files in `.claude/commands/`. The `adws/` directory contains only the external trigger (for unattended mode) and shared utilities.
+
+```
+.claude/commands/
+  sdlc.md                 # Full SDLC: Plan -> Build -> Test -> Review -> Document -> Ship
+  plan-build.md            # Plan -> Build -> Ship
+  plan-build-test.md       # Plan -> Build -> Test -> Ship
+  plan-build-review.md     # Plan -> Build -> Review -> Ship
+  plan-build-test-review.md # Plan -> Build -> Test -> Review -> Ship
+
+  # Building blocks (used by pipelines)
+  feature.md, bug.md, chore.md, refactor.md   # Spec templates
+  implement.md          # Implementation with closed-loop validation
+  test.md               # Run Nx test suite, return structured JSON
+  resolve_failed_test.md # Auto-fix a failing test
+  review.md             # Review implementation against spec
+  patch.md              # Focused fix for a review issue
+  document.md           # Generate docs from git diff + spec
+  classify_issue.md     # Route issues to the right template
+  generate_branch_name.md, commit.md, pull_request.md  # Git ops
+
+adws/
+  trigger-cron.mjs      # Polls GitHub, kicks off /sdlc via Claude Code SDK
+  health-check.mjs      # Validates env vars, git, gh CLI, Claude CLI
+  adw-modules/          # Shared utilities for trigger
+    agent.mjs            # Claude Code SDK wrapper
+    github.mjs           # GitHub ops via gh CLI
+    utils.mjs            # ADW ID generation, logging
+```
 
 ## Quick Start
 
+### Interactive (in Claude Code)
+
 ```bash
-cp .env.sample .env
-# Edit .env with your keys
+# Full SDLC from a GitHub issue
+/sdlc 42
 
-# Full pipeline: plan + build + test
-node adws/adw-plan-build-test.mjs 42
+# Or pick your pipeline
+/plan-build 42
+/plan-build-test 42
+/plan-build-review 42
 
-# Or run steps independently:
-node adws/adw-plan.mjs 42           # Plan only -> outputs adw-id
-node adws/adw-build.mjs 42 <adw-id> # Build from existing plan
-node adws/adw-test.mjs 42 <adw-id>  # Test with auto-fix retries
+# Or run steps individually
+/feature add dark mode to dashboard
+/implement specs/add-dark-mode.md
+/test
+/review <adw-id> specs/add-dark-mode.md
+/document <adw-id> specs/add-dark-mode.md
+/finalize specs/add-dark-mode.md
+```
 
-# Unattended monitoring
+### Unattended (AFK mode)
+
+```bash
+cp .env.sample .env  # Set ANTHROPIC_API_KEY
+
+# Poll GitHub every 20s, auto-process new issues
 node adws/trigger-cron.mjs
 
-# Health check
+# Or create an issue and comment "adw" to trigger
+```
+
+### Health Check
+
+```bash
 node adws/health-check.mjs
 ```
 
-## Composable Pipeline
-
-The ADW system is built from composable scripts that can run independently or chained:
-
-| Script | What it does | Requires |
-|--------|-------------|----------|
-| `adw-plan.mjs` | Classify issue, create branch, generate spec, commit | Issue number |
-| `adw-build.mjs` | Implement the spec, commit | Issue number + ADW ID |
-| `adw-test.mjs` | Run tests, auto-fix failures, retry up to 4x | Issue number |
-| `adw-review.mjs` | Review implementation against spec, auto-patch blockers | Issue number + ADW ID |
-| `adw-document.mjs` | Generate documentation from diff + spec | Issue number + ADW ID |
-| `adw-patch.mjs` | Apply focused patch from issue comment ("adw_patch") | Issue number |
-| `adw-plan-build.mjs` | Plan + Build | Issue number |
-| `adw-plan-build-test.mjs` | Plan + Build + Test | Issue number |
-| `adw-plan-build-review.mjs` | Plan + Build + Review | Issue number |
-| `adw-plan-build-test-review.mjs` | Plan + Build + Test + Review | Issue number |
-| `adw-sdlc.mjs` | **Full SDLC**: Plan + Build + Test + Review + Document | Issue number |
-
-### State Management
-
-State is persisted in `agents/{adw-id}/adw_state.json` between steps:
-
-```json
-{
-  "adw_id": "a1b2c3d4",
-  "issue_number": "42",
-  "branch_name": "feat/42-add-dark-mode",
-  "plan_file": "specs/add-dark-mode.md",
-  "issue_class": "/feature"
-}
-```
-
-### Model Assignment
+## Model Assignment
 
 | Task | Model | Reason |
 |------|-------|--------|
 | Classify, branch, commit, PR | sonnet | Lightweight routing/formatting |
-| Plan generation | opus | High-stakes architecture decisions |
+| Plan generation | opus | Architecture decisions |
 | Implementation | opus | Production code quality |
 | Test resolution | opus | Root cause analysis |
+| Review | opus | Spec compliance judgment |
+| Documentation | sonnet | Summarization from diff |
 | Test running | sonnet | Command execution |
-
-## Shared Modules (`adw-modules/`)
-
-| Module | Purpose |
-|--------|---------|
-| `agent.mjs` | Claude Code CLI wrapper |
-| `github.mjs` | GitHub operations via gh CLI |
-| `git-ops.mjs` | Branch, commit, push, PR operations |
-| `workflow-ops.mjs` | Classify, plan, implement, branch generation |
-| `state.mjs` | Persistent state with stdin/stdout piping |
-| `utils.mjs` | ADW ID generation, logging, JSON parsing |
-
-## Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/test` | Run full Nx test suite, return structured JSON |
-| `/resolve_failed_test` | Autonomously fix a failing test |
-| `/classify_adw` | Extract ADW workflow + ID from text |
-| `/review` | Review implementation against spec, report issues with severity |
-| `/document` | Generate feature documentation from git diff + spec |
-| `/patch` | Create focused mini-plan for a specific review issue |
-| `/conditional_docs` | Smart doc routing -- tells agents which docs to read |
-
-## Output Structure
-
-```
-agents/
-  {adw-id}/
-    adw_state.json
-    sdlc_planner/
-      raw_output.jsonl
-      prompts/
-    sdlc_implementor/
-      raw_output.jsonl
-    test_runner/
-      raw_output.jsonl
-    adw_plan/
-      execution.log
-    adw_build/
-      execution.log
-    adw_test/
-      execution.log
-```
