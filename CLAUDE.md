@@ -21,3 +21,7 @@
 - The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
 
 <!-- nx configuration end-->
+
+# Context Rules
+
+- NEVER commit or push without the user explicitly reviewing and approving the changes first. Always show what will be committed and wait for approval.

@@ -26,9 +26,8 @@ This prompt helps you determine what documentation you should read based on the 
 
 - .claude/commands/classify_adw.md
   - Conditions:
-    - When adding or removing new `adws/adw-*.mjs` files
+    - When adding or removing ADW pipeline commands
 
-- adws/README.md
+- .github/workflows/adw.yml
   - Conditions:
-    - When you're operating in the `adws/` directory
-    - When modifying the ADW pipeline or commands
+    - When modifying the ADW pipeline or trigger configuration

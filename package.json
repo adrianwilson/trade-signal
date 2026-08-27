@@ -64,7 +64,6 @@
     "@angular/material": "^22.0.6",
     "@angular/platform-browser": "~22.0.4",
     "@angular/router": "~22.0.4",
-    "@anthropic-ai/claude-code": "^2.1.197",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",

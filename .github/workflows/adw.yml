@@ -1,0 +1,45 @@
+name: ADW - Autonomous Developer Workflow
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  adw:
+    # Trigger on new issues OR comments containing "adw"
+    if: >
+      github.event_name == 'issues' ||
+      (github.event_name == 'issue_comment' &&
+       contains(github.event.comment.body, 'adw'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run SDLC pipeline
+        run: |
+          claude -p "/sdlc ${{ github.event.issue.number }}" \
+            --dangerously-skip-permissions \
+            --verbose \
+            --output-format stream-json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
