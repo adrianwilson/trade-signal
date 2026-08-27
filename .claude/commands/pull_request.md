@@ -7,6 +7,7 @@ Based on the `Instructions` below, take the `Variables` follow the `Run` section
 branch_name: $1
 issue: $2
 plan_file: $3
+adw_id: $4
 
 ## Instructions
 
@@ -17,6 +18,7 @@ plan_file: $3
   - Reference to the issue (Closes #<issue_number>)
   - A checklist of what was done
   - A summary of key changes made
+- Don't mention Claude Code in the PR body
 - Extract issue number, type, and title from the issue JSON
 - Examples of PR titles:
   - `feat: #123 - Add user authentication`
@@ -34,4 +36,4 @@ plan_file: $3
 
 ## Report
 
-Return ONLY the PR URL that was created (no other text)
+Return ONLY the PR URL that was created (no other text).

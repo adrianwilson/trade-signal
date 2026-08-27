@@ -6,3 +6,4 @@ git ls-files
 
 ## Read
 README.md
+.claude/commands/conditional_docs.md

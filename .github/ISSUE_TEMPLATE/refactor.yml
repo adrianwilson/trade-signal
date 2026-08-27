@@ -1,0 +1,48 @@
+name: Refactor
+description: Restructure code without changing behavior
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Refactor Description
+      description: What's being restructured and why?
+      placeholder: Describe what changes and the motivation.
+    validations:
+      required: true
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Current State
+      description: How does it work now?
+      placeholder: Describe the current code structure or pattern.
+    validations:
+      required: true
+  - type: textarea
+    id: target-state
+    attributes:
+      label: Target State
+      description: What should it look like after?
+      placeholder: Describe the desired structure or pattern.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Which part of the system does this affect?
+      options:
+        - Dashboard (Angular)
+        - API (NestJS)
+        - Shared Types (libs/signals)
+        - Full Stack
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Context
+      description: Any risks, dependencies, or constraints.
+      placeholder: Optional.
+    validations:
+      required: false

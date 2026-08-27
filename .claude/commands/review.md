@@ -7,12 +7,17 @@ Follow the `Instructions` below to **review work done against a specification fi
 adw_id: $1
 spec_file: $2
 agent_name: $3 if provided, otherwise use 'review_agent'
+review_image_dir: $4 if provided, otherwise leave it blank
 
 ## Instructions
 
 - Check current git branch using `git branch` to understand context
 - Run `git diff origin/main` to see all changes made in current branch
 - Read the spec file to understand requirements
+- If `review_image_dir` is provided:
+  - Review any screenshots in that directory to understand current UI state
+  - If the app needs to be running to take screenshots, reference `.claude/commands/prepare_app.md` for setup instructions
+  - Compare screenshots against spec requirements for visual accuracy
 - IMPORTANT: Review the implementation against the spec:
   - Do the code changes fulfill the acceptance criteria?
   - Are the validation commands passing?
@@ -43,7 +48,9 @@ agent_name: $3 if provided, otherwise use 'review_agent'
   "success": boolean,
   "spec_file": "string",
   "branch": "string",
-  "summary": "string - 2-3 sentence summary of the review",
+  "review_summary": "string - 2-3 sentence summary of the review",
+  "review_issue_number": "string - the GitHub issue number associated with this review",
+  "adw_id": "string - the ADW ID for this review",
   "review_issues": [
     {
       "issue": "string - description of the issue",

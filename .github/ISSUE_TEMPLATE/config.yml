@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ADW - Autonomous Processing
+    url: https://github.com/adrianwilson/trade-signal/issues
+    about: Comment "adw" on any issue to trigger the autonomous development pipeline.

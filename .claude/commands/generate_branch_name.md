@@ -5,11 +5,13 @@ Based on the `Instructions` below, take the `Variables` follow the `Run` section
 ## Variables
 
 issue_class: $1
-issue: $2
+adw_id: $2
+issue: $3
 
 ## Instructions
 
-- Generate a branch name in the format: `<issue_class>/<issue_number>-<concise_name>`
+- Extract the issue number and title from the issue JSON.
+- Generate a branch name in the format: `<issue_class>-issue-<issue_number>-adw-<adw_id>-<concise_name>`
 - The `<concise_name>` should be:
   - 3-6 words maximum
   - All lowercase
@@ -17,11 +19,10 @@ issue: $2
   - Descriptive of the main task/feature
   - No special characters except hyphens
 - Examples:
-  - `feat/123-add-user-auth`
-  - `fix/456-login-validation-error`
-  - `chore/789-update-dependencies`
-  - `refactor/101-extract-signal-service`
-- Extract the issue number and title from the issue JSON
+  - `feat-issue-123-adw-ab12cd34-add-user-auth`
+  - `fix-issue-456-adw-ef56gh78-login-validation-error`
+  - `chore-issue-789-adw-ij90kl12-update-dependencies`
+  - `refactor-issue-101-adw-mn34op56-extract-signal-service`
 
 ## Run
 
@@ -31,4 +32,4 @@ Run `git checkout -b <branch_name>` to create and switch to the new branch
 
 ## Report
 
-Return ONLY the branch name that was created (no other text)
+Return ONLY the branch name that was created (no other text).

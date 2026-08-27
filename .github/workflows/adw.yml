@@ -1,8 +1,6 @@
 name: ADW - Autonomous Developer Workflow
 
 on:
-  issues:
-    types: [opened]
   issue_comment:
     types: [created]
 
@@ -11,13 +9,14 @@ permissions:
   issues: write
   pull-requests: write
 
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ISSUE_NUMBER: ${{ github.event.issue.number }}
+
 jobs:
   adw:
-    # Trigger on new issues OR comments containing "adw"
-    if: >
-      github.event_name == 'issues' ||
-      (github.event_name == 'issue_comment' &&
-       contains(github.event.comment.body, 'adw'))
+    if: contains(github.event.comment.body, 'adw')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -34,12 +33,159 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Run SDLC pipeline
+      - name: Generate ADW ID
+        id: adw
+        run: echo "id=$(head -c 4 /dev/urandom | xxd -p)" >> "$GITHUB_OUTPUT"
+
+      # Phase 1: Classify -- determine issue type
+      - name: "Phase 1: Classify"
+        id: classify
         run: |
-          claude -p "/sdlc ${{ github.event.issue.number }}" \
+          ISSUE_JSON=$(gh issue view $ISSUE_NUMBER --json number,title,body,state,labels)
+          RESULT=$(claude -p "/classify_issue $ISSUE_JSON" \
             --dangerously-skip-permissions \
-            --verbose \
-            --output-format stream-json
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            --output-format json | jq -r '.result')
+          echo "command=$RESULT" >> "$GITHUB_OUTPUT"
+          echo "issue_json=$ISSUE_JSON" >> "$GITHUB_OUTPUT"
+          echo "Classification: $RESULT"
+
+      # Phase 2: Branch -- create feature branch
+      - name: "Phase 2: Branch"
+        id: branch
+        run: |
+          ISSUE_CLASS=$(echo "${{ steps.classify.outputs.command }}" | tr -d '/')
+          RESULT=$(claude -p "/generate_branch_name $ISSUE_CLASS ${{ steps.adw.outputs.id }} '${{ steps.classify.outputs.issue_json }}'" \
+            --dangerously-skip-permissions \
+            --output-format json | jq -r '.result')
+          echo "name=$RESULT" >> "$GITHUB_OUTPUT"
+          echo "Branch: $RESULT"
+
+      # Phase 3: Plan -- generate spec from issue
+      - name: "Phase 3: Plan"
+        id: plan
+        run: |
+          RESULT=$(claude -p "${{ steps.classify.outputs.command }} $ISSUE_NUMBER ${{ steps.adw.outputs.id }} '${{ steps.classify.outputs.issue_json }}'" \
+            --dangerously-skip-permissions \
+            --output-format json | jq -r '.result')
+          echo "spec_file=$RESULT" >> "$GITHUB_OUTPUT"
+          echo "Spec file: $RESULT"
+
+      # Commit the plan
+      - name: "Phase 3b: Commit plan"
+        run: |
+          claude -p "/commit sdlc_planner $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
+            --dangerously-skip-permissions \
+            --output-format json
+
+      # Phase 4: Implement -- build from spec with closed-loop validation
+      - name: "Phase 4: Implement"
+        run: |
+          claude -p "/implement ${{ steps.plan.outputs.spec_file }}" \
+            --dangerously-skip-permissions \
+            --output-format json
+
+      # Commit the implementation
+      - name: "Phase 4b: Commit implementation"
+        run: |
+          claude -p "/commit sdlc_implementor $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
+            --dangerously-skip-permissions \
+            --output-format json
+
+      # Phase 5: Test -- run tests, auto-fix failures
+      - name: "Phase 5: Test"
+        id: test
+        run: |
+          for attempt in 1 2 3; do
+            echo "Test attempt $attempt/3"
+            RESULT=$(claude -p "/test" \
+              --dangerously-skip-permissions \
+              --output-format json | jq -r '.result')
+            echo "$RESULT" > /tmp/test_results.json
+
+            # Check if all passed
+            FAILED=$(echo "$RESULT" | jq '[.[] | select(.passed == false)] | length' 2>/dev/null || echo "0")
+            if [ "$FAILED" = "0" ]; then
+              echo "All tests passed"
+              break
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "Resolving $FAILED failures..."
+              claude -p "/resolve_failed_test $RESULT" \
+                --dangerously-skip-permissions \
+                --output-format json
+            fi
+          done
+
+      # Commit test fixes if any
+      - name: "Phase 5b: Commit test fixes"
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            claude -p "/commit test_runner $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
+              --dangerously-skip-permissions \
+              --output-format json
+          fi
+
+      # Phase 6: Review -- compare implementation against spec
+      - name: "Phase 6: Review"
+        id: review
+        run: |
+          for cycle in 1 2; do
+            echo "Review cycle $cycle/2"
+            RESULT=$(claude -p "/review ${{ steps.adw.outputs.id }} ${{ steps.plan.outputs.spec_file }}" \
+              --dangerously-skip-permissions \
+              --output-format json | jq -r '.result')
+            echo "$RESULT" > /tmp/review_results.json
+
+            SUCCESS=$(echo "$RESULT" | jq '.success' 2>/dev/null || echo "true")
+            if [ "$SUCCESS" = "true" ]; then
+              echo "Review passed"
+              break
+            fi
+
+            if [ "$cycle" -lt 2 ]; then
+              # Extract blockers and patch them
+              BLOCKERS=$(echo "$RESULT" | jq '[.review_issues[] | select(.severity == "blocker")]' 2>/dev/null || echo "[]")
+              if [ "$BLOCKERS" != "[]" ]; then
+                echo "Patching blockers..."
+                PATCH_FILE=$(claude -p "/patch ${{ steps.adw.outputs.id }} '$BLOCKERS' ${{ steps.plan.outputs.spec_file }}" \
+                  --dangerously-skip-permissions \
+                  --output-format json | jq -r '.result')
+                claude -p "/implement $PATCH_FILE" \
+                  --dangerously-skip-permissions \
+                  --output-format json
+              fi
+            fi
+          done
+
+      # Commit review fixes if any
+      - name: "Phase 6b: Commit review fixes"
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            claude -p "/commit review_agent $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
+              --dangerously-skip-permissions \
+              --output-format json
+          fi
+
+      # Phase 7: Document -- generate feature docs
+      - name: "Phase 7: Document"
+        run: |
+          claude -p "/document ${{ steps.adw.outputs.id }} ${{ steps.plan.outputs.spec_file }}" \
+            --dangerously-skip-permissions \
+            --output-format json
+
+      # Commit documentation
+      - name: "Phase 7b: Commit documentation"
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            claude -p "/commit documenter $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
+              --dangerously-skip-permissions \
+              --output-format json
+          fi
+
+      # Phase 8: Ship -- push and create PR
+      - name: "Phase 8: Ship"
+        run: |
+          claude -p "/pull_request ${{ steps.branch.outputs.name }} '${{ steps.classify.outputs.issue_json }}' ${{ steps.plan.outputs.spec_file }} ${{ steps.adw.outputs.id }}" \
+            --dangerously-skip-permissions \
+            --output-format json

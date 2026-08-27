@@ -4,8 +4,9 @@ Based on the `Instructions` below, take the `Variables` follow the `Run` section
 
 ## Variables
 
-issue_class: $1
-issue: $2
+agent_name: $1
+issue_class: $2
+issue: $3
 
 ## Instructions
 
@@ -15,6 +16,7 @@ issue: $2
   - 50 characters or less
   - Descriptive of the actual changes made
   - No period at the end
+- Don't include "Generated with..." or any AI attribution in the commit message
 - Examples:
   - `feat: add user authentication module`
   - `fix: resolve login validation error`
@@ -30,4 +32,4 @@ issue: $2
 
 ## Report
 
-Return ONLY the commit message that was used (no other text)
+Return ONLY the commit message that was used (no other text).

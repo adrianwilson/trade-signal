@@ -6,6 +6,7 @@ Generate concise markdown documentation for implemented features by analyzing co
 
 adw_id: $1
 spec_path: $2 if provided, otherwise leave it blank
+documentation_screenshots_dir: $3 if provided, otherwise leave it blank
 
 ## Instructions
 
@@ -21,7 +22,12 @@ spec_path: $2 if provided, otherwise leave it blank
   - Success criteria
 - Use this to frame the documentation around what was requested vs what was built
 
-### 3. Generate Documentation
+### 3. Review Screenshots (if provided)
+- If `documentation_screenshots_dir` is provided, review the screenshots in that directory
+- Use screenshots to document UI changes, new pages, or visual features
+- Reference screenshots in the documentation where relevant
+
+### 4. Generate Documentation
 - Create a new documentation file in `app_docs/` directory
 - Filename format: `feature-{adw_id}-{descriptive-name}.md`
 - Follow the Documentation Format below
@@ -31,13 +37,16 @@ spec_path: $2 if provided, otherwise leave it blank
   - How to use it (user perspective)
   - Any configuration or setup required
 
-### 4. Update Conditional Documentation
+### 5. Update Conditional Documentation
 - After creating the documentation file, read `.claude/commands/conditional_docs.md`
 - Add an entry for the new documentation file with appropriate conditions
 - The entry should help future developers know when to read this documentation
-- Format the entry following the existing pattern in the file
+- Format the entry as follows:
+  ```
+  - **<app_docs/filename.md>**: Read when <condition describing when this doc is relevant>
+  ```
 
-### 5. Final Output
+### 6. Final Output
 - When you finish writing the documentation and updating conditional_docs.md, return exclusively the path to the documentation file created and nothing else
 
 ## Documentation Format
@@ -70,3 +79,7 @@ spec_path: $2 if provided, otherwise leave it blank
 ## Validation
 <Commands to verify the feature works>
 ```
+
+## Report
+
+Return ONLY the file path to the documentation file created (no other text).

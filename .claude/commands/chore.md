@@ -1,12 +1,20 @@
 # Chore Planning
 
-Create a new plan in specs/*.md to resolve the `Chore` using the exact specified markdown `Plan Format`. Follow the `Instructions` to create the plan use the `Relevant Files` to focus on the right files.
+Create a new plan in specs/*.md to resolve the chore using the exact specified markdown `Plan Format`. Follow the `Instructions` to create the plan, use the `Relevant Files` to focus on the right files.
+
+## Variables
+
+issue_number: $1
+adw_id: $2
+issue_json: $3
 
 ## Instructions
 
 - You're writing a plan to resolve a chore, it should be simple but we need to be thorough and precise so we don't miss anything or waste time with any second round of changes.
-- Create the plan in the `specs/*.md` file. Name it appropriately based on the `Chore`.
+- Extract chore details from the `issue_json` variable.
+- Create the plan in the `specs/` directory. Filename: `issue-{issue_number}-adw-{adw_id}-sdlc_planner-{descriptive-name}.md`
 - Use the plan format below to create the plan.
+- Read `.claude/commands/conditional_docs.md` to check if your task requires additional documentation.
 - Research the codebase and put together a plan to accomplish the chore.
 - IMPORTANT: Replace every <placeholder> in the `Plan Format` with the requested value. Add as much detail as needed to accomplish the chore.
 - Use your reasoning model: THINK HARD about the plan and the steps to accomplish the chore.
@@ -28,6 +36,11 @@ Focus on the following files:
 
 ```md
 # Chore: <chore name>
+
+## Metadata
+- **issue_number:** {issue_number}
+- **adw_id:** {adw_id}
+- **issue_json:** {issue_json}
 
 ## Chore Description
 <describe the chore in detail>
@@ -54,5 +67,6 @@ Execute every command to validate the chore is complete with zero regressions.
 <optionally list any additional notes or context that are relevant to the chore that will be helpful to the developer>
 ```
 
-## Chore
-$ARGUMENTS
+## Report
+
+Return ONLY the file path to the spec file created (no other text).

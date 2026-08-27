@@ -1,0 +1,54 @@
+name: Feature
+description: Request a new feature for the trade signal platform
+labels: ["feature"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: What should be built and why?
+      placeholder: Describe the feature, its purpose, and the value it adds.
+    validations:
+      required: true
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Who benefits and how?
+      placeholder: |
+        As a [trader/developer/admin]
+        I want to [action]
+        So that [benefit]
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Which part of the system does this affect?
+      options:
+        - Dashboard (Angular)
+        - API (NestJS)
+        - Shared Types (libs/signals)
+        - Agent Module
+        - Full Stack
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know this is done?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, or references.
+      placeholder: Optional.
+    validations:
+      required: false

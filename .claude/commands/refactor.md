@@ -1,12 +1,20 @@
 # Refactor Planning
 
-Create a new plan in specs/*.md to execute the `Refactor` using the exact specified markdown `Plan Format`. Follow the `Instructions` to create the plan use the `Relevant Files` to focus on the right files.
+Create a new plan in specs/*.md to execute the refactor using the exact specified markdown `Plan Format`. Follow the `Instructions` to create the plan, use the `Relevant Files` to focus on the right files.
+
+## Variables
+
+issue_number: $1
+adw_id: $2
+issue_json: $3
 
 ## Instructions
 
 - You're writing a plan to refactor existing code without changing its external behavior.
-- Create the plan in the `specs/*.md` file. Name it appropriately based on the `Refactor`.
+- Extract refactor details from the `issue_json` variable.
+- Create the plan in the `specs/` directory. Filename: `issue-{issue_number}-adw-{adw_id}-sdlc_planner-{descriptive-name}.md`
 - Use the `Plan Format` below to create the plan.
+- Read `.claude/commands/conditional_docs.md` to check if your task requires additional documentation.
 - Research the codebase to understand the current state and identify what needs to change.
 - IMPORTANT: Replace every <placeholder> in the `Plan Format` with the requested value. Add as much detail as needed to execute the refactor safely.
 - Use your reasoning model: THINK HARD about the refactor, its impact, and how to preserve existing behavior.
@@ -33,6 +41,11 @@ Focus on the following files:
 
 ```md
 # Refactor: <refactor name>
+
+## Metadata
+- **issue_number:** {issue_number}
+- **adw_id:** {adw_id}
+- **issue_json:** {issue_json}
 
 ## Refactor Description
 <describe the refactor in detail, including what is being restructured and why>
@@ -74,5 +87,6 @@ Execute every command to validate the refactor is complete with zero regressions
 <optionally list any additional notes, future considerations, or context that are relevant to the refactor that will be helpful to the developer>
 ```
 
-## Refactor
-$ARGUMENTS
+## Report
+
+Return ONLY the file path to the spec file created (no other text).

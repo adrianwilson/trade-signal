@@ -1,60 +1,66 @@
-# Full SDLC Pipeline
+# Full SDLC Pipeline (Interactive)
 
-Run the complete Software Development Life Cycle for the given GitHub issue. Follow each phase in order. Do not skip phases. If any phase fails, stop and report the failure.
+Run the complete Software Development Life Cycle for the given GitHub issue. Each phase runs as a separate focused task.
+
+For **unattended mode** with fully isolated agents, use the GitHub Action: comment "adw" on a GitHub issue.
 
 ## Variables
 
 issue_number: $ARGUMENTS
 
+## Instructions
+
+Execute each phase below in order. Each phase is one agent, one purpose. Between phases, capture the structured output and pass it to the next phase. Do not skip phases. If any phase fails, stop and report the failure.
+
 ## Phase 1: Classify
 
-- Fetch the GitHub issue using `gh issue view <issue_number> --json number,title,body,state,labels`
-- Run `/classify_issue` with the issue body to determine the type (feature, bug, chore, refactor)
-- Report the classification before proceeding
+- Fetch the GitHub issue: `gh issue view <issue_number> --json number,title,body,state,labels`
+- Determine the type: feature, bug, chore, or refactor
+- Save the classification and issue JSON for subsequent phases
 
 ## Phase 2: Branch
 
-- Run `/generate_branch_name` with the classification and issue data
-- Confirm the branch was created and checked out
+- Create a branch using the classification and issue data
+- Format: `<type>-issue-<number>-adw-<id>-<name>`
 
 ## Phase 3: Plan
 
-- Based on the classification, run the matching command:
-  - `/feature` for features
-  - `/bug` for bugs
-  - `/chore` for chores
-  - `/refactor` for refactors
-- Pass the issue title and body as the argument
-- Confirm the spec file was created in `specs/`
+- Based on the classification, run the matching command (`/feature`, `/bug`, `/chore`, or `/refactor`) with the issue number, ADW ID, and issue JSON
+- Capture the spec file path from the output
+- Commit the plan
 
 ## Phase 4: Implement
 
-- Run `/implement` with the path to the spec file created in Phase 3
-- This includes the closed-loop validation (build, test, lint with auto-fix retries)
+- Run `/implement` with the spec file path
+- This includes closed-loop validation (build, test, lint with auto-fix retries)
+- Commit the implementation
 
 ## Phase 5: Test
 
 - Run `/test` to execute the full validation suite
-- If any tests fail, run `/resolve_failed_test` for each failure
-- Re-run `/test` to verify fixes
-- Repeat up to 3 times
+- If any tests fail:
+  - Run `/resolve_failed_test` with the failure JSON
+  - Re-run `/test` to verify
+  - Repeat up to 3 times
+- Commit any test fixes
 
 ## Phase 6: Review
 
-- Run `/review` with the spec file to verify implementation matches requirements
+- Run `/review` with the ADW ID and spec file
 - If blocker issues are found:
   - Run `/patch` for each blocker
   - Run `/implement` with the patch plan
-  - Re-run `/review` to verify
+  - Re-run `/review` to verify (up to 2 cycles)
+- Commit any review fixes
 
 ## Phase 7: Document
 
-- Run `/document` to generate feature documentation from the git diff and spec
+- Run `/document` with the ADW ID and spec file
+- Commit the documentation
 
 ## Phase 8: Ship
 
-- Run `/commit` to create a properly formatted commit
-- Run `/pull_request` to create a PR linking the spec and issue
+- Run `/pull_request` to create a PR linking the spec, issue, and ADW ID
 
 ## Report
 

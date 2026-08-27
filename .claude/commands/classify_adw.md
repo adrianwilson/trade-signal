@@ -4,7 +4,7 @@ Extract ADW workflow information from the text below and return a JSON response.
 
 ## Instructions
 
-- Look for ADW workflow commands in the text (e.g., `/adw_plan`, `/adw_test`, `/adw_build`, `/adw_plan_build`, `/adw_plan_build_test`)
+- Look for ADW workflow commands in the text (e.g., `/adw_plan`, `/adw_test`, `/adw_build`, `/adw_plan_build`, `/adw_plan_build_test`, `/adw_review`, `/adw_document`, `/adw_patch`, `/adw_sdlc`)
 - Look for ADW IDs (8-character alphanumeric strings, often after "adw_id:" or "ADW ID:" or similar)
 - Return a JSON object with the extracted information
 - If no ADW workflow is found, return empty JSON: `{}`
@@ -16,6 +16,12 @@ Extract ADW workflow information from the text below and return a JSON response.
 - `/adw_test` - Testing only
 - `/adw_plan_build` - Plan + Build
 - `/adw_plan_build_test` - Plan + Build + Test
+- `/adw_plan_build_review` - Plan + Build + Review
+- `/adw_plan_build_test_review` - Plan + Build + Test + Review
+- `/adw_review` - Review only (requires adw_id)
+- `/adw_document` - Documentation only (requires adw_id)
+- `/adw_patch` - Patch only (requires adw_id)
+- `/adw_sdlc` - Full SDLC workflow
 
 ## Response Format
 

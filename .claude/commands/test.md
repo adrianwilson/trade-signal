@@ -2,6 +2,10 @@
 
 Execute comprehensive validation tests, returning results in a standardized JSON format for automated processing.
 
+## Purpose
+
+Run the full validation test suite to ensure the application builds, compiles, lints, and passes all tests. This command is used by the pipeline to gate deployments and catch regressions early.
+
 ## Variables
 
 TEST_COMMAND_TIMEOUT: 5 minutes
@@ -12,7 +16,7 @@ TEST_COMMAND_TIMEOUT: 5 minutes
 - Capture the result (passed/failed) and any error messages
 - IMPORTANT: Return ONLY the JSON array with test results
 - If a test passes, omit the error field
-- If a test fails, include the error message and stop processing further tests
+- IMPORTANT: If a test fails, include the error message and STOP processing further tests. Do not continue to the next test.
 - Execute all tests from the project root directory
 - Always run tasks through Nx
 
