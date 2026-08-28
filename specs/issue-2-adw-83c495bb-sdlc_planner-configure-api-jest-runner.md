@@ -1,6 +1,7 @@
 # Chore: Configure Jest test runner for API project
 
 ## Description
+
 The API project (`apps/api`) shipped two Jest-style spec files — `signals.service.spec.ts` (5 tests) and `signals.controller.spec.ts` (3 tests) — but had no Jest configuration and no `test` target. `npx nx run api:test` did not exist, and `npx nx run-many -t test` only exercised the dashboard, so the SDLC pipeline could merge API changes without ever running API tests.
 
 This chore adds the Jest infrastructure (toolchain, preset, config, spec tsconfig, and a cacheable `test` target) so the API participates in the workspace test gate. It is Phase Z1 (Validation Floor) of `docs/zte-roadmap.md`. Spec file contents were not modified — this is infrastructure only.
@@ -21,6 +22,7 @@ This chore adds the Jest infrastructure (toolchain, preset, config, spec tsconfi
 The feature is pure Nx/Jest configuration wiring — no application code changed.
 
 Data flow when `nx run api:test` executes:
+
 1. Nx invokes the `@nx/jest:jest` executor (declared in `apps/api/package.json` → `nx.targets.test`) with `jestConfig: apps/api/jest.config.ts`.
 2. Jest loads `jest.config.ts` (transpiled via the inline `@jest-config-loader-options` header), which extends the workspace-root `jest.preset.js` (a re-export of `@nx/jest/preset`).
 3. The `ts-jest` transform compiles `.ts`/`.js` under `apps/api/tsconfig.spec.json` in a `node` test environment.

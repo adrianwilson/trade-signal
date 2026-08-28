@@ -3,6 +3,7 @@
 This prompt helps you determine what documentation you should read based on the specific changes you need to make in the codebase. Review the conditions below and read the relevant documentation before proceeding with your task.
 
 ## Instructions
+
 - Review the task you've been asked to perform
 - Check each documentation path in the Conditional Documentation section
 - For each path, evaluate if any of the listed conditions apply to your task
