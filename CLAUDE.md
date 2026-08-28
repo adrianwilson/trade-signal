@@ -22,6 +22,16 @@
 
 <!-- nx configuration end-->
 
+# Project Overview
+
+- **Stack:** Angular 22 (dashboard) + NestJS 11 (API) + Nx 23 monorepo, TypeScript everywhere
+- **Architecture:** `apps/dashboard/` (Angular), `apps/api/` (NestJS), `libs/signals/` (shared types)
+- **Shared types:** `Signal`, `AggregatedSignal`, `AgentLogEntry`, `ManualSignalInput` in `libs/signals/`
+- **Commands:** `.claude/commands/` contains all workflow templates (feature, bug, chore, refactor, implement, test, review, document, etc.)
+- **Pipeline:** Use `/sdlc <issue>` for full lifecycle, or individual commands. For isolated execution: `./scripts/sdlc.sh <issue>`
+- **Conditional docs:** Read `.claude/commands/conditional_docs.md` before any task to determine what additional documentation is relevant
+- **Validation:** Always run tasks through Nx: `npx nx run-many -t build/test/lint`
+
 # Context Rules
 
 - NEVER commit or push without the user explicitly reviewing and approving the changes first. Always show what will be committed and wait for approval.
