@@ -23,9 +23,10 @@ Each phase is gated by the previous one -- you don't move forward until you have
 
 **Issues:**
 
+- [x] Add coverage thresholds (>= 70% lines/branches/functions/statements) enforced on both API (Jest) and dashboard (`@angular/build:unit-test`) test targets — closed by issue #4
 - Add meaningful unit tests across API and dashboard (coverage threshold >= 70%)
 - Add e2e tests (Cypress/Playwright) -- dashboard loads, signal table renders, CRUD works
-- Wire coverage + e2e into the `/test` command so the pipeline enforces them
+- [x] Wire coverage into the `/test` command so the pipeline enforces it (issue #4); e2e wiring still pending
 
 **Exit criteria:** When the pipeline says "tests passed," you believe it.
 
