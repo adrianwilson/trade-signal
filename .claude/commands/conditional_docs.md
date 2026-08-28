@@ -38,3 +38,9 @@ This prompt helps you determine what documentation you should read based on the 
     - When running, configuring, or debugging tests for apps/api
     - When modifying Jest config, tsconfig.spec.json, or the API test target
     - When adding a test target or test runner to another Nx project
+
+- app_docs/feature-28da6304-api-integration-tests.md
+  - Conditions:
+    - When writing or modifying HTTP integration tests for the NestJS API
+    - When testing routes, status codes, the global `api` prefix, or response shapes with supertest
+    - When adding endpoints to apps/api that need end-to-end HTTP coverage
