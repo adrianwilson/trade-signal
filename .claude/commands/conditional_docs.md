@@ -31,3 +31,9 @@ This prompt helps you determine what documentation you should read based on the 
 - .github/workflows/adw.yml
   - Conditions:
     - When modifying the ADW pipeline or trigger configuration
+
+- app_docs/feature-83c495bb-api-jest-test-runner.md
+  - Conditions:
+    - When running, configuring, or debugging tests for apps/api
+    - When modifying Jest config, tsconfig.spec.json, or the API test target
+    - When adding a test target or test runner to another Nx project
