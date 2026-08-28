@@ -1,161 +1,60 @@
 # Chore: Configure Jest test runner for API project
 
-## Metadata
-- **issue_number:** 2
-- **adw_id:** 83c495bb
-- **issue_json:** {"number":2,"title":"Configure Jest test runner for API project","state":"OPEN","labels":["enhancement"]}
+## Description
+The API project (`apps/api`) shipped two Jest-style spec files — `signals.service.spec.ts` (5 tests) and `signals.controller.spec.ts` (3 tests) — but had no Jest configuration and no `test` target. `npx nx run api:test` did not exist, and `npx nx run-many -t test` only exercised the dashboard, so the SDLC pipeline could merge API changes without ever running API tests.
 
-## Chore Description
-The API project (`apps/api`) ships two Jest-style spec files — `signals.service.spec.ts` (5 tests) and `signals.controller.spec.ts` (3 tests) — but the project has **no Jest configuration and no `test` target**. As a result `npx nx run api:test` does not exist and `npx nx run-many -t test` only exercises the dashboard.
+This chore adds the Jest infrastructure (toolchain, preset, config, spec tsconfig, and a cacheable `test` target) so the API participates in the workspace test gate. It is Phase Z1 (Validation Floor) of `docs/zte-roadmap.md`. Spec file contents were not modified — this is infrastructure only.
 
-This is Phase Z1 (Validation Floor) of `docs/zte-roadmap.md`: without an API test gate the SDLC pipeline merges API changes without ever running API tests.
+## Design Decisions
 
-**What this chore delivers:**
-- Install the Jest toolchain the workspace is currently missing (`jest`, `ts-jest`, `@types/jest`, and an explicit `@nx/jest`).
-- A root `jest.preset.js` (the shared Nx Jest preset — none exists today).
-- `apps/api/jest.config.ts` using the `@nx/jest` preset with a `ts-jest` transform.
-- `apps/api/tsconfig.spec.json` scoped to spec files.
-- A `test` target on `apps/api/package.json` using the `@nx/jest:jest` executor.
-- Exclude spec files from `apps/api/tsconfig.app.json` (build/typecheck config) so the spec files — which reference Jest globals — only compile under the spec tsconfig.
+- **Jest, not Vitest (the dashboard's runner).** The existing spec files are written in Jest style and the issue explicitly required Jest for the API. Matching the requested runner avoided rewriting spec content, which the acceptance criteria forbade. The workspace now intentionally runs two unit-test runners: Vitest for Angular (`@angular/build:unit-test`), Jest for NestJS.
+- **`ts-jest`, not `@swc/jest`.** `ts-jest` is the conventional NestJS transform and needs no extra wiring. Although `@swc/core` is present, `@swc/jest` is not; keeping the transform to a single added package is simpler.
+- **Jest 30 line.** `@nx/jest@23.1.0` pulls `jest-config@^30`, so `jest`/`@types/jest` were pinned to `^30` to avoid a major-version mismatch. `ts-jest@^29` is the current stable line and is Jest-30 compatible. `jest-environment-node@^30` is explicit because Jest 30 no longer bundles the node environment.
+- **`@nx/jest` promoted to an explicit dev dependency.** It was only transitively installed; making it explicit ensures the `@nx/jest:jest` executor and shared preset resolve reliably.
+- **Explicit `test` target in `package.json`, no `nx.json` changes.** The executor is invoked directly from the project target with `cache: true` set locally, matching the repo pattern where `api` declares its targets inline. A `@nx/jest/plugin` inference entry was considered and rejected to keep target definitions explicit and consistent with the existing `build`/`serve`/`prune` targets.
+- **Spec files excluded from `tsconfig.app.json`.** The build/typecheck config previously swept in `.spec.ts` via `include: ["src/**/*.ts"]`. Since the specs reference Jest globals only available under the spec tsconfig, they are now excluded (`src/**/*.spec.ts`, `src/**/*.test.ts`) to prevent a build/typecheck regression.
+- **Dedicated `tsconfig.spec.json` with CommonJS + decorator metadata.** The workspace base uses `module: nodenext`; Jest/`ts-jest` needs `commonjs`. `experimentalDecorators` + `emitDecoratorMetadata` are required for NestJS classes under test (works with `reflect-metadata`, already an `apps/api` dependency). `composite`/`emitDeclarationOnly`/`declarationMap` are overridden to `false` to avoid conflicts with the base project-references settings during Jest's own compilation. `ignoreDeprecations: "6.0"` was added to silence the TS deprecation warning for these overrides.
+- **`@jest-config-loader-options` header in `jest.config.ts`.** Because the base tsconfig targets `nodenext`, the `.ts` Jest config needs explicit loader options (CommonJS, `transpileOnly`, `esModuleInterop`) so Nx/Jest can transpile and load the config file itself. This is separate from the `ts-jest` transform that compiles the spec files.
 
-Constraint from the issue: **do not modify the content of the existing spec files** — infrastructure only.
+## Architecture
 
-## Relevant Files
-Use these files to resolve the chore:
+The feature is pure Nx/Jest configuration wiring — no application code changed.
 
-- `apps/api/package.json` — Holds the project's Nx config (`nx.targets`). The new `test` target is added here. Currently has `build`, `serve`, `prune*`, etc., but no `test`.
-- `apps/api/tsconfig.json` — Project solution tsconfig; references `tsconfig.app.json`. Must add a reference to the new `tsconfig.spec.json` (mirrors the dashboard convention).
-- `apps/api/tsconfig.app.json` — Build/typecheck tsconfig. Currently `include: ["src/**/*.ts"]`, which sweeps in the `.spec.ts` files. Must exclude specs so build/typecheck never compiles Jest-global code.
-- `apps/api/src/signals/signals.service.spec.ts` — Existing 5 tests (`describe`/`it`/`expect` globals). Must pass unchanged.
-- `apps/api/src/signals/signals.controller.spec.ts` — Existing 3 tests. Must pass unchanged.
-- `apps/dashboard/tsconfig.spec.json` — Reference pattern for a per-project spec tsconfig (dashboard uses Vitest; API will use Jest, but the structure/`references` convention is the model to follow).
-- `apps/dashboard/project.json` — Reference for how the dashboard declares its `test` target (`@angular/build:unit-test`); confirms the workspace convention of an explicit `test` target per project.
-- `nx.json` — Workspace config. `targetDefaults` currently covers `@angular/build:unit-test` but has no Jest defaults; `test` is not registered as a cacheable Jest target. Confirm the `@nx/jest:jest` executor works without a plugin entry (it does — the executor is invoked directly from the project target).
-- `package.json` (root) — Dev dependencies. `@swc/*` is present; `@nx/jest` is only transitively installed and `jest`/`ts-jest`/`@types/jest` are **not** installed. These must be added.
-- `README.md` — Confirms `npx nx run-many -t test` is the documented way to run all tests (the acceptance criteria target).
+Data flow when `nx run api:test` executes:
+1. Nx invokes the `@nx/jest:jest` executor (declared in `apps/api/package.json` → `nx.targets.test`) with `jestConfig: apps/api/jest.config.ts`.
+2. Jest loads `jest.config.ts` (transpiled via the inline `@jest-config-loader-options` header), which extends the workspace-root `jest.preset.js` (a re-export of `@nx/jest/preset`).
+3. The `ts-jest` transform compiles `.ts`/`.js` under `apps/api/tsconfig.spec.json` in a `node` test environment.
+4. The 8 spec tests run; coverage (when collected) is written to `coverage/apps/api`.
 
-### New Files
-- `jest.preset.js` (workspace root) — Shared Nx Jest preset re-export, referenced by every project's `jest.config`.
-- `apps/api/jest.config.ts` — API Jest configuration (preset + `ts-jest` transform + node environment).
-- `apps/api/tsconfig.spec.json` — TypeScript config scoped to `jest.config.ts` + spec files, with Jest types and CommonJS module output.
+Integration with the rest of the system: the target is cacheable, so it joins `nx run-many -t test` and `nx affected -t test` alongside the dashboard's Vitest target. `apps/api/tsconfig.json` references both `tsconfig.app.json` (build) and `tsconfig.spec.json` (tests), mirroring the dashboard convention and keeping build and test compilation cleanly separated.
 
-## Step by Step Tasks
-IMPORTANT: Execute every step in order, top to bottom.
+## Key Files
 
-### 1. Install the missing Jest toolchain
-- Add the Jest dev dependencies at the workspace root. Pin to versions compatible with the installed `@nx/jest@23.1.0` (which depends on `jest-config@^30`), i.e. the Jest 30 line.
-- Run: `npm install --save-dev jest@^30 ts-jest@^29 @types/jest@^30 @nx/jest@23.1.0 jest-environment-node@^30`
-  - `jest` — the runner (currently absent).
-  - `ts-jest` — TypeScript transform for the spec files (matches the NestJS convention; `@swc/jest` is an alternative but ts-jest needs no extra swc-jest package).
-  - `@types/jest` — provides `describe`/`it`/`expect` global typings so the spec tsconfig type-checks.
-  - `@nx/jest` — make the currently-transitive plugin an explicit dependency so the `@nx/jest:jest` executor and preset resolve reliably.
-  - `jest-environment-node` — Jest 30 no longer bundles the node environment; make it explicit.
-- Verify the versions installed by checking `package.json` `devDependencies` after install.
+- `jest.preset.js` (workspace root) — Shared Nx Jest preset re-export, extended by every project's Jest config.
+- `apps/api/jest.config.ts` — API Jest config: `node` environment, `ts-jest` transform against `tsconfig.spec.json`, plus the `@jest-config-loader-options` header for loading the config under `nodenext`.
+- `apps/api/tsconfig.spec.json` — TypeScript config scoped to `jest.config.ts` + spec files; CommonJS output, `["jest","node"]` types, decorator metadata enabled.
+- `apps/api/tsconfig.json` — Solution tsconfig; now references both `tsconfig.app.json` and `tsconfig.spec.json`.
+- `apps/api/tsconfig.app.json` — Build/typecheck config; now excludes `*.spec.ts`/`*.test.ts`.
+- `apps/api/package.json` — Declares the cacheable `test` target (`@nx/jest:jest` executor).
+- `package.json` (root) — Adds dev deps: `jest@^30`, `ts-jest@^29`, `@types/jest@^30`, `@nx/jest@^23.1.0`, `jest-environment-node@^30`.
+- `apps/api/src/signals/*.spec.ts` — The 8 existing tests (unchanged).
 
-### 2. Create the workspace-root Jest preset
-- Create `jest.preset.js` at the repo root with:
-  ```js
-  const nxPreset = require('@nx/jest/preset').default;
+## Acceptance Criteria
 
-  module.exports = { ...nxPreset };
-  ```
-- This is the standard Nx shared preset that per-project `jest.config` files extend.
-
-### 3. Create `apps/api/tsconfig.spec.json`
-- Create the spec tsconfig scoped to Jest, mirroring the dashboard's `tsconfig.spec.json` structure but for a Node/Jest (not Vitest/DOM) target. The workspace base uses `module: nodenext`, so override to `commonjs` for Jest and enable decorator metadata (required by NestJS classes under test):
-  ```json
-  {
-    "extends": "../../tsconfig.base.json",
-    "compilerOptions": {
-      "outDir": "../../dist/out-tsc",
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "types": ["jest", "node"],
-      "target": "es2021",
-      "rootDir": "src",
-      "experimentalDecorators": true,
-      "emitDecoratorMetadata": true,
-      "composite": false,
-      "emitDeclarationOnly": false,
-      "declarationMap": false
-    },
-    "include": [
-      "jest.config.ts",
-      "src/**/*.test.ts",
-      "src/**/*.spec.ts",
-      "src/**/*.d.ts"
-    ]
-  }
-  ```
-- Rationale: `types: ["jest", "node"]` resolves the Jest globals; `module: commonjs` is what `ts-jest` expects; `composite/emitDeclarationOnly/declarationMap` overrides prevent conflicts with the base project-references settings during Jest's own compilation.
-
-### 4. Create `apps/api/jest.config.ts`
-- Create the API Jest config using the root preset and a `ts-jest` transform pointed at the spec tsconfig:
-  ```ts
-  export default {
-    displayName: 'api',
-    preset: '../../jest.preset.js',
-    testEnvironment: 'node',
-    transform: {
-      '^.+\\.[tj]s$': [
-        'ts-jest',
-        { tsconfig: '<rootDir>/tsconfig.spec.json' },
-      ],
-    },
-    moduleFileExtensions: ['ts', 'js', 'html'],
-    coverageDirectory: '../../coverage/apps/api',
-  };
-  ```
-- `testEnvironment: 'node'` is correct for NestJS (no DOM).
-
-### 5. Reference the spec tsconfig from the project solution tsconfig
-- Edit `apps/api/tsconfig.json` and add `./tsconfig.spec.json` to the `references` array (mirrors `apps/dashboard/tsconfig.json`):
-  ```json
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.spec.json" }
-  ]
-  ```
-
-### 6. Exclude spec files from the build/typecheck tsconfig
-- Edit `apps/api/tsconfig.app.json` so the app build/typecheck config no longer compiles the Jest spec files (they reference Jest globals only available under the spec tsconfig). Change `exclude` from `[]` to:
-  ```json
-  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
-  ```
-- This prevents any build/typecheck regression now that the spec files rely on Jest globals.
-
-### 7. Add the `test` target to the API project
-- Edit `apps/api/package.json` and add a `test` entry inside `nx.targets` (alongside `build`, `serve`, etc.):
-  ```json
-  "test": {
-    "executor": "@nx/jest:jest",
-    "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-    "cache": true,
-    "options": {
-      "jestConfig": "apps/api/jest.config.ts"
-    }
-  }
-  ```
-
-### 8. Run the API test target
-- Run `npx nx run api:test` and confirm all 8 existing tests (5 service + 3 controller) pass with zero failures.
-- If a decorator/metadata error appears, confirm `experimentalDecorators` + `emitDecoratorMetadata` are set in `tsconfig.spec.json` (Step 3) and `reflect-metadata` is present (it is, in `apps/api` dependencies).
-
-### 9. Run the full workspace validation
-- Execute every command in the `Validation Commands` section and confirm all pass with zero errors and zero regressions.
-- Confirm `npx nx run-many -t test` now lists and runs **both** `api` and `dashboard`.
+- `npx nx run api:test` exists and all 8 spec tests (5 service + 3 controller) pass.
+- `npx nx run-many -t test` runs **both** `api` and `dashboard`.
+- Spec file contents are unchanged from before this chore.
+- `npx nx run-many -t build` and `-t lint` pass with no regression from the tsconfig changes.
 
 ## Validation Commands
-Execute every command to validate the chore is complete with zero regressions.
 
-- `npx nx run api:test` — Runs the new API Jest target; all 8 existing spec tests must pass.
-- `npx nx run-many -t test` — Runs tests for **both** `api` and `dashboard` (proves the API is now in the test gate).
-- `npx nx run-many -t build` — Build all projects to validate no build regression from the tsconfig changes.
-- `npx nx run-many -t lint` — Lint all projects to validate code quality is unaffected.
+- `npx nx run api:test` — Runs the API Jest target; all 8 spec tests must pass.
+- `npx nx run-many -t test` — Runs tests for both `api` and `dashboard`.
+- `npx nx run-many -t build` — Confirms no build regression from the tsconfig changes.
+- `npx nx run-many -t lint` — Confirms lint is unaffected.
 
 ## Notes
-- **Why not Vitest (like the dashboard):** the issue explicitly requires Jest for the API and the spec files are already written in Jest style (`toBeGreaterThanOrEqual`, `toHaveProperty`, plain `describe/it`). Matching the requested runner avoids rewriting spec content, which the acceptance criteria forbid.
-- **Why ts-jest and not @swc/jest:** ts-jest is the NestJS default and needs no additional swc-jest wiring; `@swc/core` is present but `@swc/jest` is not. Keeping the transform to one added package (`ts-jest`) is simpler and matches conventional NestJS Jest setups.
-- **Jest 30 alignment:** `@nx/jest@23.1.0` pulls `jest-config@^30`, so installing `jest@^30`/`@types/jest@^30` avoids a major-version mismatch. `ts-jest@^29` is the current stable line and is compatible with Jest 30.
-- **No `nx.json` changes required:** the `@nx/jest:jest` executor is invoked directly from the project's `test` target with `cache: true` set locally, so no `targetDefaults` entry or plugin registration is needed. (Optionally a `@nx/jest/plugin` entry could infer targets, but explicit target definition matches the existing pattern in this repo where `api` defines its targets inline in `package.json`.)
-- **Do not touch spec file contents** — this chore is infrastructure only, per the acceptance criteria.
+
+- The workspace deliberately runs two unit-test runners (Vitest for Angular, Jest for NestJS). Future API libs adopting Jest should follow this same preset + `tsconfig.spec.json` pattern.
+- If a decorator/metadata error ever appears in API tests, confirm `experimentalDecorators` + `emitDecoratorMetadata` remain set in `tsconfig.spec.json` and that `reflect-metadata` is still an `apps/api` dependency.
+- No `nx.json` `targetDefaults` entry is required; caching is configured on the target itself.
