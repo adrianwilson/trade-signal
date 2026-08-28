@@ -22,6 +22,8 @@ Extract ADW workflow information from the text below and return a JSON response.
 - `/adw_document` - Documentation only (requires adw_id)
 - `/adw_patch` - Patch only (requires adw_id)
 - `/adw_sdlc` - Full SDLC workflow
+- `/adw_sdlc_zte` - Full SDLC with Zero Touch Execution (auto-merge)
+- `/adw_ship` - Ship only (merge PR to main, requires adw_id)
 
 ## Response Format
 

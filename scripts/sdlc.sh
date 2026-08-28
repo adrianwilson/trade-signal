@@ -6,13 +6,21 @@
 # Structured JSON output pipes between steps.
 # All agent input/output is logged to agents/{adw-id}/ for traceability.
 #
-# Usage: ./scripts/sdlc.sh <issue-number>
+# Usage: ./scripts/sdlc.sh <issue-number> [--zte]
+#
+# Flags:
+#   --zte  Zero Touch Execution: auto-merge PR if all phases pass
 
 set -e
 
+ZTE=false
+if [[ "$*" == *"--zte"* ]]; then
+  ZTE=true
+fi
+
 ISSUE_NUMBER=$1
-if [ -z "$ISSUE_NUMBER" ]; then
-  echo "Usage: ./scripts/sdlc.sh <issue-number>"
+if [ -z "$ISSUE_NUMBER" ] || [ "$ISSUE_NUMBER" = "--zte" ]; then
+  echo "Usage: ./scripts/sdlc.sh <issue-number> [--zte]"
   exit 1
 fi
 
@@ -211,11 +219,43 @@ if [ -n "$(git status --porcelain)" ]; then
   echo ""
 fi
 
-# Phase 8: Ship
+# Phase 8: Ship (create PR)
 echo "=== Phase 8: Ship ==="
 PR_URL=$(run_phase "ship" "pr_creator" "/pull_request $BRANCH_NAME '$ISSUE_JSON' $SPEC_FILE $ADW_ID")
 echo "PR: $PR_URL"
 echo ""
+
+# Phase 9: Track KPIs
+echo "=== Phase 9: Track KPIs ==="
+STATE_FOR_KPIS="{\"adw_id\":\"$ADW_ID\",\"issue_number\":\"$ISSUE_NUMBER\",\"issue_class\":\"$CLASSIFICATION\",\"plan_file\":\"$SPEC_FILE\"}"
+run_phase "track_kpis" "kpi_tracker" "/track_agentic_kpis $STATE_FOR_KPIS" > /dev/null
+echo "KPIs updated: app_docs/agentic_kpis.md"
+echo ""
+
+# Commit KPI update
+if [ -n "$(git status --porcelain)" ]; then
+  run_phase "commit_kpis" "kpi_committer" "/commit kpi_tracker $ISSUE_CLASS '$ISSUE_JSON'" > /dev/null
+  echo "KPIs committed"
+  echo ""
+fi
+
+# Phase 10: Zero Touch Execution (auto-merge)
+MERGED=false
+if [ "$ZTE" = true ]; then
+  echo "=== Phase 10: ZTE (Auto-Merge) ==="
+  if [ "$TESTS_PASSED" = true ] && [ "$REVIEW_PASSED" = true ]; then
+    echo "All checks passed. Merging to main..."
+    git checkout main
+    git pull origin main
+    git merge "$BRANCH_NAME" --no-edit
+    git push origin main
+    MERGED=true
+    echo "Merged $BRANCH_NAME to main"
+  else
+    echo "SKIPPED: Tests or review did not pass. PR created but not merged."
+  fi
+  echo ""
+fi
 
 # Final state
 cat > "$AGENTS_DIR/state.json" << EOF
@@ -229,6 +269,8 @@ cat > "$AGENTS_DIR/state.json" << EOF
   "review_passed": $REVIEW_PASSED,
   "doc_file": "$DOC_FILE",
   "pr_url": "$PR_URL",
+  "merged": $MERGED,
+  "zte": $ZTE,
   "completed": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 EOF
@@ -244,5 +286,6 @@ echo "  Tests:          $([ "$TESTS_PASSED" = true ] && echo "PASSED" || echo "F
 echo "  Review:         $([ "$REVIEW_PASSED" = true ] && echo "PASSED" || echo "FAILED")"
 echo "  Documentation:  $DOC_FILE"
 echo "  PR:             $PR_URL"
+echo "  Merged:         $([ "$MERGED" = true ] && echo "YES" || echo "NO")"
 echo "  ADW ID:         $ADW_ID"
 echo "  Logs:           $AGENTS_DIR/"
