@@ -56,6 +56,16 @@
         ],
         "executor": "nx:noop"
       },
+      "test": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{workspaceRoot}/coverage/{projectRoot}"
+        ],
+        "cache": true,
+        "options": {
+          "jestConfig": "apps/api/jest.config.ts"
+        }
+      },
       "serve": {
         "continuous": true,
         "executor": "@nx/js:node",
