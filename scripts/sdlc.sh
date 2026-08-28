@@ -69,7 +69,7 @@ run_phase() {
   echo "{\"phase\":\"$phase_name\",\"agent\":\"$agent_name\",\"cost_usd\":$cost,\"duration_ms\":$duration,\"num_turns\":$num_turns,\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \
     > "$phase_dir/meta.json"
 
-  echo "$phase_name: cost=\$$cost, turns=$num_turns, duration=${duration}ms"
+  echo "$phase_name: cost=\$$cost, turns=$num_turns, duration=${duration}ms" >&2
 
   # Return the result via stdout
   echo "$result"
