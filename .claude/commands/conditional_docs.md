@@ -3,6 +3,7 @@
 This prompt helps you determine what documentation you should read based on the specific changes you need to make in the codebase. Review the conditions below and read the relevant documentation before proceeding with your task.
 
 ## Instructions
+
 - Review the task you've been asked to perform
 - Check each documentation path in the Conditional Documentation section
 - For each path, evaluate if any of the listed conditions apply to your task
@@ -31,3 +32,9 @@ This prompt helps you determine what documentation you should read based on the 
 - .github/workflows/adw.yml
   - Conditions:
     - When modifying the ADW pipeline or trigger configuration
+
+- app_docs/feature-83c495bb-api-jest-test-runner.md
+  - Conditions:
+    - When running, configuring, or debugging tests for apps/api
+    - When modifying Jest config, tsconfig.spec.json, or the API test target
+    - When adding a test target or test runner to another Nx project

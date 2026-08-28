@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { SignalsService } from './signals.service';
-import { ManualSignalInput } from '@org/signals';
+import type { ManualSignalInput } from '@org/signals';
 
 @Controller('signals')
 export class SignalsController {
