@@ -209,12 +209,13 @@ for (let attempt = 1; attempt <= 3; attempt++) {
     '/test',
   );
 
-  let failedCount = 0;
+  let failedCount = 1; // default to failed if parse fails
   try {
-    const parsed = JSON.parse(testResult);
+    const jsonMatch = testResult.match(/\[[\s\S]*\]/);
+    const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : testResult);
     failedCount = parsed.filter((t) => !t.passed).length;
   } catch {
-    failedCount = 0;
+    // If we can't parse the result, assume failure
   }
 
   if (failedCount === 0) {
@@ -248,11 +249,12 @@ for (let cycle = 1; cycle <= 2; cycle++) {
     `/review ${adwId} ${specFile}`,
   );
 
-  let success = true;
+  let success = false; // default to failed if parse fails
   try {
-    success = JSON.parse(reviewResult).success;
+    const jsonMatch = reviewResult.match(/\{[\s\S]*\}/);
+    success = JSON.parse(jsonMatch ? jsonMatch[0] : reviewResult).success;
   } catch {
-    success = true;
+    // If we can't parse the result, assume failure
   }
 
   if (success) {

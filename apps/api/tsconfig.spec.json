@@ -1,23 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
-    "types": ["jest", "node"],
-    "target": "es2021",
-    "rootDir": "src",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "composite": false,
-    "emitDeclarationOnly": false,
-    "declarationMap": false
+    "types": ["jest", "node"]
   },
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
 }

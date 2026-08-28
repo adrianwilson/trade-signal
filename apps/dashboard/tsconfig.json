@@ -5,7 +5,9 @@
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
     "module": "preserve",
+    "isolatedModules": false,
     "composite": false,
+    "declaration": true,
     "emitDeclarationOnly": false,
     "declarationMap": false
   },
