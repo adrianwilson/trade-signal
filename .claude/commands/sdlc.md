@@ -58,7 +58,13 @@ Execute each phase below in order. Each phase is one agent, one purpose. Between
 - Run `/document` with the ADW ID and spec file
 - Commit the documentation
 
-## Phase 8: Ship
+## Phase 8: Finalize
+
+- Run `/finalize` with the spec file path to transform the build plan into a living design anchor
+- Strips execution details (tasks, phases), keeps design decisions, architecture, acceptance criteria
+- Commit the finalized spec
+
+## Phase 9: Ship
 
 - Run `/pull_request` to create a PR linking the spec, issue, and ADW ID
 

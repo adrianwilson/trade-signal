@@ -219,13 +219,27 @@ if [ -n "$(git status --porcelain)" ]; then
   echo ""
 fi
 
-# Phase 8: Ship (create PR)
-echo "=== Phase 8: Ship ==="
+# Phase 8: Finalize spec (build plan -> design anchor)
+echo "=== Phase 8: Finalize ==="
+run_phase "finalize" "spec_finalizer" "/finalize $SPEC_FILE" > /dev/null
+echo "Spec finalized: $SPEC_FILE"
+echo ""
+
+# Phase 8b: Commit finalized spec
+if [ -n "$(git status --porcelain)" ]; then
+  echo "=== Phase 8b: Commit finalized spec ==="
+  run_phase "commit_finalize" "spec_finalizer_committer" "/commit spec_finalizer $ISSUE_CLASS '$ISSUE_JSON'" > /dev/null
+  echo "Finalized spec committed"
+  echo ""
+fi
+
+# Phase 9: Ship (create PR)
+echo "=== Phase 9: Ship ==="
 PR_URL=$(run_phase "ship" "pr_creator" "/pull_request $BRANCH_NAME '$ISSUE_JSON' $SPEC_FILE $ADW_ID")
 echo "PR: $PR_URL"
 echo ""
 
-# Phase 9: Track KPIs
+# Phase 10: Track KPIs
 echo "=== Phase 9: Track KPIs ==="
 STATE_FOR_KPIS="{\"adw_id\":\"$ADW_ID\",\"issue_number\":\"$ISSUE_NUMBER\",\"issue_class\":\"$CLASSIFICATION\",\"plan_file\":\"$SPEC_FILE\"}"
 run_phase "track_kpis" "kpi_tracker" "/track_agentic_kpis $STATE_FOR_KPIS" > /dev/null
@@ -239,10 +253,10 @@ if [ -n "$(git status --porcelain)" ]; then
   echo ""
 fi
 
-# Phase 10: Zero Touch Execution (auto-merge)
+# Phase 11: Zero Touch Execution (auto-merge)
 MERGED=false
 if [ "$ZTE" = true ]; then
-  echo "=== Phase 10: ZTE (Auto-Merge) ==="
+  echo "=== Phase 11: ZTE (Auto-Merge) ==="
   if [ "$TESTS_PASSED" = true ] && [ "$REVIEW_PASSED" = true ]; then
     echo "All checks passed. Merging to main..."
     git checkout main

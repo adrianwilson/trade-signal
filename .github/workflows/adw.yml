@@ -183,8 +183,20 @@ jobs:
               --output-format json
           fi
 
-      # Phase 8: Ship -- push and create PR
-      - name: "Phase 8: Ship"
+      # Phase 8: Finalize spec -- transform build plan into design anchor
+      - name: "Phase 8: Finalize"
+        run: |
+          claude -p "/finalize ${{ steps.plan.outputs.spec_file }}" \
+            --dangerously-skip-permissions \
+            --output-format json
+          if [ -n "$(git status --porcelain)" ]; then
+            claude -p "/commit spec_finalizer $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
+              --dangerously-skip-permissions \
+              --output-format json
+          fi
+
+      # Phase 9: Ship -- push and create PR
+      - name: "Phase 9: Ship"
         id: ship
         run: |
           PR_URL=$(claude -p "/pull_request ${{ steps.branch.outputs.name }} '${{ steps.classify.outputs.issue_json }}' ${{ steps.plan.outputs.spec_file }} ${{ steps.adw.outputs.id }}" \
@@ -192,8 +204,8 @@ jobs:
             --output-format json | jq -r '.result')
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
-      # Phase 9: Track KPIs
-      - name: "Phase 9: Track KPIs"
+      # Phase 10: Track KPIs
+      - name: "Phase 10: Track KPIs"
         run: |
           STATE='{"adw_id":"${{ steps.adw.outputs.id }}","issue_number":"${{ env.ISSUE_NUMBER }}","issue_class":"${{ steps.classify.outputs.command }}","plan_file":"${{ steps.plan.outputs.spec_file }}"}'
           claude -p "/track_agentic_kpis $STATE" \
@@ -205,8 +217,8 @@ jobs:
               --output-format json
           fi
 
-      # Phase 10: ZTE (Zero Touch Execution) -- auto-merge if comment was "adw_zte"
-      - name: "Phase 10: ZTE Auto-Merge"
+      # Phase 11: ZTE (Zero Touch Execution) -- auto-merge if comment was "adw_zte"
+      - name: "Phase 11: ZTE Auto-Merge"
         if: contains(github.event.comment.body, 'adw_zte')
         run: |
           echo "ZTE mode: auto-merging to main"
