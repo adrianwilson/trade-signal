@@ -22,6 +22,7 @@ This suite boots the full `AppModule` over an in-memory HTTP server and drives i
 The suite lives at `apps/api/src/signals/signals.integration.spec.ts` and is additive — the existing 8 unit tests are unchanged.
 
 Lifecycle (`beforeAll` / `afterAll`):
+
 1. `Test.createTestingModule({ imports: [AppModule] }).compile()` builds the full DI graph (`AppModule` → `SignalsModule` → `SignalsController` + `SignalsService`).
 2. `moduleRef.createNestApplication()` → `app.setGlobalPrefix('api')` → `await app.init()` starts the app in-memory with production routing.
 3. `app.getHttpServer()` yields the HTTP handle that `supertest` drives.

@@ -101,6 +101,12 @@ function runPhase(phaseName, agentName, prompt) {
 
 function commitPhase(phaseName, agentName, issueClass, issueJson) {
   if (hasUncommittedChanges()) {
+    // Format files before committing to pass CI format:check
+    try {
+      exec('npx nx format:write --quiet');
+    } catch {
+      // format:write may fail if no files to format
+    }
     heading(`${phaseName}: Commit`);
     runPhase(
       phaseName,
@@ -328,11 +334,37 @@ log(`PR: ${prUrl}\n`);
 
 // Phase 10: Track KPIs
 heading('Phase 10: Track KPIs');
+
+// Aggregate costs from all phase meta.json files
+const { readdirSync } = await import('node:fs');
+const agentDirs = readdirSync(agentsDir, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name);
+
+let totalCost = 0;
+let totalTurns = 0;
+let totalDuration = 0;
+for (const dir of agentDirs) {
+  const metaPath = join(agentsDir, dir, 'meta.json');
+  try {
+    const meta = JSON.parse(readFileSync(metaPath, 'utf-8'));
+    totalCost += typeof meta.cost_usd === 'number' ? meta.cost_usd : 0;
+    totalTurns += typeof meta.num_turns === 'number' ? meta.num_turns : 0;
+    totalDuration +=
+      typeof meta.duration_ms === 'number' ? meta.duration_ms : 0;
+  } catch {
+    // Skip dirs without meta.json
+  }
+}
+
 const stateForKpis = JSON.stringify({
   adw_id: adwId,
   issue_number: issueNumber,
   issue_class: classification,
   plan_file: specFile,
+  total_cost_usd: Math.round(totalCost * 100) / 100,
+  total_turns: totalTurns,
+  total_duration_s: Math.round(totalDuration / 1000),
 });
 runPhase('track_kpis', 'kpi_tracker', `/track_agentic_kpis ${stateForKpis}`);
 log('KPIs updated: app_docs/agentic_kpis.md\n');
