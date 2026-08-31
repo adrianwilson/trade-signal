@@ -63,3 +63,4 @@ logs/
 agents/
 
 test-output
+playwright-report
