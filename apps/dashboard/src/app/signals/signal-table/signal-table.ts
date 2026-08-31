@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { Signal } from '@org/signals';
 import { SignalService } from '../../services/signal.service';
@@ -23,11 +23,11 @@ export class SignalTableComponent implements OnInit {
     'source',
     'timestamp',
   ];
-  signals: Signal[] = [];
+  signals = new MatTableDataSource<Signal>([]);
 
   ngOnInit(): void {
     this.signalService.getSignals().subscribe((data) => {
-      this.signals = data;
+      this.signals.data = data;
     });
   }
 
