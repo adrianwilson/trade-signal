@@ -10,4 +10,19 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/api',
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.spec.ts',
+    '!src/main.ts',
+    '!src/**/*.module.ts',
+  ],
+  coverageReporters: ['text', 'text-summary', 'html', 'lcov'],
+  coverageThreshold: {
+    global: {
+      lines: 70,
+      branches: 70,
+      functions: 70,
+      statements: 70,
+    },
+  },
 };

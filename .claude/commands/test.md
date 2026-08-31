@@ -37,10 +37,11 @@ TEST_COMMAND_TIMEOUT: 5 minutes
    - test_name: "lint"
    - test_purpose: "Validates code quality, unused imports, and style violations"
 
-4. **Run All Tests**
+4. **Run All Tests (with coverage enforcement)**
    - Command: `npx nx run-many -t test`
    - test_name: "unit_tests"
    - test_purpose: "Validates all unit tests pass across dashboard and API"
+   - IMPORTANT: Both test targets now collect code coverage and enforce a 70% floor on lines, branches, functions, and statements (API via Jest `coverageThreshold`, dashboard via the `@angular/build:unit-test` `coverageThresholds`). If either project drops below the floor, its test target exits non-zero and this step fails — a below-floor coverage result is a test failure, captured by the existing `unit_tests` entry. No separate command is required; enforcement rides on `npx nx run-many -t test`.
 
 ## Report
 

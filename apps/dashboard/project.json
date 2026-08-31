@@ -64,8 +64,24 @@
     },
     "test": {
       "executor": "@angular/build:unit-test",
+      "outputs": ["{workspaceRoot}/coverage/dashboard"],
       "options": {
-        "watch": false
+        "watch": false,
+        "coverage": true,
+        "coverageThresholds": {
+          "lines": 70,
+          "branches": 70,
+          "functions": 70,
+          "statements": 70
+        },
+        "coverageInclude": ["src/**/*.ts"],
+        "coverageExclude": [
+          "src/**/*.spec.ts",
+          "src/main.ts",
+          "src/app/app.config.ts",
+          "src/app/app.routes.ts"
+        ],
+        "coverageReporters": ["text", "text-summary", "html"]
       }
     },
     "serve-static": {
