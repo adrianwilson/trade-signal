@@ -51,7 +51,7 @@ describe('SignalTableComponent', () => {
     const fixture = TestBed.createComponent(SignalTableComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.componentInstance.signals.length).toBe(2);
+    expect(fixture.componentInstance.signals.data.length).toBe(2);
   });
 
   it('should render table rows', async () => {

@@ -11,6 +11,9 @@
     },
     {
       "path": "./apps/dashboard"
+    },
+    {
+      "path": "./apps/dashboard-e2e"
     }
   ],
   "compilerOptions": {}

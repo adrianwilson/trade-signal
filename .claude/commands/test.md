@@ -43,6 +43,12 @@ TEST_COMMAND_TIMEOUT: 5 minutes
    - test_purpose: "Validates all unit tests pass across dashboard and API"
    - IMPORTANT: Both test targets now collect code coverage and enforce a 70% floor on lines, branches, functions, and statements (API via Jest `coverageThreshold`, dashboard via the `@angular/build:unit-test` `coverageThresholds`). If either project drops below the floor, its test target exits non-zero and this step fails — a below-floor coverage result is a test failure, captured by the existing `unit_tests` entry. No separate command is required; enforcement rides on `npx nx run-many -t test`.
 
+5. **Run E2E Tests**
+   - Command: `npx nx run dashboard-e2e:e2e`
+   - test_name: "e2e"
+   - test_purpose: "Validates the full application works end-to-end — dashboard loads, connects to API, renders signal data correctly"
+   - This step starts both API and dashboard via Playwright's webServer config, runs headless Chromium tests, then tears down the servers.
+
 ## Report
 
 - IMPORTANT: Return results exclusively as a JSON array
