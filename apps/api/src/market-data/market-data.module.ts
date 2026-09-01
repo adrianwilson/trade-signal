@@ -9,5 +9,6 @@ import { SignalsModule } from '../signals/signals.module';
   imports: [TypeOrmModule.forFeature([AssetPriceEntity]), SignalsModule],
   controllers: [MarketDataController],
   providers: [MarketDataService],
+  exports: [MarketDataService],
 })
 export class MarketDataModule {}

@@ -7,6 +7,7 @@ import { SignalsModule } from '../signals/signals.module';
 import { SignalEntity } from '../signals/signal.entity';
 import { MarketDataModule } from '../market-data/market-data.module';
 import { AssetPriceEntity } from '../market-data/asset-price.entity';
+import { TechnicalAnalysisModule } from '../technical-analysis/technical-analysis.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AssetPriceEntity } from '../market-data/asset-price.entity';
     ScheduleModule.forRoot(),
     SignalsModule,
     MarketDataModule,
+    TechnicalAnalysisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
