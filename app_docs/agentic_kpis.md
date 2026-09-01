@@ -8,18 +8,18 @@ Summary metrics across all ADW runs.
 
 | Metric                | Value       | Last Updated            |
 | --------------------- | ----------- | ----------------------- |
-| Current Streak        | 13          | 2026-09-01 15:52:00 MDT |
-| Longest Streak        | 13          | 2026-09-01 15:52:00 MDT |
-| Total Plan Size       | 1375 lines  | 2026-09-01 15:52:00 MDT |
-| Largest Plan Size     | 199 lines   | 2026-09-01 15:52:00 MDT |
-| Total Diff Size       | 71354 lines | 2026-09-01 15:52:00 MDT |
-| Largest Diff Size     | 40879 lines | 2026-09-01 15:52:00 MDT |
-| Average Presence      | 1.0         | 2026-09-01 15:52:00 MDT |
-| Average Interventions | 0.55        | 2026-09-01 15:52:00 MDT |
-| ZTE-Ready Runs        | 9/11 (82%)  | 2026-09-01 15:52:00 MDT |
-| CI First-Pass Rate    | 73% (8/11)  | 2026-09-01 15:52:00 MDT |
-| Scope Drift Rate      | 18% (2/11)  | 2026-09-01 15:52:00 MDT |
-| Average Prompts       | 3.4         | 2026-09-01 15:52:00 MDT |
+| Current Streak        | 14          | 2026-09-01 16:10:00 MDT |
+| Longest Streak        | 14          | 2026-09-01 16:10:00 MDT |
+| Total Plan Size       | 1375 lines  | 2026-09-01 16:10:00 MDT |
+| Largest Plan Size     | 199 lines   | 2026-09-01 16:10:00 MDT |
+| Total Diff Size       | 81938 lines | 2026-09-01 16:10:00 MDT |
+| Largest Diff Size     | 40879 lines | 2026-09-01 16:10:00 MDT |
+| Average Presence      | 1.0         | 2026-09-01 16:10:00 MDT |
+| Average Interventions | 0.5         | 2026-09-01 16:10:00 MDT |
+| ZTE-Ready Runs        | 10/12 (83%) | 2026-09-01 16:10:00 MDT |
+| CI First-Pass Rate    | 75% (9/12)  | 2026-09-01 16:10:00 MDT |
+| Scope Drift Rate      | 17% (2/12)  | 2026-09-01 16:10:00 MDT |
+| Average Prompts       | 3.3         | 2026-09-01 16:10:00 MDT |
 
 ## ADW KPIs
 
@@ -40,6 +40,7 @@ Detailed metrics for individual ADW workflow runs.
 | 2026-09-01 | c3970936 | 21    | /feature | 1        | 46   | 544/0/10             | 0             | pass | 0      | clean                           | 1       |
 | 2026-09-01 | b0f4edac | 23    | /feature | 1        | 55   | 253/13/5             | 0             | pass | 0      | clean                           | 3       |
 | 2026-09-01 | fc358296 | 25    | /feature | 1        | 40   | 172/2/5              | 0             | pass | 0      | clean                           | 2       |
+| 2026-09-01 | 94f6fcb6 | 27+28 | /feature | 1        | 0    | 3209/7375/13         | 0             | pass | 0      | clean                           | 3       |
 
 ### Intervention Log (Issue #5)
 
