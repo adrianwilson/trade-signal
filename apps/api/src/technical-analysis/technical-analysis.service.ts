@@ -181,6 +181,7 @@ export class TechnicalAnalysisService {
             direction: result.rsiSignal,
             confidence: Math.round(Math.abs(result.rsi - 50) * 2),
             notes: `RSI at ${result.rsi.toFixed(1)}`,
+            source: 'rsi',
           });
         }
 
@@ -195,6 +196,7 @@ export class TechnicalAnalysisService {
               100,
             ),
             notes: `MACD histogram at ${result.macd.histogram.toFixed(4)}`,
+            source: 'macd',
           });
         }
 
@@ -206,6 +208,7 @@ export class TechnicalAnalysisService {
             direction: result.smaSignal,
             confidence: 75,
             notes: `SMA crossover: ${result.crossover.type === 'bullish' ? 'Golden cross' : 'Death cross'} (SMA-50 vs SMA-200)`,
+            source: 'sma-crossover',
           });
         }
 
@@ -222,6 +225,7 @@ export class TechnicalAnalysisService {
               Math.abs(result.bollingerPercentB - 0.5) * 200,
             ),
             notes: `Bollinger %B at ${result.bollingerPercentB.toFixed(2)}`,
+            source: 'bollinger',
           });
         }
       } catch (err) {
