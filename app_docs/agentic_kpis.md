@@ -8,18 +8,18 @@ Summary metrics across all ADW runs.
 
 | Metric                | Value       | Last Updated            |
 | --------------------- | ----------- | ----------------------- |
-| Current Streak        | 9           | 2026-09-01 13:15:00 MDT |
-| Longest Streak        | 9           | 2026-09-01 13:15:00 MDT |
-| Total Plan Size       | 1211 lines  | 2026-09-01 13:15:00 MDT |
-| Largest Plan Size     | 199 lines   | 2026-09-01 13:15:00 MDT |
-| Total Diff Size       | 70245 lines | 2026-09-01 13:15:00 MDT |
-| Largest Diff Size     | 40879 lines | 2026-09-01 13:15:00 MDT |
-| Average Presence      | 1.0         | 2026-09-01 13:15:00 MDT |
-| Average Interventions | 0.86        | 2026-09-01 13:15:00 MDT |
-| ZTE-Ready Runs        | 5/7 (71%)   | 2026-09-01 13:15:00 MDT |
-| CI First-Pass Rate    | 83% (5/6)   | 2026-09-01 13:15:00 MDT |
-| Scope Drift Rate      | 29% (2/7)   | 2026-09-01 13:15:00 MDT |
-| Average Prompts       | 4.4         | 2026-09-01 13:15:00 MDT |
+| Current Streak        | 10          | 2026-09-01 14:00:00 MDT |
+| Longest Streak        | 10          | 2026-09-01 14:00:00 MDT |
+| Total Plan Size       | 1234 lines  | 2026-09-01 14:00:00 MDT |
+| Largest Plan Size     | 199 lines   | 2026-09-01 14:00:00 MDT |
+| Total Diff Size       | 70370 lines | 2026-09-01 14:00:00 MDT |
+| Largest Diff Size     | 40879 lines | 2026-09-01 14:00:00 MDT |
+| Average Presence      | 1.0         | 2026-09-01 14:00:00 MDT |
+| Average Interventions | 0.75        | 2026-09-01 14:00:00 MDT |
+| ZTE-Ready Runs        | 6/8 (75%)   | 2026-09-01 14:00:00 MDT |
+| CI First-Pass Rate    | 86% (6/7)   | 2026-09-01 14:00:00 MDT |
+| Scope Drift Rate      | 25% (2/8)   | 2026-09-01 14:00:00 MDT |
+| Average Prompts       | 4.0         | 2026-09-01 14:00:00 MDT |
 
 ## ADW KPIs
 
@@ -35,7 +35,8 @@ Detailed metrics for individual ADW workflow runs.
 | 2026-09-01 | 7cc59c0b | 1     | /feature | 1        | 100  | 246/0/5              | 0             | pass | 0      | clean                           | 2       |
 | 2026-09-01 | ce60b8b4 | 13    | /feature | 1        | 154  | 674/140/14           | 0             | pass | 0      | clean                           | 2       |
 | 2026-09-01 | 0cb7af55 | 15    | /feature | 1        | 80   | 224/20/5             | 0             | pass | 0      | clean                           | 3       |
-| 2026-09-01 | 8dc41f47 | 17    | /feature | 1        | 189  | 945/5/16             | 0             | pass | 0      | clean                           | 3       |
+| 2026-09-01 | 8dc41f47 | 17    | /feature | 1        | 189  | 945/5/16             | 0             | fail | 0      | clean                           | 3       |
+| 2026-09-01 | a8c62ee1 | 19    | /feature | 1        | 23   | 121/4/6              | 0             | pass | 0      | clean                           | 1       |
 
 ### Intervention Log (Issue #5)
 
