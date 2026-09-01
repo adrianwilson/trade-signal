@@ -23,7 +23,7 @@ export class SignalTableComponent implements OnInit {
     'source',
     'timestamp',
   ];
-  signals = new MatTableDataSource<Signal>([]);
+  signals: MatTableDataSource<Signal> = new MatTableDataSource<Signal>([]);
 
   ngOnInit(): void {
     this.signalService.getSignals().subscribe((data) => {

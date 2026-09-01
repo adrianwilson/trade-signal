@@ -12,14 +12,14 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'npx nx serve api',
+      command: 'pnpm exec nx serve api',
       url: 'http://localhost:3000/api/signals',
       reuseExistingServer: !process.env['CI'],
       cwd: workspaceRoot,
       timeout: 120000,
     },
     {
-      command: 'npx nx serve dashboard',
+      command: 'pnpm exec nx serve dashboard',
       url: 'http://localhost:4200',
       reuseExistingServer: !process.env['CI'],
       cwd: workspaceRoot,
