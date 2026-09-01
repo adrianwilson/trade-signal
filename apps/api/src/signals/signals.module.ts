@@ -8,5 +8,6 @@ import { SignalEntity } from './signal.entity';
   imports: [TypeOrmModule.forFeature([SignalEntity])],
   controllers: [SignalsController],
   providers: [SignalsService],
+  exports: [SignalsService],
 })
 export class SignalsModule {}
