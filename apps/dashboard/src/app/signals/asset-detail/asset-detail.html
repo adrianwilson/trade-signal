@@ -10,9 +10,7 @@
   </div>
   } @else if (error) {
   <p class="error">{{ error }}</p>
-  } @else if (analysis) {
-
-  @if (data.price) {
+  } @else if (analysis) { @if (data.price) {
   <div class="price-header">
     <span class="price">{{ data.price | number:'1.2-2' }}</span>
     @if (data.changePercent) {
@@ -20,7 +18,8 @@
       class="change"
       [style.color]="data.changePercent >= 0 ? '#4caf50' : '#f44336'"
     >
-      {{ data.changePercent >= 0 ? '+' : '' }}{{ data.changePercent | number:'1.2-2' }}%
+      {{ data.changePercent >= 0 ? '+' : '' }}{{ data.changePercent |
+      number:'1.2-2' }}%
     </span>
     }
   </div>
@@ -28,7 +27,10 @@
 
   <div class="overall-signal">
     <span>Overall Signal</span>
-    <mat-chip [style.background-color]="signalColor(analysis.overallSignal)" style="color: white">
+    <mat-chip
+      [style.background-color]="signalColor(analysis.overallSignal)"
+      style="color: white"
+    >
       {{ analysis.overallSignal }}
     </mat-chip>
   </div>
@@ -41,7 +43,11 @@
     <div class="indicator-card">
       <div class="indicator-header">
         <span class="indicator-name">RSI (14)</span>
-        <mat-chip [style.background-color]="signalColor(analysis.rsiSignal)" style="color: white" class="small-chip">
+        <mat-chip
+          [style.background-color]="signalColor(analysis.rsiSignal)"
+          style="color: white"
+          class="small-chip"
+        >
           {{ analysis.rsiSignal }}
         </mat-chip>
       </div>
@@ -54,12 +60,18 @@
     <div class="indicator-card">
       <div class="indicator-header">
         <span class="indicator-name">MACD</span>
-        <mat-chip [style.background-color]="signalColor(analysis.macdSignal)" style="color: white" class="small-chip">
+        <mat-chip
+          [style.background-color]="signalColor(analysis.macdSignal)"
+          style="color: white"
+          class="small-chip"
+        >
           {{ analysis.macdSignal }}
         </mat-chip>
       </div>
       @if (analysis.macd) {
-      <div class="indicator-value">{{ analysis.macd.histogram | number:'1.4-4' }}</div>
+      <div class="indicator-value">
+        {{ analysis.macd.histogram | number:'1.4-4' }}
+      </div>
       <div class="indicator-zone">Histogram</div>
       } @else {
       <div class="indicator-value">N/A</div>
@@ -69,24 +81,27 @@
     <div class="indicator-card">
       <div class="indicator-header">
         <span class="indicator-name">SMA Crossover</span>
-        <mat-chip [style.background-color]="signalColor(analysis.smaSignal)" style="color: white" class="small-chip">
+        <mat-chip
+          [style.background-color]="signalColor(analysis.smaSignal)"
+          style="color: white"
+          class="small-chip"
+        >
           {{ analysis.smaSignal }}
         </mat-chip>
       </div>
       <div class="sma-values">
         @if (analysis.sma20 !== null) {
         <div>SMA-20: {{ analysis.sma20 | number:'1.2-2' }}</div>
-        }
-        @if (analysis.sma50 !== null) {
+        } @if (analysis.sma50 !== null) {
         <div>SMA-50: {{ analysis.sma50 | number:'1.2-2' }}</div>
-        }
-        @if (analysis.sma200 !== null) {
+        } @if (analysis.sma200 !== null) {
         <div>SMA-200: {{ analysis.sma200 | number:'1.2-2' }}</div>
         }
       </div>
       @if (analysis.crossover.occurred) {
       <div class="indicator-zone">
-        {{ analysis.crossover.type === 'bullish' ? 'Golden Cross' : 'Death Cross' }}
+        {{ analysis.crossover.type === 'bullish' ? 'Golden Cross' : 'Death
+        Cross' }}
       </div>
       }
     </div>
@@ -94,24 +109,27 @@
     <div class="indicator-card">
       <div class="indicator-header">
         <span class="indicator-name">Bollinger Bands</span>
-        <mat-chip [style.background-color]="signalColor(analysis.bollingerSignal)" style="color: white" class="small-chip">
+        <mat-chip
+          [style.background-color]="signalColor(analysis.bollingerSignal)"
+          style="color: white"
+          class="small-chip"
+        >
           {{ analysis.bollingerSignal }}
         </mat-chip>
       </div>
       <div class="indicator-value">
-        %B: {{ analysis.bollingerPercentB !== null ? (analysis.bollingerPercentB | number:'1.2-2') : 'N/A' }}
+        %B: {{ analysis.bollingerPercentB !== null ? (analysis.bollingerPercentB
+        | number:'1.2-2') : 'N/A' }}
       </div>
-      <div class="indicator-zone">{{ bollingerZone(analysis.bollingerPercentB) }}</div>
+      <div class="indicator-zone">
+        {{ bollingerZone(analysis.bollingerPercentB) }}
+      </div>
     </div>
   </div>
 
   @if (analysis.ema20 !== null) {
-  <div class="ema-footer">
-    EMA-20: {{ analysis.ema20 | number:'1.2-2' }}
-  </div>
-  }
-
-  }
+  <div class="ema-footer">EMA-20: {{ analysis.ema20 | number:'1.2-2' }}</div>
+  } }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
