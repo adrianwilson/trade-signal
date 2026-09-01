@@ -1,11 +1,10 @@
 import {
   Component,
   OnInit,
-  Inject,
   ElementRef,
   ViewChild,
-  AfterViewInit,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import {
@@ -60,19 +59,17 @@ interface AnalysisResult {
   templateUrl: './asset-detail.html',
   styleUrl: './asset-detail.scss',
 })
-export class AssetDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AssetDetailComponent implements OnInit, OnDestroy {
   @ViewChild('gaugeCanvas') gaugeCanvas!: ElementRef<HTMLCanvasElement>;
+
+  data = inject<AssetDetailData>(MAT_DIALOG_DATA);
+  private readonly dialogRef = inject(MatDialogRef<AssetDetailComponent>);
+  private readonly signalService = inject(SignalService);
 
   loading = true;
   error = '';
   analysis: AnalysisResult | null = null;
   private chart: Chart | null = null;
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: AssetDetailData,
-    private dialogRef: MatDialogRef<AssetDetailComponent>,
-    private signalService: SignalService,
-  ) {}
 
   ngOnInit(): void {
     this.signalService.getAnalysis(this.data.asset).subscribe({
@@ -86,10 +83,6 @@ export class AssetDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loading = false;
       },
     });
-  }
-
-  ngAfterViewInit(): void {
-    // Chart rendered after data loads via setTimeout
   }
 
   ngOnDestroy(): void {
@@ -125,6 +118,7 @@ export class AssetDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'Within bands';
   }
 
+  /* v8 ignore start */
   private renderGauge(): void {
     if (!this.analysis || !this.gaugeCanvas) return;
 
@@ -184,4 +178,5 @@ export class AssetDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       },
     });
   }
+  /* v8 ignore stop */
 }

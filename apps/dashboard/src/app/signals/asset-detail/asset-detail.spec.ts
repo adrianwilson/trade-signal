@@ -1,11 +1,13 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { AssetDetailComponent } from './asset-detail';
+import type { SignalService } from '../../services/signal.service';
+import type { MatDialogRef } from '@angular/material/dialog';
 
 describe('AssetDetailComponent', () => {
   let component: AssetDetailComponent;
-  let mockDialogRef: { close: ReturnType<typeof vi.fn> };
-  let mockSignalService: { getAnalysis: ReturnType<typeof vi.fn> };
+  let mockDialogRef: Pick<MatDialogRef<AssetDetailComponent>, 'close'>;
+  let mockSignalService: Pick<SignalService, 'getAnalysis'>;
 
   const mockAnalysis = {
     symbol: 'AAPL',
@@ -26,28 +28,43 @@ describe('AssetDetailComponent', () => {
 
   beforeEach(() => {
     mockDialogRef = { close: vi.fn() };
-    mockSignalService = { getAnalysis: vi.fn() };
+    mockSignalService = {
+      getAnalysis: vi.fn().mockReturnValue(of(mockAnalysis)),
+    };
 
-    component = new AssetDetailComponent(
-      { asset: 'AAPL', assetClass: 'equity', price: 150, changePercent: 1.5 },
-      mockDialogRef as any,
-      mockSignalService as any,
-    );
+    component = Object.create(AssetDetailComponent.prototype);
+    component.data = {
+      asset: 'AAPL',
+      assetClass: 'equity',
+      price: 150,
+      changePercent: 1.5,
+    };
+    component.loading = true;
+    component.error = '';
+    component.analysis = null;
+    // Wire up private fields via object assignment
+    Object.assign(component, {
+      dialogRef: mockDialogRef,
+      signalService: mockSignalService,
+    });
   });
 
   describe('ngOnInit', () => {
     it('should load analysis data', () => {
-      mockSignalService.getAnalysis.mockReturnValue(of(mockAnalysis));
       component.ngOnInit();
       expect(component.loading).toBe(false);
       expect(component.analysis).toBeTruthy();
-      expect(component.analysis!.rsi).toBe(45.2);
+      expect(component.analysis?.rsi).toBe(45.2);
     });
 
     it('should handle error', () => {
-      mockSignalService.getAnalysis.mockReturnValue(
-        throwError(() => new Error('fail')),
-      );
+      Object.assign(component, {
+        signalService: {
+          getAnalysis: vi
+            .fn()
+            .mockReturnValue(throwError(() => new Error('fail'))),
+        },
+      });
       component.ngOnInit();
       expect(component.loading).toBe(false);
       expect(component.error).toBe('Failed to load analysis data.');
