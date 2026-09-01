@@ -20,7 +20,7 @@ issue_json: $3
 - Use your reasoning model: THINK HARD about the bug, its root cause, and the steps to fix it properly.
 - IMPORTANT: Be surgical with your bug fix, solve the bug at hand and don't fall off track.
 - IMPORTANT: We want the minimal number of changes that will fix and address the bug.
-- If you need a new library, use `npm install` and be sure to report it in the `Notes` section of the `Plan Format`.
+- If you need a new library, use `pnpm add` and be sure to report it in the `Notes` section of the `Plan Format`.
 - Always run tasks through Nx (e.g., `npx nx run`, `npx nx run-many`, `npx nx affected`).
 - Respect requested files in the `Relevant Files` section.
 - Start your research by reading the `README.md` file.

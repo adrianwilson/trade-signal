@@ -35,15 +35,15 @@ buy/sell/hold signals with confidence scores.
 ## Getting Started
 
 ```bash
-npm install
-npx nx serve dashboard    # Angular dev server
-npx nx serve api          # NestJS dev server
+pnpm install
+pnpm exec nx serve dashboard    # Angular dev server
+pnpm exec nx serve api          # NestJS dev server
 ```
 
 ## Development
 
 ```bash
-npx nx graph              # Visualize project dependencies
-npx nx run-many -t build  # Build all projects
-npx nx run-many -t test   # Run all tests
+pnpm exec nx graph              # Visualize project dependencies
+pnpm exec nx run-many -t build  # Build all projects
+pnpm exec nx run-many -t test   # Run all tests
 ```

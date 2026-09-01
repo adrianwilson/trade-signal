@@ -20,7 +20,7 @@ issue_json: $3
 - Use your reasoning model: THINK HARD about the feature requirements, design, and implementation approach.
 - Follow existing patterns and conventions in the codebase. Don't reinvent the wheel.
 - This is an Nx monorepo with Angular (frontend) and NestJS (backend). Both frameworks use decorators heavily -- follow their conventions.
-- If you need a new library, use `npm install` and be sure to report it in the `Notes` section of the `Plan Format`.
+- If you need a new library, use `pnpm add` and be sure to report it in the `Notes` section of the `Plan Format`.
 - Always run tasks through Nx (e.g., `npx nx run`, `npx nx run-many`, `npx nx affected`).
 - Respect requested files in the `Relevant Files` section.
 - Start your research by reading the `README.md` file.

@@ -5,7 +5,7 @@ Start the Angular dashboard and NestJS API for testing, review, or E2E workflows
 ## Instructions
 
 ### 1. Check Dependencies
-- Verify `node_modules/` exists. If not, run `npm install`.
+- Verify `node_modules/` exists. If not, run `pnpm install`.
 
 ### 2. Check if Already Running
 - Run `lsof -i :4200` to check if the Angular dashboard is already running
@@ -13,8 +13,8 @@ Start the Angular dashboard and NestJS API for testing, review, or E2E workflows
 - If both are already running, skip to step 4
 
 ### 3. Start Services
-- Start the NestJS API: `npx nx serve api &`
-- Start the Angular dashboard: `npx nx serve dashboard &`
+- Start the NestJS API: `pnpm exec nx serve api &`
+- Start the Angular dashboard: `pnpm exec nx serve dashboard &`
 - Wait for both services to be ready:
   - Dashboard should be accessible at `http://localhost:4200`
   - API should be accessible at `http://localhost:3000`
