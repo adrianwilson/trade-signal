@@ -12,6 +12,7 @@ Add Simple Moving Average (SMA) and Exponential Moving Average (EMA) moving aver
 ## Architecture
 
 ### Existing Code
+
 - `indicators.ts`: `calculateEMA`, `calculateRSI`, `calculateMACD`
 - `technical-analysis.service.ts`: `AnalysisResult` with RSI + MACD, cron job creates signals
 - `technical-analysis.controller.ts`: `GET /technical-analysis/:symbol`
@@ -19,10 +20,12 @@ Add Simple Moving Average (SMA) and Exponential Moving Average (EMA) moving aver
 ### Changes
 
 #### 1. `indicators.ts` - Add `calculateSMA` and crossover detection
+
 - `calculateSMA(prices: number[], period: number): number[]` - sliding window average
 - `detectCrossover(shortMA: number[], longMA: number[]): CrossoverResult` - detects golden/death crosses
 
 #### 2. `technical-analysis.service.ts` - Integrate SMA/EMA into analysis
+
 - Add SMA-20, SMA-50, SMA-200 to `AnalysisResult`
 - Add EMA-20 to `AnalysisResult`
 - Add crossover signal (SMA-50 vs SMA-200)
@@ -31,11 +34,13 @@ Add Simple Moving Average (SMA) and Exponential Moving Average (EMA) moving aver
 - Update cron job to create SMA-based signals
 
 #### 3. `indicators.spec.ts` - Add SMA and crossover tests
+
 - SMA calculation correctness
 - SMA edge cases (insufficient data)
 - Crossover detection (bullish, bearish, no crossover)
 
 #### 4. `technical-analysis.service.spec.ts` - Update service tests
+
 - Verify SMA/EMA values in analysis result
 - Verify crossover signal generation
 
