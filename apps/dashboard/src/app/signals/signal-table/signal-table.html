@@ -79,3 +79,20 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 </table>
+
+<div
+  class="table-footer"
+  [hidden]="loading || error || signals.data.length === 0"
+>
+  <span class="last-updated">
+    @if (lastUpdated) { Updated {{ lastUpdated | date:'medium' }} }
+  </span>
+  <button
+    mat-icon-button
+    (click)="refresh()"
+    [disabled]="refreshing"
+    aria-label="Refresh"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>

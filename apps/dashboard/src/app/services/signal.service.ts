@@ -21,10 +21,13 @@ export class SignalService {
   }
 
   getMarketQuotes(): Observable<
-    Record<string, { price: number; changePercent: number }>
+    Record<string, { price: number; changePercent: number; updatedAt?: string }>
   > {
     return this.http.get<
-      Record<string, { price: number; changePercent: number }>
+      Record<
+        string,
+        { price: number; changePercent: number; updatedAt?: string }
+      >
     >(`${this.baseUrl}/market-data/quotes`);
   }
 }

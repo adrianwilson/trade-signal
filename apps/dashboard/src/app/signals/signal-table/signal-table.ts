@@ -4,6 +4,8 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { Signal } from '@org/signals';
 import { SignalService } from '../../services/signal.service';
 
@@ -15,6 +17,8 @@ import { SignalService } from '../../services/signal.service';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatCardModule,
+    MatButtonModule,
+    MatIconModule,
     DatePipe,
     DecimalPipe,
     CurrencyPipe,
@@ -36,11 +40,25 @@ export class SignalTableComponent implements OnInit {
     'timestamp',
   ];
   signals: MatTableDataSource<Signal> = new MatTableDataSource<Signal>([]);
-  quotes: Record<string, { price: number; changePercent: number }> = {};
+  quotes: Record<
+    string,
+    { price: number; changePercent: number; updatedAt?: string }
+  > = {};
   loading = true;
+  refreshing = false;
   error = '';
+  lastUpdated = '';
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  refresh(): void {
+    this.refreshing = true;
+    this.loadData();
+  }
+
+  private loadData(): void {
     this.signalService.getSignals().subscribe({
       next: (data) => {
         this.signals.data = data;
@@ -50,6 +68,7 @@ export class SignalTableComponent implements OnInit {
       error: () => {
         this.error = 'Failed to load signals. Is the API running?';
         this.loading = false;
+        this.refreshing = false;
       },
     });
   }
@@ -58,9 +77,16 @@ export class SignalTableComponent implements OnInit {
     this.signalService.getMarketQuotes().subscribe({
       next: (data) => {
         this.quotes = data;
+        this.refreshing = false;
+        const timestamps = Object.values(data)
+          .map((q) => q.updatedAt)
+          .filter(Boolean) as string[];
+        if (timestamps.length > 0) {
+          this.lastUpdated = timestamps.sort().reverse()[0];
+        }
       },
       error: () => {
-        // Quotes are optional — don't break the table if market data fails
+        this.refreshing = false;
       },
     });
   }

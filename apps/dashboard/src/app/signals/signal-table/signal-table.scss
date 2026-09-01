@@ -22,3 +22,15 @@ h2 {
   background-color: #fdecea;
   color: #611a15;
 }
+
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.last-updated {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 12px;
+}

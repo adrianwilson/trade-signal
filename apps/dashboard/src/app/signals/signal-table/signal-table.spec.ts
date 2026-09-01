@@ -96,6 +96,40 @@ describe('SignalTableComponent', () => {
     expect(emptyState).toBeTruthy();
   });
 
+  it('should set lastUpdated from quotes response', async () => {
+    const fixture = setup({
+      getSignals: () => of(mockSignals),
+      getMarketQuotes: () =>
+        of({
+          AAPL: {
+            price: 150,
+            changePercent: 1.5,
+            updatedAt: '2026-09-01T12:00:00Z',
+          },
+        }),
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.lastUpdated).toBe('2026-09-01T12:00:00Z');
+  });
+
+  it('should refresh data when refresh() is called', async () => {
+    let callCount = 0;
+    const fixture = setup({
+      getSignals: () => {
+        callCount++;
+        return of(mockSignals);
+      },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(callCount).toBe(1);
+    fixture.componentInstance.refresh();
+    await fixture.whenStable();
+    expect(callCount).toBe(2);
+    expect(fixture.componentInstance.refreshing).toBe(false);
+  });
+
   it('should return correct direction colors', () => {
     const fixture = setup({ getSignals: () => of(mockSignals) });
     const component = fixture.componentInstance;
