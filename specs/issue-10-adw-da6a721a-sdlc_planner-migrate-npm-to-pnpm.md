@@ -1,6 +1,7 @@
 # Chore: Migrate from npm to pnpm
 
 ## Metadata
+
 - **issue_number:** 10
 - **adw_id:** da6a721a
 - **issue_json:** {"number":10,"title":"Migrate from npm to pnpm","state":"OPEN","labels":["enhancement"]}
@@ -10,6 +11,7 @@
 Replace npm with pnpm as the package manager for the Nx monorepo. pnpm is faster, enforces strict dependency isolation (no phantom dependencies), and is the recommended package manager for Nx. The npm lockfile mismatch between local and CI environments (which broke PR #9) is a symptom of npm's weaker lockfile guarantees — pnpm's lockfile is deterministic across Node versions.
 
 ## User Story
+
 As a developer
 I want pnpm as the package manager
 So that installs are faster, dependencies are strict, and the tooling matches Nx best practices
@@ -54,12 +56,15 @@ npm's lockfile format varies between major npm versions (v6 → lockfile v1, v10
 ## Implementation Plan
 
 ### Phase 1: Foundation
+
 Install pnpm via Volta, pin its version, create `pnpm-workspace.yaml`, generate `pnpm-lock.yaml`, and remove `package-lock.json`. Verify `pnpm install` works.
 
 ### Phase 2: Core Implementation
+
 Update CI and ADW workflows to use pnpm. Update all `package.json` scripts. Update `.claude/commands/` files. Update README.md and CLAUDE.md.
 
 ### Phase 3: Integration
+
 Run full validation suite with pnpm to confirm zero regressions.
 
 ## Step by Step Tasks
@@ -75,9 +80,9 @@ Run full validation suite with pnpm to confirm zero regressions.
 - Create `pnpm-workspace.yaml` at the repo root with the workspace packages matching the current `workspaces` field in `package.json`:
   ```yaml
   packages:
-    - "packages/*"
-    - "apps/*"
-    - "libs/*"
+    - 'packages/*'
+    - 'apps/*'
+    - 'libs/*'
   ```
 
 ### 3. Update package.json
@@ -139,15 +144,19 @@ Run full validation suite with pnpm to confirm zero regressions.
 ## Testing Strategy
 
 ### Unit Tests
+
 No new tests. Existing tests must pass unchanged — this is a tooling change only.
 
 ### Integration Tests
+
 No new tests. Existing API integration tests must pass.
 
 ### E2E Tests
+
 Existing Playwright e2e tests must pass via `pnpm exec nx run dashboard-e2e:e2e`.
 
 ### Edge Cases
+
 - **Phantom dependencies** — pnpm's strict mode may surface imports that relied on npm's hoisting. If any project fails to build/run, the missing dependency must be explicitly added to the correct `package.json`.
 - **Global installs in CI** — `npm install -g` for claude-code in the ADW workflow. pnpm global installs work differently; may need to keep `npm` for this one global install or use `npx` directly.
 - **Workspace protocol** — pnpm uses `workspace:*` protocol for inter-workspace deps. Existing `package.json` files in apps/libs may need updating if they reference workspace packages.

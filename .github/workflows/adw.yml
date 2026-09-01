@@ -40,7 +40,7 @@ jobs:
         run: echo "id=$(head -c 4 /dev/urandom | xxd -p)" >> "$GITHUB_OUTPUT"
 
       # Phase 1: Classify -- determine issue type
-      - name: "Phase 1: Classify"
+      - name: 'Phase 1: Classify'
         id: classify
         run: |
           ISSUE_JSON=$(gh issue view $ISSUE_NUMBER --json number,title,body,state,labels)
@@ -52,7 +52,7 @@ jobs:
           echo "Classification: $RESULT"
 
       # Phase 2: Branch -- create feature branch
-      - name: "Phase 2: Branch"
+      - name: 'Phase 2: Branch'
         id: branch
         run: |
           ISSUE_CLASS=$(echo "${{ steps.classify.outputs.command }}" | tr -d '/')
@@ -63,7 +63,7 @@ jobs:
           echo "Branch: $RESULT"
 
       # Phase 3: Plan -- generate spec from issue
-      - name: "Phase 3: Plan"
+      - name: 'Phase 3: Plan'
         id: plan
         run: |
           RESULT=$(claude -p "${{ steps.classify.outputs.command }} $ISSUE_NUMBER ${{ steps.adw.outputs.id }} '${{ steps.classify.outputs.issue_json }}'" \
@@ -73,28 +73,28 @@ jobs:
           echo "Spec file: $RESULT"
 
       # Commit the plan
-      - name: "Phase 3b: Commit plan"
+      - name: 'Phase 3b: Commit plan'
         run: |
           claude -p "/commit sdlc_planner $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
             --dangerously-skip-permissions \
             --output-format json
 
       # Phase 4: Implement -- build from spec with closed-loop validation
-      - name: "Phase 4: Implement"
+      - name: 'Phase 4: Implement'
         run: |
           claude -p "/implement ${{ steps.plan.outputs.spec_file }}" \
             --dangerously-skip-permissions \
             --output-format json
 
       # Commit the implementation
-      - name: "Phase 4b: Commit implementation"
+      - name: 'Phase 4b: Commit implementation'
         run: |
           claude -p "/commit sdlc_implementor $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
             --dangerously-skip-permissions \
             --output-format json
 
       # Phase 5: Test -- run tests, auto-fix failures
-      - name: "Phase 5: Test"
+      - name: 'Phase 5: Test'
         id: test
         run: |
           for attempt in 1 2 3; do
@@ -120,7 +120,7 @@ jobs:
           done
 
       # Commit test fixes if any
-      - name: "Phase 5b: Commit test fixes"
+      - name: 'Phase 5b: Commit test fixes'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             claude -p "/commit test_runner $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
@@ -129,7 +129,7 @@ jobs:
           fi
 
       # Phase 6: Review -- compare implementation against spec
-      - name: "Phase 6: Review"
+      - name: 'Phase 6: Review'
         id: review
         run: |
           for cycle in 1 2; do
@@ -161,7 +161,7 @@ jobs:
           done
 
       # Commit review fixes if any
-      - name: "Phase 6b: Commit review fixes"
+      - name: 'Phase 6b: Commit review fixes'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             claude -p "/commit review_agent $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
@@ -170,14 +170,14 @@ jobs:
           fi
 
       # Phase 7: Document -- generate feature docs
-      - name: "Phase 7: Document"
+      - name: 'Phase 7: Document'
         run: |
           claude -p "/document ${{ steps.adw.outputs.id }} ${{ steps.plan.outputs.spec_file }}" \
             --dangerously-skip-permissions \
             --output-format json
 
       # Commit documentation
-      - name: "Phase 7b: Commit documentation"
+      - name: 'Phase 7b: Commit documentation'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             claude -p "/commit documenter $(echo '${{ steps.classify.outputs.command }}' | tr -d '/') '${{ steps.classify.outputs.issue_json }}'" \
@@ -186,7 +186,7 @@ jobs:
           fi
 
       # Phase 8: Finalize spec -- transform build plan into design anchor
-      - name: "Phase 8: Finalize"
+      - name: 'Phase 8: Finalize'
         run: |
           claude -p "/finalize ${{ steps.plan.outputs.spec_file }}" \
             --dangerously-skip-permissions \
@@ -198,7 +198,7 @@ jobs:
           fi
 
       # Phase 9: Ship -- push and create PR
-      - name: "Phase 9: Ship"
+      - name: 'Phase 9: Ship'
         id: ship
         run: |
           PR_URL=$(claude -p "/pull_request ${{ steps.branch.outputs.name }} '${{ steps.classify.outputs.issue_json }}' ${{ steps.plan.outputs.spec_file }} ${{ steps.adw.outputs.id }}" \
@@ -207,7 +207,7 @@ jobs:
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
 
       # Phase 10: Track KPIs
-      - name: "Phase 10: Track KPIs"
+      - name: 'Phase 10: Track KPIs'
         run: |
           STATE='{"adw_id":"${{ steps.adw.outputs.id }}","issue_number":"${{ env.ISSUE_NUMBER }}","issue_class":"${{ steps.classify.outputs.command }}","plan_file":"${{ steps.plan.outputs.spec_file }}"}'
           claude -p "/track_agentic_kpis $STATE" \
@@ -220,7 +220,7 @@ jobs:
           fi
 
       # Phase 11: ZTE (Zero Touch Execution) -- auto-merge if comment was "adw_zte"
-      - name: "Phase 11: ZTE Auto-Merge"
+      - name: 'Phase 11: ZTE Auto-Merge'
         if: contains(github.event.comment.body, 'adw_zte')
         run: |
           echo "ZTE mode: auto-merging to main"

@@ -25,12 +25,12 @@ buy/sell/hold signals with confidence scores.
 
 ### Agent Modules (to build)
 
-| Module | Agentic Pattern | Purpose |
-|--------|----------------|---------|
-| Market Data Agent | Tool use, API integration | Fetch prices from exchanges/APIs |
-| Technical Analysis Agent | Reasoning, chain of thought | RSI, MACD, volume analysis |
-| News Sentiment Agent | RAG, web search | Analyze news for sentiment scores |
-| Signal Synthesis Agent | Multi-agent orchestration | Aggregate all signals into final verdict |
+| Module                   | Agentic Pattern             | Purpose                                  |
+| ------------------------ | --------------------------- | ---------------------------------------- |
+| Market Data Agent        | Tool use, API integration   | Fetch prices from exchanges/APIs         |
+| Technical Analysis Agent | Reasoning, chain of thought | RSI, MACD, volume analysis               |
+| News Sentiment Agent     | RAG, web search             | Analyze news for sentiment scores        |
+| Signal Synthesis Agent   | Multi-agent orchestration   | Aggregate all signals into final verdict |
 
 ## Getting Started
 
