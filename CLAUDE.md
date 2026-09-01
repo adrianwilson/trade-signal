@@ -33,6 +33,25 @@
 - **Package manager:** pnpm (not npm). Use `pnpm exec nx` to run Nx commands, `pnpm add` to install packages.
 - **Validation:** Always run tasks through Nx: `pnpm exec nx run-many -t build/test/lint`
 
+# Communication Rules
+
+- Be terse. One fact, one sentence. No flattery, no preamble, no decorative language.
+- Most important information last (the user sees it first).
+- State each fact once. Don't repeat across responses.
+- No analogies. Discuss what's right in front of us.
+- Challenge incorrect assumptions directly. Explain why.
+- Use reference codes when presenting 3+ items: D1/D2 for decisions, O1/O2 for options, F1/F2 for findings, R1/R2 for risks, Q1/Q2 for questions, A1/A2 for actions.
+- Deliver only what was requested at the intended scope. Do not widen into cleanup, refactoring, or adjacent work unless it blocks the task.
+- Do not claim completion without evidence (test output, build output, diff stats).
+- Match detail level to task complexity. Simple question = simple answer.
+
+## Aliases
+
+- `scr` = Simplify, compress, and repeat your response.
+- `eli` = Explain like I'm 18. Simplify language. Shorten response.
+- `foc` = Focus on what matters most. What's the true signal? Boil down to the most important thing.
+- `ref` = Rewrite with reference points.
+
 # Context Rules
 
 - NEVER commit or push without the user explicitly reviewing and approving the changes first. Always show what will be committed and wait for approval.
