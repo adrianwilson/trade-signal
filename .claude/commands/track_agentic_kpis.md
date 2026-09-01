@@ -16,9 +16,10 @@ attempts_incrementing_phases: [plan, patch]
   - issue_number
   - issue_class
   - plan_file path
-  - total_cost_usd (pipeline cost estimate)
-  - total_turns (total agent turns across all phases)
-  - total_duration_s (total pipeline duration in seconds)
+  - human_interventions (number of times the human had to step in beyond routine approvals — e.g., fixing permissions, running interactive commands, course-correcting the agent, resolving environment issues)
+  - ci_first_pass (boolean: did CI pass on the first push? 1 = yes, 0 = no)
+  - review_findings (number of issues found by /review — critical + informational)
+  - scope_drift (boolean: did implementation require unplanned changes outside the spec? 1 = yes, 0 = no. Include a brief note of what drifted.)
 
 ### 2. Calculate Metrics
 
@@ -57,10 +58,11 @@ attempts_incrementing_phases: [plan, patch]
 - Check if current adw_id already exists in the table
 - If exists: update that row with new values
 - If not: add a new row with the calculated metrics
-- Include cost, turns, and duration columns:
-  - **Cost ($)**: total_cost_usd from state_json (e.g., "5.42")
-  - **Turns**: total_turns from state_json (e.g., "128")
-  - **Duration**: total_duration_s from state_json, formatted as minutes (e.g., "16m 51s")
+- Include the following columns:
+  - **Interventions**: human_interventions from state_json. Count of times the human had to do something beyond saying "yes" to proceed — fixing env issues, running interactive commands, course-correcting. 0 = ZTE-ready run.
+  - **CI**: ci_first_pass from state_json. Whether CI passed on first push (pass/fail).
+  - **Review**: review_findings from state_json. Number of issues found by /review.
+  - **Drift**: scope_drift from state_json. Whether unplanned changes were needed (clean/drifted + note).
 
 ### 5. Update Agentic KPIs Summary Table
 
@@ -73,6 +75,10 @@ Calculate summary metrics across ALL rows in the ADW KPIs table:
 - **Total Diff Size**: Sum of all diff lines (added + removed)
 - **Largest Diff Size**: Maximum diff size across all runs
 - **Average Presence**: Average number of attempts across all runs. Lower is better (1.0 = perfect, no retries needed).
+- **Average Interventions**: Average human interventions per run. Lower is better (0 = fully autonomous, ZTE-ready).
+- **ZTE-Ready Runs**: Count of runs with 0 human interventions (runs that could have been fully autonomous).
+- **CI First-Pass Rate**: Percentage of runs where CI passed on the first push.
+- **Scope Drift Rate**: Percentage of runs that required unplanned changes outside the spec.
 
 ### 6. Write Updated File
 
