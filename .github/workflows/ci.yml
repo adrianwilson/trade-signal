@@ -27,6 +27,7 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
 
       # This enables task distribution via Nx Cloud
       # Learn more at https://nx.dev/docs/reference/nx-cloud-cli#npx-nxcloud-startcirun
