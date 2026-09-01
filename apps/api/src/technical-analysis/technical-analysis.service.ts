@@ -8,6 +8,7 @@ import {
   calculateSMA,
   calculateEMA,
   detectCrossover,
+  calculateBollingerBands,
 } from './indicators';
 import type { CrossoverResult } from './indicators';
 import type { SignalDirection } from '@org/signals';
@@ -24,6 +25,8 @@ export interface AnalysisResult {
   ema20: number | null;
   crossover: CrossoverResult;
   smaSignal: SignalDirection;
+  bollingerPercentB: number | null;
+  bollingerSignal: SignalDirection;
   overallSignal: SignalDirection;
 }
 
@@ -73,7 +76,19 @@ export class TechnicalAnalysisService {
     const crossover = detectCrossover(sma50, sma200);
     const smaSignal = this.crossoverToSignal(crossover);
 
-    const overallSignal = this.combineSignals(rsiSignal, macdSignal, smaSignal);
+    const bollinger = calculateBollingerBands(closes);
+    const latestPercentB =
+      bollinger.percentB.length > 0
+        ? bollinger.percentB[bollinger.percentB.length - 1]
+        : null;
+    const bollingerSignal = this.bollingerToSignal(latestPercentB);
+
+    const overallSignal = this.combineSignals(
+      rsiSignal,
+      macdSignal,
+      smaSignal,
+      bollingerSignal,
+    );
 
     return {
       symbol: yahooSymbol,
@@ -87,6 +102,8 @@ export class TechnicalAnalysisService {
       ema20: latestEMA20,
       crossover,
       smaSignal,
+      bollingerPercentB: latestPercentB,
+      bollingerSignal,
       overallSignal,
     };
   }
@@ -105,6 +122,13 @@ export class TechnicalAnalysisService {
     return 'HOLD';
   }
 
+  private bollingerToSignal(percentB: number | null): SignalDirection {
+    if (percentB === null) return 'HOLD';
+    if (percentB < 0.2) return 'BUY';
+    if (percentB > 0.8) return 'SELL';
+    return 'HOLD';
+  }
+
   private crossoverToSignal(crossover: CrossoverResult): SignalDirection {
     if (!crossover.occurred) return 'HOLD';
     if (crossover.type === 'bullish') return 'BUY';
@@ -116,8 +140,9 @@ export class TechnicalAnalysisService {
     rsi: SignalDirection,
     macd: SignalDirection,
     sma: SignalDirection = 'HOLD',
+    bollinger: SignalDirection = 'HOLD',
   ): SignalDirection {
-    const signals = [rsi, macd, sma];
+    const signals = [rsi, macd, sma, bollinger];
     const buys = signals.filter((s) => s === 'BUY').length;
     const sells = signals.filter((s) => s === 'SELL').length;
     if (buys >= 2) return 'BUY';
@@ -181,6 +206,22 @@ export class TechnicalAnalysisService {
             direction: result.smaSignal,
             confidence: 75,
             notes: `SMA crossover: ${result.crossover.type === 'bullish' ? 'Golden cross' : 'Death cross'} (SMA-50 vs SMA-200)`,
+          });
+        }
+
+        if (
+          result.bollingerPercentB !== null &&
+          result.bollingerSignal !== 'HOLD'
+        ) {
+          await this.signalsService.create({
+            asset: signal.asset,
+            assetClass: signal.assetClass as
+              'equity' | 'crypto' | 'forex' | 'options',
+            direction: result.bollingerSignal,
+            confidence: Math.round(
+              Math.abs(result.bollingerPercentB - 0.5) * 200,
+            ),
+            notes: `Bollinger %B at ${result.bollingerPercentB.toFixed(2)}`,
           });
         }
       } catch (err) {

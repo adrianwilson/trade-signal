@@ -49,6 +49,48 @@ export function detectCrossover(
   return { type: 'none', occurred: false };
 }
 
+export interface BollingerBandsResult {
+  middle: number[];
+  upper: number[];
+  lower: number[];
+  percentB: number[];
+}
+
+export function calculateBollingerBands(
+  prices: number[],
+  period = 20,
+  k = 2,
+): BollingerBandsResult {
+  const middle = calculateSMA(prices, period);
+
+  if (middle.length === 0) {
+    return { middle: [], upper: [], lower: [], percentB: [] };
+  }
+
+  const upper: number[] = [];
+  const lower: number[] = [];
+  const percentB: number[] = [];
+
+  for (let i = 0; i < middle.length; i++) {
+    const window = prices.slice(i, i + period);
+    const mean = middle[i];
+    const variance =
+      window.reduce((sum, val) => sum + (val - mean) ** 2, 0) / period;
+    const stddev = Math.sqrt(variance);
+
+    const upperBand = mean + k * stddev;
+    const lowerBand = mean - k * stddev;
+    upper.push(upperBand);
+    lower.push(lowerBand);
+
+    const bandwidth = upperBand - lowerBand;
+    const price = prices[i + period - 1];
+    percentB.push(bandwidth === 0 ? 0.5 : (price - lowerBand) / bandwidth);
+  }
+
+  return { middle, upper, lower, percentB };
+}
+
 export function calculateEMA(prices: number[], period: number): number[] {
   if (prices.length < period) return [];
 

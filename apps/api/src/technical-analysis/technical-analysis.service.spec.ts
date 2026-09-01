@@ -50,6 +50,9 @@ describe('TechnicalAnalysisService', () => {
       expect(result.ema20).not.toBeNull();
       expect(result.crossover).toBeDefined();
       expect(result.smaSignal).toBeDefined();
+      expect(result.bollingerPercentB).not.toBeNull();
+      expect(typeof result.bollingerPercentB).toBe('number');
+      expect(result.bollingerSignal).toBeDefined();
       expect(result.overallSignal).toBeDefined();
     });
 
@@ -66,6 +69,8 @@ describe('TechnicalAnalysisService', () => {
       expect(result.ema20).toBeNull();
       expect(result.crossover.occurred).toBe(false);
       expect(result.smaSignal).toBe('HOLD');
+      expect(result.bollingerPercentB).toBeNull();
+      expect(result.bollingerSignal).toBe('HOLD');
     });
   });
 
