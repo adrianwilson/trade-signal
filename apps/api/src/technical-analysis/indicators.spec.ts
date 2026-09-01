@@ -1,6 +1,7 @@
 import {
   calculateSMA,
   detectCrossover,
+  calculateBollingerBands,
   calculateEMA,
   calculateRSI,
   calculateMACD,
@@ -70,6 +71,47 @@ describe('Technical Analysis Indicators', () => {
       const result = detectCrossover([1], [1]);
       expect(result.type).toBe('none');
       expect(result.occurred).toBe(false);
+    });
+  });
+
+  describe('calculateBollingerBands', () => {
+    it('should return empty for insufficient data', () => {
+      const result = calculateBollingerBands([1, 2, 3], 20);
+      expect(result.middle).toEqual([]);
+      expect(result.upper).toEqual([]);
+      expect(result.lower).toEqual([]);
+      expect(result.percentB).toEqual([]);
+    });
+
+    it('should calculate bands with correct structure', () => {
+      const result = calculateBollingerBands(closes, 5);
+      expect(result.middle.length).toBe(closes.length - 5 + 1);
+      expect(result.upper.length).toBe(result.middle.length);
+      expect(result.lower.length).toBe(result.middle.length);
+      expect(result.percentB.length).toBe(result.middle.length);
+    });
+
+    it('should have upper > middle > lower', () => {
+      const result = calculateBollingerBands(closes, 5);
+      for (let i = 0; i < result.middle.length; i++) {
+        expect(result.upper[i]).toBeGreaterThanOrEqual(result.middle[i]);
+        expect(result.middle[i]).toBeGreaterThanOrEqual(result.lower[i]);
+      }
+    });
+
+    it('should have %B between 0 and 1 when price is within bands', () => {
+      // Constant prices produce zero bandwidth, %B defaults to 0.5
+      const flat = Array(20).fill(100);
+      const result = calculateBollingerBands(flat, 20);
+      expect(result.percentB[0]).toBeCloseTo(0.5);
+    });
+
+    it('should produce %B near 0 when price is at lower band', () => {
+      // Trending down: last price should be near or below lower band
+      const down = Array.from({ length: 25 }, (_, i) => 100 - i * 2);
+      const result = calculateBollingerBands(down, 20);
+      const lastPB = result.percentB[result.percentB.length - 1];
+      expect(lastPB).toBeLessThan(0.3);
     });
   });
 
