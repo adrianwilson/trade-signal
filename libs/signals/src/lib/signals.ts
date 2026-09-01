@@ -4,7 +4,7 @@
 
 export type AssetClass = 'equity' | 'crypto' | 'forex' | 'options';
 export type SignalDirection = 'BUY' | 'SELL' | 'HOLD';
-export type SignalSource = 'manual' | 'rsi' | 'macd' | 'news-sentiment' | 'volume' | 'agent';
+export type SignalSource = 'manual' | 'rsi' | 'macd' | 'sma-crossover' | 'bollinger' | 'news-sentiment' | 'volume' | 'agent';
 
 export interface Signal {
   id: string;
@@ -44,4 +44,5 @@ export interface ManualSignalInput {
   direction: SignalDirection;
   confidence: number;
   notes?: string;
+  source?: SignalSource;
 }

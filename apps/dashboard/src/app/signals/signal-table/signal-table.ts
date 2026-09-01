@@ -6,8 +6,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Signal } from '@org/signals';
 import { SignalService } from '../../services/signal.service';
+import {
+  AssetDetailComponent,
+  AssetDetailData,
+} from '../asset-detail/asset-detail';
 
 @Component({
   selector: 'app-signal-table',
@@ -19,6 +24,7 @@ import { SignalService } from '../../services/signal.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
     DatePipe,
     DecimalPipe,
     CurrencyPipe,
@@ -28,6 +34,7 @@ import { SignalService } from '../../services/signal.service';
 })
 export class SignalTableComponent implements OnInit {
   private readonly signalService = inject(SignalService);
+  private readonly dialog = inject(MatDialog);
 
   displayedColumns = [
     'asset',
@@ -102,6 +109,21 @@ export class SignalTableComponent implements OnInit {
       default:
         return '#9e9e9e';
     }
+  }
+
+  openDetail(signal: Signal): void {
+    const quote = this.quotes[signal.asset];
+    const data: AssetDetailData = {
+      asset: signal.asset,
+      assetClass: signal.assetClass,
+      price: quote?.price,
+      changePercent: quote?.changePercent,
+    };
+    this.dialog.open(AssetDetailComponent, {
+      data,
+      width: '560px',
+      maxHeight: '90vh',
+    });
   }
 
   changeColor(change: number): string {

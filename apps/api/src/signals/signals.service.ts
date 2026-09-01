@@ -97,7 +97,7 @@ export class SignalsService implements OnModuleInit {
       assetClass: input.assetClass,
       direction: input.direction,
       confidence: input.confidence,
-      source: 'manual',
+      source: input.source ?? 'manual',
       reasoning: input.notes,
       timestamp: new Date().toISOString(),
     };
