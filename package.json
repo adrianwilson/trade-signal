@@ -78,12 +78,14 @@
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/schedule": "^12.0.1",
     "@nestjs/typeorm": "^12.0.1",
     "@org/signals": "workspace:*",
     "better-sqlite3": "^13.0.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "~7.8.0",
-    "typeorm": "^1.1.1"
+    "typeorm": "^1.1.1",
+    "yahoo-finance2": "^4.0.2"
   },
   "volta": {
     "node": "24.20.0"

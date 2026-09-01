@@ -28,13 +28,18 @@ describe('SignalTableComponent', () => {
     },
   ];
 
+  const defaultService: Partial<SignalService> = {
+    getMarketQuotes: () => of({}),
+  };
+
   function setup(serviceOverride: Partial<SignalService>) {
+    const mergedService = { ...defaultService, ...serviceOverride };
     TestBed.configureTestingModule({
       imports: [SignalTableComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: SignalService, useValue: serviceOverride },
+        { provide: SignalService, useValue: mergedService },
       ],
     });
     const fixture = TestBed.createComponent(SignalTableComponent);

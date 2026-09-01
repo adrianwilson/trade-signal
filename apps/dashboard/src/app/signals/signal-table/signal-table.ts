@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -16,6 +16,8 @@ import { SignalService } from '../../services/signal.service';
     MatProgressSpinnerModule,
     MatCardModule,
     DatePipe,
+    DecimalPipe,
+    CurrencyPipe,
   ],
   templateUrl: './signal-table.html',
   styleUrl: './signal-table.scss',
@@ -27,11 +29,14 @@ export class SignalTableComponent implements OnInit {
     'asset',
     'assetClass',
     'direction',
+    'price',
+    'priceChange',
     'confidence',
     'source',
     'timestamp',
   ];
   signals: MatTableDataSource<Signal> = new MatTableDataSource<Signal>([]);
+  quotes: Record<string, { price: number; changePercent: number }> = {};
   loading = true;
   error = '';
 
@@ -40,10 +45,22 @@ export class SignalTableComponent implements OnInit {
       next: (data) => {
         this.signals.data = data;
         this.loading = false;
+        this.loadQuotes();
       },
       error: () => {
         this.error = 'Failed to load signals. Is the API running?';
         this.loading = false;
+      },
+    });
+  }
+
+  private loadQuotes(): void {
+    this.signalService.getMarketQuotes().subscribe({
+      next: (data) => {
+        this.quotes = data;
+      },
+      error: () => {
+        // Quotes are optional — don't break the table if market data fails
       },
     });
   }
@@ -59,5 +76,11 @@ export class SignalTableComponent implements OnInit {
       default:
         return '#9e9e9e';
     }
+  }
+
+  changeColor(change: number): string {
+    if (change > 0) return '#4caf50';
+    if (change < 0) return '#f44336';
+    return '#9e9e9e';
   }
 }

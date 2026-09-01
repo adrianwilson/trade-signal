@@ -19,4 +19,12 @@ export class SignalService {
   createSignal(input: ManualSignalInput): Observable<Signal> {
     return this.http.post<Signal>(`${this.baseUrl}/signals`, input);
   }
+
+  getMarketQuotes(): Observable<
+    Record<string, { price: number; changePercent: number }>
+  > {
+    return this.http.get<
+      Record<string, { price: number; changePercent: number }>
+    >(`${this.baseUrl}/market-data/quotes`);
+  }
 }
