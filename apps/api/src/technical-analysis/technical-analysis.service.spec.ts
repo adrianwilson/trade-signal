@@ -7,13 +7,13 @@ describe('TechnicalAnalysisService', () => {
   let mockMarketData: Partial<MarketDataService>;
   let mockSignals: Partial<SignalsService>;
 
-  // 40 close prices that trend up then down
-  const mockHistory = Array.from({ length: 40 }, (_, i) => ({
-    date: `2026-01-${String(i + 1).padStart(2, '0')}`,
-    open: 100 + i * 0.5,
-    high: 101 + i * 0.5,
-    low: 99 + i * 0.5,
-    close: i < 20 ? 100 + i : 120 - (i - 20) * 0.5,
+  // 220 close prices to support SMA-200
+  const mockHistory = Array.from({ length: 220 }, (_, i) => ({
+    date: `2026-01-${String((i % 28) + 1).padStart(2, '0')}`,
+    open: 100 + Math.sin(i / 10) * 5,
+    high: 101 + Math.sin(i / 10) * 5,
+    low: 99 + Math.sin(i / 10) * 5,
+    close: 100 + Math.sin(i / 10) * 5 + i * 0.01,
     volume: 1000000,
   }));
 
@@ -35,7 +35,7 @@ describe('TechnicalAnalysisService', () => {
   });
 
   describe('analyze', () => {
-    it('should return RSI and MACD values', async () => {
+    it('should return RSI, MACD, and SMA/EMA values', async () => {
       const result = await service.analyze('AAPL', 'AAPL', 'equity');
       expect(result.symbol).toBe('AAPL');
       expect(result.rsi).not.toBeNull();
@@ -43,6 +43,13 @@ describe('TechnicalAnalysisService', () => {
       expect(result.rsiSignal).toBeDefined();
       expect(result.macd).not.toBeNull();
       expect(result.macdSignal).toBeDefined();
+      expect(result.sma20).not.toBeNull();
+      expect(typeof result.sma20).toBe('number');
+      expect(result.sma50).not.toBeNull();
+      expect(result.sma200).not.toBeNull();
+      expect(result.ema20).not.toBeNull();
+      expect(result.crossover).toBeDefined();
+      expect(result.smaSignal).toBeDefined();
       expect(result.overallSignal).toBeDefined();
     });
 
@@ -53,6 +60,12 @@ describe('TechnicalAnalysisService', () => {
       expect(result.rsiSignal).toBe('HOLD');
       expect(result.macd).toBeNull();
       expect(result.macdSignal).toBe('HOLD');
+      expect(result.sma20).toBeNull();
+      expect(result.sma50).toBeNull();
+      expect(result.sma200).toBeNull();
+      expect(result.ema20).toBeNull();
+      expect(result.crossover.occurred).toBe(false);
+      expect(result.smaSignal).toBe('HOLD');
     });
   });
 
