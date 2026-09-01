@@ -14,10 +14,10 @@ describe('Health Check (integration)', () => {
     app = module.createNestApplication();
     app.setGlobalPrefix('api');
     await app.init();
-  });
+  }, 30000);
 
   afterAll(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   it('GET /api/health returns 200 with status, uptime, timestamp', async () => {

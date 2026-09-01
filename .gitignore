@@ -5,6 +5,10 @@ dist
 tmp
 out-tsc
 
+# database
+data/
+*.sqlite
+
 # dependencies
 node_modules
 

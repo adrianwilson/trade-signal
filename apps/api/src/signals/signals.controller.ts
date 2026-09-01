@@ -19,8 +19,8 @@ export class SignalsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const signal = this.signalsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const signal = await this.signalsService.findOne(id);
     if (!signal) {
       throw new NotFoundException(`Signal with id "${id}" not found`);
     }
