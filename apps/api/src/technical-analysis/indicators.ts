@@ -1,3 +1,54 @@
+export function calculateSMA(prices: number[], period: number): number[] {
+  if (prices.length < period) return [];
+
+  const sma: number[] = [];
+  let sum = 0;
+
+  for (let i = 0; i < period; i++) {
+    sum += prices[i];
+  }
+  sma.push(sum / period);
+
+  for (let i = period; i < prices.length; i++) {
+    sum += prices[i] - prices[i - period];
+    sma.push(sum / period);
+  }
+
+  return sma;
+}
+
+export interface CrossoverResult {
+  type: 'bullish' | 'bearish' | 'none';
+  occurred: boolean;
+}
+
+export function detectCrossover(
+  shortMA: number[],
+  longMA: number[],
+): CrossoverResult {
+  if (shortMA.length < 2 || longMA.length < 2) {
+    return { type: 'none', occurred: false };
+  }
+
+  // Align from the end (most recent values)
+  const s1 = shortMA[shortMA.length - 2];
+  const s2 = shortMA[shortMA.length - 1];
+  const l1 = longMA[longMA.length - 2];
+  const l2 = longMA[longMA.length - 1];
+
+  // Golden cross: short crosses above long
+  if (s1 <= l1 && s2 > l2) {
+    return { type: 'bullish', occurred: true };
+  }
+
+  // Death cross: short crosses below long
+  if (s1 >= l1 && s2 < l2) {
+    return { type: 'bearish', occurred: true };
+  }
+
+  return { type: 'none', occurred: false };
+}
+
 export function calculateEMA(prices: number[], period: number): number[] {
   if (prices.length < period) return [];
 

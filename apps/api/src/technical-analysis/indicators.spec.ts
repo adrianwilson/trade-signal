@@ -1,4 +1,10 @@
-import { calculateEMA, calculateRSI, calculateMACD } from './indicators';
+import {
+  calculateSMA,
+  detectCrossover,
+  calculateEMA,
+  calculateRSI,
+  calculateMACD,
+} from './indicators';
 
 describe('Technical Analysis Indicators', () => {
   // 20 sample close prices for testing
@@ -6,6 +12,66 @@ describe('Technical Analysis Indicators', () => {
     44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.1, 45.42, 45.84, 46.08, 45.89,
     46.03, 45.61, 46.28, 46.28, 46.0, 46.03, 46.41, 46.22, 45.64,
   ];
+
+  describe('calculateSMA', () => {
+    it('should return empty for insufficient data', () => {
+      expect(calculateSMA([1, 2], 5)).toEqual([]);
+    });
+
+    it('should calculate SMA correctly', () => {
+      const sma = calculateSMA(closes, 5);
+      expect(sma.length).toBe(closes.length - 5 + 1);
+      const expectedFirst = (44.34 + 44.09 + 44.15 + 43.61 + 44.33) / 5;
+      expect(sma[0]).toBeCloseTo(expectedFirst, 10);
+    });
+
+    it('should produce correct number of values', () => {
+      const sma = calculateSMA(closes, 10);
+      expect(sma.length).toBe(closes.length - 10 + 1);
+    });
+
+    it('should handle period equal to data length', () => {
+      const sma = calculateSMA([1, 2, 3], 3);
+      expect(sma).toEqual([2]);
+    });
+
+    it('should calculate sliding window correctly', () => {
+      const sma = calculateSMA([1, 2, 3, 4, 5], 3);
+      expect(sma).toEqual([2, 3, 4]);
+    });
+  });
+
+  describe('detectCrossover', () => {
+    it('should detect bullish crossover (golden cross)', () => {
+      const shortMA = [10, 12]; // crosses above
+      const longMA = [11, 11]; // stays flat
+      const result = detectCrossover(shortMA, longMA);
+      expect(result.type).toBe('bullish');
+      expect(result.occurred).toBe(true);
+    });
+
+    it('should detect bearish crossover (death cross)', () => {
+      const shortMA = [12, 10]; // crosses below
+      const longMA = [11, 11]; // stays flat
+      const result = detectCrossover(shortMA, longMA);
+      expect(result.type).toBe('bearish');
+      expect(result.occurred).toBe(true);
+    });
+
+    it('should return none when no crossover', () => {
+      const shortMA = [12, 13]; // stays above
+      const longMA = [11, 11];
+      const result = detectCrossover(shortMA, longMA);
+      expect(result.type).toBe('none');
+      expect(result.occurred).toBe(false);
+    });
+
+    it('should return none for insufficient data', () => {
+      const result = detectCrossover([1], [1]);
+      expect(result.type).toBe('none');
+      expect(result.occurred).toBe(false);
+    });
+  });
 
   describe('calculateEMA', () => {
     it('should return empty for insufficient data', () => {
