@@ -1,6 +1,23 @@
 <h2>Trading Signals</h2>
 
-<table mat-table [dataSource]="signals" class="signal-table">
+@if (loading) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+} @else if (error) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error }}</mat-card-content>
+</mat-card>
+} @else if (signals.data.length === 0) {
+<div class="state-container empty-state">No signals found.</div>
+}
+
+<table
+  mat-table
+  [dataSource]="signals"
+  class="signal-table"
+  [hidden]="loading || error || signals.data.length === 0"
+>
   <ng-container matColumnDef="asset">
     <th mat-header-cell *matHeaderCellDef>Asset</th>
     <td mat-cell *matCellDef="let signal">{{ signal.asset }}</td>
@@ -14,8 +31,10 @@
   <ng-container matColumnDef="direction">
     <th mat-header-cell *matHeaderCellDef>Direction</th>
     <td mat-cell *matCellDef="let signal">
-      <mat-chip [style.background-color]="directionColor(signal.direction)"
-                style="color: white">
+      <mat-chip
+        [style.background-color]="directionColor(signal.direction)"
+        style="color: white"
+      >
         {{ signal.direction }}
       </mat-chip>
     </td>
@@ -33,7 +52,9 @@
 
   <ng-container matColumnDef="timestamp">
     <th mat-header-cell *matHeaderCellDef>Time</th>
-    <td mat-cell *matCellDef="let signal">{{ signal.timestamp | date:'short' }}</td>
+    <td mat-cell *matCellDef="let signal">
+      {{ signal.timestamp | date:'short' }}
+    </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

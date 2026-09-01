@@ -5,3 +5,20 @@ h2 {
 .signal-table {
   width: 100%;
 }
+
+.state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 0;
+}
+
+.empty-state {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 16px;
+}
+
+.error-card {
+  background-color: #fdecea;
+  color: #611a15;
+}
