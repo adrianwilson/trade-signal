@@ -6,20 +6,20 @@ Performance metrics for the AI Developer Workflow (ADW) system.
 
 Summary metrics across all ADW runs.
 
-| Metric                | Value       | Last Updated            |
-| --------------------- | ----------- | ----------------------- |
-| Current Streak        | 10          | 2026-09-01 14:00:00 MDT |
-| Longest Streak        | 10          | 2026-09-01 14:00:00 MDT |
-| Total Plan Size       | 1234 lines  | 2026-09-01 14:00:00 MDT |
-| Largest Plan Size     | 199 lines   | 2026-09-01 14:00:00 MDT |
-| Total Diff Size       | 70370 lines | 2026-09-01 14:00:00 MDT |
-| Largest Diff Size     | 40879 lines | 2026-09-01 14:00:00 MDT |
-| Average Presence      | 1.0         | 2026-09-01 14:00:00 MDT |
-| Average Interventions | 0.75        | 2026-09-01 14:00:00 MDT |
-| ZTE-Ready Runs        | 6/8 (75%)   | 2026-09-01 14:00:00 MDT |
-| CI First-Pass Rate    | 86% (6/7)   | 2026-09-01 14:00:00 MDT |
-| Scope Drift Rate      | 25% (2/8)   | 2026-09-01 14:00:00 MDT |
-| Average Prompts       | 4.0         | 2026-09-01 14:00:00 MDT |
+| Metric                | Value        | Last Updated            |
+| --------------------- | ------------ | ----------------------- |
+| Current Streak        | 11           | 2026-09-01 15:00:00 MDT |
+| Longest Streak        | 11           | 2026-09-01 15:00:00 MDT |
+| Total Plan Size       | 1280 lines   | 2026-09-01 15:00:00 MDT |
+| Largest Plan Size     | 199 lines    | 2026-09-01 15:00:00 MDT |
+| Total Diff Size       | 70914 lines  | 2026-09-01 15:00:00 MDT |
+| Largest Diff Size     | 40879 lines  | 2026-09-01 15:00:00 MDT |
+| Average Presence      | 1.0          | 2026-09-01 15:00:00 MDT |
+| Average Interventions | 0.67         | 2026-09-01 15:00:00 MDT |
+| ZTE-Ready Runs        | 7/9 (78%)    | 2026-09-01 15:00:00 MDT |
+| CI First-Pass Rate    | 88% (7/8)    | 2026-09-01 15:00:00 MDT |
+| Scope Drift Rate      | 22% (2/9)    | 2026-09-01 15:00:00 MDT |
+| Average Prompts       | 3.8          | 2026-09-01 15:00:00 MDT |
 
 ## ADW KPIs
 
@@ -37,6 +37,7 @@ Detailed metrics for individual ADW workflow runs.
 | 2026-09-01 | 0cb7af55 | 15    | /feature | 1        | 80   | 224/20/5             | 0             | pass | 0      | clean                           | 3       |
 | 2026-09-01 | 8dc41f47 | 17    | /feature | 1        | 189  | 945/5/16             | 0             | fail | 0      | clean                           | 3       |
 | 2026-09-01 | a8c62ee1 | 19    | /feature | 1        | 23   | 121/4/6              | 0             | pass | 0      | clean                           | 1       |
+| 2026-09-01 | c3970936 | 21    | /feature | 1        | 46   | 544/0/10             | 0             | pass | 0      | clean                           | 1       |
 
 ### Intervention Log (Issue #5)
 
