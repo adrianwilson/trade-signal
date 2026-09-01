@@ -6,20 +6,20 @@ Performance metrics for the AI Developer Workflow (ADW) system.
 
 Summary metrics across all ADW runs.
 
-| Metric                | Value        | Last Updated            |
-| --------------------- | ------------ | ----------------------- |
-| Current Streak        | 11           | 2026-09-01 15:00:00 MDT |
-| Longest Streak        | 11           | 2026-09-01 15:00:00 MDT |
-| Total Plan Size       | 1280 lines   | 2026-09-01 15:00:00 MDT |
-| Largest Plan Size     | 199 lines    | 2026-09-01 15:00:00 MDT |
-| Total Diff Size       | 70914 lines  | 2026-09-01 15:00:00 MDT |
-| Largest Diff Size     | 40879 lines  | 2026-09-01 15:00:00 MDT |
-| Average Presence      | 1.0          | 2026-09-01 15:00:00 MDT |
-| Average Interventions | 0.67         | 2026-09-01 15:00:00 MDT |
-| ZTE-Ready Runs        | 7/9 (78%)    | 2026-09-01 15:00:00 MDT |
-| CI First-Pass Rate    | 88% (7/8)    | 2026-09-01 15:00:00 MDT |
-| Scope Drift Rate      | 22% (2/9)    | 2026-09-01 15:00:00 MDT |
-| Average Prompts       | 3.8          | 2026-09-01 15:00:00 MDT |
+| Metric                | Value       | Last Updated            |
+| --------------------- | ----------- | ----------------------- |
+| Current Streak        | 11          | 2026-09-01 15:00:00 MDT |
+| Longest Streak        | 11          | 2026-09-01 15:00:00 MDT |
+| Total Plan Size       | 1280 lines  | 2026-09-01 15:00:00 MDT |
+| Largest Plan Size     | 199 lines   | 2026-09-01 15:00:00 MDT |
+| Total Diff Size       | 70914 lines | 2026-09-01 15:00:00 MDT |
+| Largest Diff Size     | 40879 lines | 2026-09-01 15:00:00 MDT |
+| Average Presence      | 1.0         | 2026-09-01 15:00:00 MDT |
+| Average Interventions | 0.67        | 2026-09-01 15:00:00 MDT |
+| ZTE-Ready Runs        | 7/9 (78%)   | 2026-09-01 15:00:00 MDT |
+| CI First-Pass Rate    | 88% (7/8)   | 2026-09-01 15:00:00 MDT |
+| Scope Drift Rate      | 22% (2/9)   | 2026-09-01 15:00:00 MDT |
+| Average Prompts       | 3.8         | 2026-09-01 15:00:00 MDT |
 
 ## ADW KPIs
 
