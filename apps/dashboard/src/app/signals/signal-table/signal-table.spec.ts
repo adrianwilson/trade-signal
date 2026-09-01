@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { SignalTableComponent } from './signal-table';
 import { SignalService } from '../../services/signal.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Signal } from '@org/signals';
 
 describe('SignalTableComponent', () => {
@@ -28,34 +28,39 @@ describe('SignalTableComponent', () => {
     },
   ];
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  function setup(serviceOverride: Partial<SignalService>) {
+    TestBed.configureTestingModule({
       imports: [SignalTableComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        {
-          provide: SignalService,
-          useValue: { getSignals: () => of(mockSignals) },
-        },
+        { provide: SignalService, useValue: serviceOverride },
       ],
-    }).compileComponents();
-  });
+    });
+    const fixture = TestBed.createComponent(SignalTableComponent);
+    return fixture;
+  }
 
   it('should create', () => {
-    const fixture = TestBed.createComponent(SignalTableComponent);
+    const fixture = setup({ getSignals: () => of(mockSignals) });
     expect(fixture.componentInstance).toBeTruthy();
   });
 
+  it('should show loading state initially', () => {
+    const fixture = setup({ getSignals: () => of(mockSignals) });
+    expect(fixture.componentInstance.loading).toBe(true);
+  });
+
   it('should load signals on init', async () => {
-    const fixture = TestBed.createComponent(SignalTableComponent);
+    const fixture = setup({ getSignals: () => of(mockSignals) });
     fixture.detectChanges();
     await fixture.whenStable();
     expect(fixture.componentInstance.signals.data.length).toBe(2);
+    expect(fixture.componentInstance.loading).toBe(false);
   });
 
   it('should render table rows', async () => {
-    const fixture = TestBed.createComponent(SignalTableComponent);
+    const fixture = setup({ getSignals: () => of(mockSignals) });
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -63,8 +68,31 @@ describe('SignalTableComponent', () => {
     expect(rows.length).toBe(2);
   });
 
+  it('should show error state on API failure', async () => {
+    const fixture = setup({
+      getSignals: () => throwError(() => new Error('API down')),
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.error).toBeTruthy();
+    expect(fixture.componentInstance.loading).toBe(false);
+    const errorCard = fixture.nativeElement.querySelector('.error-card');
+    expect(errorCard).toBeTruthy();
+  });
+
+  it('should show empty state when no signals', async () => {
+    const fixture = setup({ getSignals: () => of([]) });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.signals.data.length).toBe(0);
+    const emptyState = fixture.nativeElement.querySelector('.empty-state');
+    expect(emptyState).toBeTruthy();
+  });
+
   it('should return correct direction colors', () => {
-    const fixture = TestBed.createComponent(SignalTableComponent);
+    const fixture = setup({ getSignals: () => of(mockSignals) });
     const component = fixture.componentInstance;
     expect(component.directionColor('BUY')).toBe('#4caf50');
     expect(component.directionColor('SELL')).toBe('#f44336');

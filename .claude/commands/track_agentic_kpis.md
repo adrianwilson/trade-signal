@@ -20,6 +20,7 @@ attempts_incrementing_phases: [plan, patch]
   - ci_first_pass (boolean: did CI pass on the first push? 1 = yes, 0 = no)
   - review_findings (number of issues found by /review — critical + informational)
   - scope_drift (boolean: did implementation require unplanned changes outside the spec? 1 = yes, 0 = no. Include a brief note of what drifted.)
+  - prompts (number of user prompts/messages during the pipeline run. Count every message the user sent — approvals, questions, corrections, "yes", "proceed", etc. Lower = more autonomous.)
 
 ### 2. Calculate Metrics
 
@@ -63,6 +64,7 @@ attempts_incrementing_phases: [plan, patch]
   - **CI**: ci_first_pass from state_json. Whether CI passed on first push (pass/fail).
   - **Review**: review_findings from state_json. Number of issues found by /review.
   - **Drift**: scope_drift from state_json. Whether unplanned changes were needed (clean/drifted + note).
+  - **Prompts**: prompts from state_json. Number of user messages during the run.
 
 ### 5. Update Agentic KPIs Summary Table
 
@@ -79,6 +81,7 @@ Calculate summary metrics across ALL rows in the ADW KPIs table:
 - **ZTE-Ready Runs**: Count of runs with 0 human interventions (runs that could have been fully autonomous).
 - **CI First-Pass Rate**: Percentage of runs where CI passed on the first push.
 - **Scope Drift Rate**: Percentage of runs that required unplanned changes outside the spec.
+- **Average Prompts**: Average user prompts per run. Lower = more autonomous. A ZTE run would have 1-2 prompts (trigger + approve).
 
 ### 6. Write Updated File
 
