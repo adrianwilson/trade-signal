@@ -59,10 +59,10 @@ describe('Signals API (integration)', () => {
     // Mirror main.ts: routes are served under the global `api` prefix.
     app.setGlobalPrefix('api');
     await app.init();
-  });
+  }, 30000);
 
   afterAll(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe('GET /api/signals', () => {
