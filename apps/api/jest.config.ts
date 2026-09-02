@@ -17,7 +17,7 @@ export default {
     ],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@nestjs/typeorm|@nestjs/schedule|typeorm)/)',
+    'node_modules/(?!(@nestjs/typeorm|@nestjs/schedule|@nestjs/jwt|@nestjs/passport|typeorm)/)',
   ],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/api',

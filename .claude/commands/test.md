@@ -22,28 +22,33 @@ TEST_COMMAND_TIMEOUT: 5 minutes
 
 ## Test Execution Sequence
 
-1. **TypeScript Type Check**
+1. **Format Check**
+   - Command: `npx nx format:check --all`
+   - test_name: "format"
+   - test_purpose: "Validates all files match Prettier formatting rules"
+
+2. **TypeScript Type Check**
    - Command: `npx nx run-many -t typecheck`
    - test_name: "typecheck"
    - test_purpose: "Validates TypeScript type correctness across all projects"
 
-2. **Build All Projects**
+3. **Build All Projects**
    - Command: `npx nx run-many -t build`
    - test_name: "build"
    - test_purpose: "Validates all projects compile and bundle without errors"
 
-3. **Lint All Projects**
+4. **Lint All Projects**
    - Command: `npx nx run-many -t lint`
    - test_name: "lint"
    - test_purpose: "Validates code quality, unused imports, and style violations"
 
-4. **Run All Tests (with coverage enforcement)**
+5. **Run All Tests (with coverage enforcement)**
    - Command: `npx nx run-many -t test`
    - test_name: "unit_tests"
    - test_purpose: "Validates all unit tests pass across dashboard and API"
    - IMPORTANT: Both test targets now collect code coverage and enforce a 70% floor on lines, branches, functions, and statements (API via Jest `coverageThreshold`, dashboard via the `@angular/build:unit-test` `coverageThresholds`). If either project drops below the floor, its test target exits non-zero and this step fails — a below-floor coverage result is a test failure, captured by the existing `unit_tests` entry. No separate command is required; enforcement rides on `npx nx run-many -t test`.
 
-5. **Run E2E Tests**
+6. **Run E2E Tests**
    - Command: `npx nx run dashboard-e2e:e2e`
    - test_name: "e2e"
    - test_purpose: "Validates the full application works end-to-end — dashboard loads, connects to API, renders signal data correctly"
