@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -25,6 +25,7 @@ import { SignalService, AssetSentiment } from '../../services/signal.service';
 })
 export class NewsPanelComponent implements OnInit, OnDestroy {
   private readonly signalService = inject(SignalService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   sentiments: AssetSentiment[] = [];
   loading = true;
@@ -57,11 +58,13 @@ export class NewsPanelComponent implements OnInit, OnDestroy {
         this.sentiments = data;
         this.loading = false;
         this.refreshing = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Failed to load news sentiment. Is the API running?';
         this.loading = false;
         this.refreshing = false;
+        this.cdr.detectChanges();
       },
     });
   }
