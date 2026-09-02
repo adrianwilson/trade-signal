@@ -33,6 +33,20 @@
 - **Package manager:** pnpm (not npm). Use `pnpm exec nx` to run Nx commands, `pnpm add` to install packages.
 - **Validation:** Always run tasks through Nx: `pnpm exec nx run-many -t build/test/lint`
 
+# Pre-Push Validation (MANDATORY)
+
+Before every `git push`, run these checks in order. Do NOT push if any fail:
+
+1. **Format:** `pnpm exec nx format:check --all` — if it fails, run `pnpm exec nx format:write` and re-stage
+2. **Typecheck:** `pnpm exec nx run-many -t typecheck` — catches TS errors that `build` misses
+3. **Build:** `pnpm exec nx run-many -t build` — includes bundle budget enforcement
+4. **Lint:** `pnpm exec nx run-many -t lint` — 0 errors required (warnings OK)
+5. **Tests:** `pnpm exec nx run-many -t test` — includes coverage thresholds
+
+If any step fails, fix the issue before pushing. Do not skip steps or use `--no-verify`.
+
+When changing routes or default navigation, also verify e2e tests still pass: `pnpm exec nx run dashboard-e2e:e2e`
+
 # Communication Rules
 
 - Be terse. One fact, one sentence. No flattery, no preamble, no decorative language.
