@@ -5,6 +5,7 @@ import {
   ViewChild,
   OnDestroy,
   inject,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import {
@@ -65,6 +66,7 @@ export class AssetDetailComponent implements OnInit, OnDestroy {
   data = inject<AssetDetailData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<AssetDetailComponent>);
   private readonly signalService = inject(SignalService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   loading = true;
   error = '';
@@ -76,11 +78,13 @@ export class AssetDetailComponent implements OnInit, OnDestroy {
       next: (result) => {
         this.analysis = result as unknown as AnalysisResult;
         this.loading = false;
+        this.cdr.detectChanges();
         setTimeout(() => this.renderGauge(), 0);
       },
       error: () => {
         this.error = 'Failed to load analysis data.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }
