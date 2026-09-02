@@ -16,6 +16,8 @@ import { WatchlistModule } from '../watchlist/watchlist.module';
 import { WatchlistEntity } from '../watchlist/watchlist.entity';
 import { AlertsModule } from '../alerts/alerts.module';
 import { AlertEntity } from '../alerts/alert.entity';
+import { PortfolioModule } from '../portfolio/portfolio.module';
+import { PortfolioEntity } from '../portfolio/portfolio.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { AlertEntity } from '../alerts/alert.entity';
         UserEntity,
         WatchlistEntity,
         AlertEntity,
+        PortfolioEntity,
       ],
       synchronize: true,
     }),
@@ -41,6 +44,7 @@ import { AlertEntity } from '../alerts/alert.entity';
     AuthModule,
     WatchlistModule,
     AlertsModule,
+    PortfolioModule,
   ],
   controllers: [AppController],
   providers: [AppService],
