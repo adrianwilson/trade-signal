@@ -10,6 +10,8 @@ import { AssetPriceEntity } from '../market-data/asset-price.entity';
 import { TechnicalAnalysisModule } from '../technical-analysis/technical-analysis.module';
 import { NewsSentimentModule } from '../news-sentiment/news-sentiment.module';
 import { SynthesisModule } from '../synthesis/synthesis.module';
+import { AuthModule } from '../auth/auth.module';
+import { UserEntity } from '../auth/user.entity';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { SynthesisModule } from '../synthesis/synthesis.module';
       type: 'better-sqlite3',
       database:
         process.env['NODE_ENV'] === 'test' ? ':memory:' : 'data/signals.sqlite',
-      entities: [SignalEntity, AssetPriceEntity],
+      entities: [SignalEntity, AssetPriceEntity, UserEntity],
       synchronize: true,
     }),
     ScheduleModule.forRoot(),
@@ -26,6 +28,7 @@ import { SynthesisModule } from '../synthesis/synthesis.module';
     TechnicalAnalysisModule,
     NewsSentimentModule,
     SynthesisModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
