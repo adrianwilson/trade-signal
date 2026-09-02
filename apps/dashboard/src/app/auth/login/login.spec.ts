@@ -13,22 +13,18 @@ describe('LoginComponent', () => {
 
   beforeEach(() => {
     mockAuthService = {
-      login: vi
-        .fn()
-        .mockReturnValue(
-          of({
-            access_token: 'token',
-            user: { id: '1', email: 'test@test.com' },
-          }),
-        ),
-      register: vi
-        .fn()
-        .mockReturnValue(
-          of({
-            access_token: 'token',
-            user: { id: '1', email: 'test@test.com' },
-          }),
-        ),
+      login: vi.fn().mockReturnValue(
+        of({
+          access_token: 'token',
+          user: { id: '1', email: 'test@test.com' },
+        }),
+      ),
+      register: vi.fn().mockReturnValue(
+        of({
+          access_token: 'token',
+          user: { id: '1', email: 'test@test.com' },
+        }),
+      ),
     };
     mockRouter = { navigate: vi.fn() };
 
