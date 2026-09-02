@@ -18,6 +18,15 @@ export interface AssetSentiment {
   headlines: NewsHeadline[];
 }
 
+export interface PortfolioPosition {
+  id: string;
+  asset: string;
+  assetClass: string;
+  quantity: number;
+  avgPrice: number;
+  addedAt: string;
+}
+
 export interface WatchlistItem {
   id: string;
   asset: string;
@@ -46,6 +55,28 @@ export class SignalService {
     return this.http.get<Record<string, unknown>>(
       `${this.baseUrl}/technical-analysis/${symbol}`,
     );
+  }
+
+  getPortfolio(): Observable<PortfolioPosition[]> {
+    return this.http.get<PortfolioPosition[]>(`${this.baseUrl}/portfolio`);
+  }
+
+  addPortfolioPosition(
+    asset: string,
+    assetClass: string,
+    quantity: number,
+    avgPrice: number,
+  ): Observable<PortfolioPosition> {
+    return this.http.post<PortfolioPosition>(`${this.baseUrl}/portfolio`, {
+      asset,
+      assetClass,
+      quantity,
+      avgPrice,
+    });
+  }
+
+  removePortfolioPosition(asset: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/portfolio/${asset}`);
   }
 
   getNewsSentiment(): Observable<AssetSentiment[]> {
