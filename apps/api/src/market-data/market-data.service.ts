@@ -9,6 +9,7 @@ const yahooFinance =
   typeof YahooFinance === 'function' ? new YahooFinance() : YahooFinance;
 import { AssetPriceEntity } from './asset-price.entity';
 import { SignalsService } from '../signals/signals.service';
+import { CoinGeckoService } from './coingecko.service';
 
 export interface QuoteResult {
   symbol: string;
@@ -35,6 +36,7 @@ export class MarketDataService {
     @InjectRepository(AssetPriceEntity)
     private readonly priceRepository: Repository<AssetPriceEntity>,
     private readonly signalsService: SignalsService,
+    private readonly coinGeckoService: CoinGeckoService,
   ) {}
 
   mapSymbol(asset: string, assetClass: string): string {
@@ -48,7 +50,29 @@ export class MarketDataService {
     }
   }
 
-  async getQuote(yahooSymbol: string): Promise<QuoteResult | null> {
+  async getQuote(
+    yahooSymbol: string,
+    originalAsset?: string,
+  ): Promise<QuoteResult | null> {
+    if (originalAsset && this.coinGeckoService.isCryptoAsset(originalAsset)) {
+      const cgQuote = await this.coinGeckoService.getQuote(originalAsset);
+      if (cgQuote) {
+        await this.priceRepository.save({
+          symbol: originalAsset,
+          price: cgQuote.price,
+          changePercent: cgQuote.changePercent,
+          volume: cgQuote.volume,
+          updatedAt: cgQuote.updatedAt,
+        });
+        return cgQuote;
+      }
+    }
+    return this.getYahooQuote(yahooSymbol);
+  }
+
+  private async getYahooQuote(
+    yahooSymbol: string,
+  ): Promise<QuoteResult | null> {
     try {
       const result: Record<string, unknown> =
         await yahooFinance.quote(yahooSymbol);
@@ -86,7 +110,25 @@ export class MarketDataService {
     }
   }
 
-  async getHistory(yahooSymbol: string, days = 30): Promise<HistoryResult[]> {
+  async getHistory(
+    yahooSymbol: string,
+    days = 30,
+    originalAsset?: string,
+  ): Promise<HistoryResult[]> {
+    if (originalAsset && this.coinGeckoService.isCryptoAsset(originalAsset)) {
+      const cgHistory = await this.coinGeckoService.getHistory(
+        originalAsset,
+        days,
+      );
+      if (cgHistory.length > 0) return cgHistory;
+    }
+    return this.getYahooHistory(yahooSymbol, days);
+  }
+
+  private async getYahooHistory(
+    yahooSymbol: string,
+    days: number,
+  ): Promise<HistoryResult[]> {
     const now = new Date();
     const start = new Date(now);
     start.setDate(start.getDate() - days);
@@ -125,7 +167,7 @@ export class MarketDataService {
       seen.add(key);
 
       const yahooSymbol = this.mapSymbol(signal.asset, signal.assetClass);
-      const quote = await this.getQuote(yahooSymbol);
+      const quote = await this.getQuote(yahooSymbol, signal.asset);
       if (quote) {
         results[signal.asset] = quote;
       }

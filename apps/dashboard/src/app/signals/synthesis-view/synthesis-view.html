@@ -1,4 +1,19 @@
-<h2>Signal Synthesis</h2>
+<div class="header-row">
+  <h2>Signal Synthesis</h2>
+  @if (!loading()) {
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Asset Class</mat-label>
+    <mat-select
+      [(ngModel)]="selectedClass"
+      (ngModelChange)="selectedClass.set($event)"
+    >
+      @for (cls of assetClasses(); track cls) {
+      <mat-option [value]="cls">{{ cls === 'all' ? 'All' : cls }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  }
+</div>
 
 @if (loading()) {
 <div class="state-container">

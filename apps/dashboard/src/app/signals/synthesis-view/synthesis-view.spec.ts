@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
-import { signal } from '@angular/core';
+import { signal, computed } from '@angular/core';
 import { SynthesisViewComponent } from './synthesis-view';
 import type { AggregatedSignal } from '@org/signals';
 
@@ -34,10 +34,23 @@ describe('SynthesisViewComponent', () => {
     };
 
     component = Object.create(SynthesisViewComponent.prototype);
-    component.syntheses = signal<AggregatedSignal[]>([]);
+    component.allSyntheses = signal<AggregatedSignal[]>([]);
+    component.selectedClass = signal('all');
     component.loading = signal(true);
     component.refreshing = signal(false);
     component.error = signal('');
+    component.syntheses = computed(() => {
+      const filter = component.selectedClass();
+      const all = component.allSyntheses();
+      if (filter === 'all') return all;
+      return all.filter((s) => s.assetClass === filter);
+    });
+    component.assetClasses = computed(() => {
+      const classes = new Set(
+        component.allSyntheses().map((s) => s.assetClass),
+      );
+      return ['all', ...Array.from(classes)];
+    });
     Object.assign(component, { signalService: mockSignalService });
   });
 
@@ -64,6 +77,16 @@ describe('SynthesisViewComponent', () => {
       component.refresh();
       expect(component.refreshing()).toBe(false);
       expect(component.syntheses().length).toBe(1);
+    });
+  });
+
+  describe('filtering', () => {
+    it('should filter by asset class', () => {
+      component.allSyntheses.set(mockSyntheses);
+      component.selectedClass.set('equity');
+      expect(component.syntheses().length).toBe(1);
+      component.selectedClass.set('crypto');
+      expect(component.syntheses().length).toBe(0);
     });
   });
 
