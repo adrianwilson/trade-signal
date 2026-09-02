@@ -4,7 +4,6 @@ import { SignalsService } from '../signals/signals.service';
 import type {
   Signal,
   SignalDirection,
-  SignalSource,
   AggregatedSignal,
   AgentContribution,
 } from '@org/signals';

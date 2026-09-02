@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -17,7 +16,6 @@ import type { AggregatedSignal } from '@org/signals';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    DecimalPipe,
   ],
   templateUrl: './synthesis-view.html',
   styleUrl: './synthesis-view.scss',
