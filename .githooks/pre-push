@@ -1,0 +1,21 @@
+#!/bin/sh
+# Pre-push hook: run format check and typecheck before pushing
+# Matches CI validation order to catch failures locally
+
+echo "Running pre-push checks..."
+
+echo "  [1/2] Format check..."
+pnpm exec nx format:check --base=HEAD~1 2>/dev/null
+if [ $? -ne 0 ]; then
+  echo "  ❌ Format check failed. Run: pnpm exec nx format:write"
+  exit 1
+fi
+
+echo "  [2/2] TypeScript type check..."
+pnpm exec nx run-many -t typecheck 2>&1 | tail -5
+if [ $? -ne 0 ]; then
+  echo "  ❌ Typecheck failed."
+  exit 1
+fi
+
+echo "  ✅ Pre-push checks passed."

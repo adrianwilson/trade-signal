@@ -8,7 +8,8 @@
     "start:api": "pnpm exec nx serve api",
     "build": "pnpm exec nx run-many -t build",
     "test": "pnpm exec nx run-many -t test",
-    "lint": "pnpm exec nx run-many -t lint"
+    "lint": "pnpm exec nx run-many -t lint",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "packageManager": "pnpm@10.12.4",
   "private": true,
