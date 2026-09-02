@@ -14,6 +14,8 @@ import { AuthModule } from '../auth/auth.module';
 import { UserEntity } from '../auth/user.entity';
 import { WatchlistModule } from '../watchlist/watchlist.module';
 import { WatchlistEntity } from '../watchlist/watchlist.entity';
+import { AlertsModule } from '../alerts/alerts.module';
+import { AlertEntity } from '../alerts/alert.entity';
 
 @Module({
   imports: [
@@ -21,7 +23,13 @@ import { WatchlistEntity } from '../watchlist/watchlist.entity';
       type: 'better-sqlite3',
       database:
         process.env['NODE_ENV'] === 'test' ? ':memory:' : 'data/signals.sqlite',
-      entities: [SignalEntity, AssetPriceEntity, UserEntity, WatchlistEntity],
+      entities: [
+        SignalEntity,
+        AssetPriceEntity,
+        UserEntity,
+        WatchlistEntity,
+        AlertEntity,
+      ],
       synchronize: true,
     }),
     ScheduleModule.forRoot(),
@@ -32,6 +40,7 @@ import { WatchlistEntity } from '../watchlist/watchlist.entity';
     SynthesisModule,
     AuthModule,
     WatchlistModule,
+    AlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
