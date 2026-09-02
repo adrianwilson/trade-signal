@@ -1,0 +1,70 @@
+<h2>News Sentiment</h2>
+
+@if (loading) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+} @else if (error) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error }}</mat-card-content>
+</mat-card>
+} @else if (sentiments.length === 0) {
+<div class="state-container empty-state">
+  No sentiment data available. Set FINNHUB_API_KEY to enable news analysis.
+</div>
+} @else {
+<div class="sentiment-grid">
+  @for (s of sentiments; track s.asset) {
+  <mat-card class="sentiment-card">
+    <mat-card-header>
+      <mat-card-title>
+        {{ s.asset }}
+        <mat-chip
+          [style.background-color]="signalColor(s.signal)"
+          style="color: white"
+          class="signal-chip"
+        >
+          {{ s.signal }}
+        </mat-chip>
+      </mat-card-title>
+      <mat-card-subtitle>
+        <mat-icon [style.color]="sentimentColor(s.score)" class="trend-icon">
+          {{ sentimentIcon(s.score) }}
+        </mat-icon>
+        Score: {{ s.score | number : '1.2-2' }} ({{ s.headlineCount }}
+        headlines)
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (s.headlines.length > 0) {
+      <mat-list class="headline-list">
+        @for (h of s.headlines.slice(0, 5); track h.url) {
+        <mat-list-item class="headline-item">
+          <span class="headline-text">{{ h.title }}</span>
+          <span class="headline-source">{{ h.source }}</span>
+        </mat-list-item>
+        }
+      </mat-list>
+      @if (s.headlines.length > 5) {
+      <div class="more-headlines">
+        +{{ s.headlines.length - 5 }} more headlines
+      </div>
+      } }
+    </mat-card-content>
+  </mat-card>
+  }
+</div>
+}
+
+<div class="panel-footer" [hidden]="loading || error">
+  <span></span>
+  <button
+    mat-icon-button
+    (click)="refresh()"
+    [disabled]="refreshing"
+    aria-label="Refresh"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>

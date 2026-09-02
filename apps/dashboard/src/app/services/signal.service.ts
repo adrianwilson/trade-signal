@@ -3,6 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Signal, ManualSignalInput } from '@org/signals';
 
+export interface NewsHeadline {
+  title: string;
+  source: string;
+  url: string;
+  publishedAt: string;
+}
+
+export interface AssetSentiment {
+  asset: string;
+  score: number;
+  signal: string;
+  headlineCount: number;
+  headlines: NewsHeadline[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class SignalService {
   private readonly http = inject(HttpClient);
@@ -23,6 +38,16 @@ export class SignalService {
   getAnalysis(symbol: string): Observable<Record<string, unknown>> {
     return this.http.get<Record<string, unknown>>(
       `${this.baseUrl}/technical-analysis/${symbol}`,
+    );
+  }
+
+  getNewsSentiment(): Observable<AssetSentiment[]> {
+    return this.http.get<AssetSentiment[]>(`${this.baseUrl}/news-sentiment`);
+  }
+
+  analyzeNewsSentiment(symbol: string): Observable<AssetSentiment> {
+    return this.http.get<AssetSentiment>(
+      `${this.baseUrl}/news-sentiment/${symbol}`,
     );
   }
 
