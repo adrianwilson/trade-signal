@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
@@ -7,7 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { Signal } from '@org/signals';
+import { Signal as TradeSignal } from '@org/signals';
 import { SignalService } from '../../services/signal.service';
 import {
   AssetDetailComponent,
@@ -46,22 +46,21 @@ export class SignalTableComponent implements OnInit {
     'source',
     'timestamp',
   ];
-  signals: MatTableDataSource<Signal> = new MatTableDataSource<Signal>([]);
-  quotes: Record<
-    string,
-    { price: number; changePercent: number; updatedAt?: string }
-  > = {};
-  loading = true;
-  refreshing = false;
-  error = '';
-  lastUpdated = '';
+  signals = new MatTableDataSource<TradeSignal>([]);
+  quotes = signal<
+    Record<string, { price: number; changePercent: number; updatedAt?: string }>
+  >({});
+  loading = signal(true);
+  refreshing = signal(false);
+  error = signal('');
+  lastUpdated = signal('');
 
   ngOnInit(): void {
     this.loadData();
   }
 
   refresh(): void {
-    this.refreshing = true;
+    this.refreshing.set(true);
     this.loadData();
   }
 
@@ -69,13 +68,13 @@ export class SignalTableComponent implements OnInit {
     this.signalService.getSignals().subscribe({
       next: (data) => {
         this.signals.data = data;
-        this.loading = false;
+        this.loading.set(false);
         this.loadQuotes();
       },
       error: () => {
-        this.error = 'Failed to load signals. Is the API running?';
-        this.loading = false;
-        this.refreshing = false;
+        this.error.set('Failed to load signals. Is the API running?');
+        this.loading.set(false);
+        this.refreshing.set(false);
       },
     });
   }
@@ -83,17 +82,17 @@ export class SignalTableComponent implements OnInit {
   private loadQuotes(): void {
     this.signalService.getMarketQuotes().subscribe({
       next: (data) => {
-        this.quotes = data;
-        this.refreshing = false;
+        this.quotes.set(data);
+        this.refreshing.set(false);
         const timestamps = Object.values(data)
           .map((q) => q.updatedAt)
           .filter(Boolean) as string[];
         if (timestamps.length > 0) {
-          this.lastUpdated = timestamps.sort().reverse()[0];
+          this.lastUpdated.set(timestamps.sort().reverse()[0]);
         }
       },
       error: () => {
-        this.refreshing = false;
+        this.refreshing.set(false);
       },
     });
   }
@@ -111,11 +110,12 @@ export class SignalTableComponent implements OnInit {
     }
   }
 
-  openDetail(signal: Signal): void {
-    const quote = this.quotes[signal.asset];
+  openDetail(row: TradeSignal): void {
+    const q = this.quotes();
+    const quote = q[row.asset];
     const data: AssetDetailData = {
-      asset: signal.asset,
-      assetClass: signal.assetClass,
+      asset: row.asset,
+      assetClass: row.assetClass,
       price: quote?.price,
       changePercent: quote?.changePercent,
     };

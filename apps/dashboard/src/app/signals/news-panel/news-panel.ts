@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -25,12 +25,11 @@ import { SignalService, AssetSentiment } from '../../services/signal.service';
 })
 export class NewsPanelComponent implements OnInit, OnDestroy {
   private readonly signalService = inject(SignalService);
-  private readonly cdr = inject(ChangeDetectorRef);
 
-  sentiments: AssetSentiment[] = [];
-  loading = true;
-  refreshing = false;
-  error = '';
+  sentiments = signal<AssetSentiment[]>([]);
+  loading = signal(true);
+  refreshing = signal(false);
+  error = signal('');
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private retryCount = 0;
 
@@ -39,7 +38,7 @@ export class NewsPanelComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void {
-    this.refreshing = true;
+    this.refreshing.set(true);
     this.loadData();
   }
 
@@ -55,22 +54,20 @@ export class NewsPanelComponent implements OnInit, OnDestroy {
           this.retryTimer = setTimeout(() => this.loadData(), 3000);
           return;
         }
-        this.sentiments = data;
-        this.loading = false;
-        this.refreshing = false;
-        this.cdr.detectChanges();
+        this.sentiments.set(data);
+        this.loading.set(false);
+        this.refreshing.set(false);
       },
       error: () => {
-        this.error = 'Failed to load news sentiment. Is the API running?';
-        this.loading = false;
-        this.refreshing = false;
-        this.cdr.detectChanges();
+        this.error.set('Failed to load news sentiment. Is the API running?');
+        this.loading.set(false);
+        this.refreshing.set(false);
       },
     });
   }
 
-  signalColor(signal: string): string {
-    switch (signal) {
+  signalColor(sig: string): string {
+    switch (sig) {
       case 'BUY':
         return '#4caf50';
       case 'SELL':

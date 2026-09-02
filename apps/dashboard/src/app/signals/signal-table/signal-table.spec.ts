@@ -53,7 +53,7 @@ describe('SignalTableComponent', () => {
 
   it('should show loading state initially', () => {
     const fixture = setup({ getSignals: () => of(mockSignals) });
-    expect(fixture.componentInstance.loading).toBe(true);
+    expect(fixture.componentInstance.loading()).toBe(true);
   });
 
   it('should load signals on init', async () => {
@@ -61,7 +61,7 @@ describe('SignalTableComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(fixture.componentInstance.signals.data.length).toBe(2);
-    expect(fixture.componentInstance.loading).toBe(false);
+    expect(fixture.componentInstance.loading()).toBe(false);
   });
 
   it('should render table rows', async () => {
@@ -80,8 +80,8 @@ describe('SignalTableComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    expect(fixture.componentInstance.error).toBeTruthy();
-    expect(fixture.componentInstance.loading).toBe(false);
+    expect(fixture.componentInstance.error()).toBeTruthy();
+    expect(fixture.componentInstance.loading()).toBe(false);
     const errorCard = fixture.nativeElement.querySelector('.error-card');
     expect(errorCard).toBeTruthy();
   });
@@ -110,7 +110,9 @@ describe('SignalTableComponent', () => {
     });
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.componentInstance.lastUpdated).toBe('2026-09-01T12:00:00Z');
+    expect(fixture.componentInstance.lastUpdated()).toBe(
+      '2026-09-01T12:00:00Z',
+    );
   });
 
   it('should refresh data when refresh() is called', async () => {
@@ -127,7 +129,7 @@ describe('SignalTableComponent', () => {
     fixture.componentInstance.refresh();
     await fixture.whenStable();
     expect(callCount).toBe(2);
-    expect(fixture.componentInstance.refreshing).toBe(false);
+    expect(fixture.componentInstance.refreshing()).toBe(false);
   });
 
   it('should return correct direction colors', () => {

@@ -1,20 +1,20 @@
 <h2>News Sentiment</h2>
 
-@if (loading) {
+@if (loading()) {
 <div class="state-container">
   <mat-spinner diameter="48"></mat-spinner>
 </div>
-} @else if (error) {
+} @else if (error()) {
 <mat-card class="error-card">
-  <mat-card-content>{{ error }}</mat-card-content>
+  <mat-card-content>{{ error() }}</mat-card-content>
 </mat-card>
-} @else if (sentiments.length === 0) {
+} @else if (sentiments().length === 0) {
 <div class="state-container empty-state">
   No sentiment data available. Set FINNHUB_API_KEY to enable news analysis.
 </div>
 } @else {
 <div class="sentiment-grid">
-  @for (s of sentiments; track s.asset) {
+  @for (s of sentiments(); track s.asset) {
   <mat-card class="sentiment-card">
     <mat-card-header>
       <mat-card-title>
@@ -57,12 +57,12 @@
 </div>
 }
 
-<div class="panel-footer" [hidden]="loading || error">
+<div class="panel-footer" [hidden]="loading() || error()">
   <span></span>
   <button
     mat-icon-button
     (click)="refresh()"
-    [disabled]="refreshing"
+    [disabled]="refreshing()"
     aria-label="Refresh"
   >
     <mat-icon>refresh</mat-icon>

@@ -5,7 +5,7 @@ import {
   ViewChild,
   OnDestroy,
   inject,
-  ChangeDetectorRef,
+  signal,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import {
@@ -66,25 +66,22 @@ export class AssetDetailComponent implements OnInit, OnDestroy {
   data = inject<AssetDetailData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<AssetDetailComponent>);
   private readonly signalService = inject(SignalService);
-  private readonly cdr = inject(ChangeDetectorRef);
 
-  loading = true;
-  error = '';
-  analysis: AnalysisResult | null = null;
+  loading = signal(true);
+  error = signal('');
+  analysis = signal<AnalysisResult | null>(null);
   private chart: Chart | null = null;
 
   ngOnInit(): void {
     this.signalService.getAnalysis(this.data.asset).subscribe({
       next: (result) => {
-        this.analysis = result as unknown as AnalysisResult;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.analysis.set(result as unknown as AnalysisResult);
+        this.loading.set(false);
         setTimeout(() => this.renderGauge(), 0);
       },
       error: () => {
-        this.error = 'Failed to load analysis data.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Failed to load analysis data.');
+        this.loading.set(false);
       },
     });
   }
@@ -97,8 +94,8 @@ export class AssetDetailComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   }
 
-  signalColor(signal: string): string {
-    switch (signal) {
+  signalColor(sig: string): string {
+    switch (sig) {
       case 'BUY':
         return '#4caf50';
       case 'SELL':
@@ -124,13 +121,14 @@ export class AssetDetailComponent implements OnInit, OnDestroy {
 
   /* v8 ignore start */
   private renderGauge(): void {
-    if (!this.analysis || !this.gaugeCanvas) return;
+    const a = this.analysis();
+    if (!a || !this.gaugeCanvas) return;
 
     const indicators = [
-      { label: 'RSI', signal: this.analysis.rsiSignal },
-      { label: 'MACD', signal: this.analysis.macdSignal },
-      { label: 'SMA', signal: this.analysis.smaSignal },
-      { label: 'Bollinger', signal: this.analysis.bollingerSignal },
+      { label: 'RSI', signal: a.rsiSignal },
+      { label: 'MACD', signal: a.macdSignal },
+      { label: 'SMA', signal: a.smaSignal },
+      { label: 'Bollinger', signal: a.bollingerSignal },
     ];
 
     const labels = indicators.map((i) => i.label);

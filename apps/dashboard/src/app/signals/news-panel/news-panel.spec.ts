@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
 import { NewsPanelComponent } from './news-panel';
 import type { AssetSentiment } from '../../services/signal.service';
 
@@ -30,19 +31,23 @@ describe('NewsPanelComponent', () => {
     };
 
     component = Object.create(NewsPanelComponent.prototype);
-    component.sentiments = [];
-    component.loading = true;
-    component.refreshing = false;
-    component.error = '';
-    Object.assign(component, { signalService: mockSignalService });
+    component.sentiments = signal<AssetSentiment[]>([]);
+    component.loading = signal(true);
+    component.refreshing = signal(false);
+    component.error = signal('');
+    Object.assign(component, {
+      signalService: mockSignalService,
+      retryCount: 0,
+      retryTimer: null,
+    });
   });
 
   describe('ngOnInit', () => {
     it('should load sentiment data', () => {
       component.ngOnInit();
-      expect(component.loading).toBe(false);
-      expect(component.sentiments.length).toBe(1);
-      expect(component.sentiments[0].asset).toBe('AAPL');
+      expect(component.loading()).toBe(false);
+      expect(component.sentiments().length).toBe(1);
+      expect(component.sentiments()[0].asset).toBe('AAPL');
     });
 
     it('should handle error', () => {
@@ -50,8 +55,8 @@ describe('NewsPanelComponent', () => {
         throwError(() => new Error('fail')),
       );
       component.ngOnInit();
-      expect(component.loading).toBe(false);
-      expect(component.error).toBe(
+      expect(component.loading()).toBe(false);
+      expect(component.error()).toBe(
         'Failed to load news sentiment. Is the API running?',
       );
     });
@@ -60,8 +65,8 @@ describe('NewsPanelComponent', () => {
   describe('refresh', () => {
     it('should set refreshing and reload data', () => {
       component.refresh();
-      expect(component.refreshing).toBe(false);
-      expect(component.sentiments.length).toBe(1);
+      expect(component.refreshing()).toBe(false);
+      expect(component.sentiments().length).toBe(1);
     });
   });
 

@@ -1,13 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
 import { AssetDetailComponent } from './asset-detail';
-import type { SignalService } from '../../services/signal.service';
-import type { MatDialogRef } from '@angular/material/dialog';
 
 describe('AssetDetailComponent', () => {
   let component: AssetDetailComponent;
-  let mockDialogRef: Pick<MatDialogRef<AssetDetailComponent>, 'close'>;
-  let mockSignalService: Pick<SignalService, 'getAnalysis'>;
+  let mockDialogRef: { close: ReturnType<typeof vi.fn> };
+  let mockSignalService: { getAnalysis: ReturnType<typeof vi.fn> };
 
   const mockAnalysis = {
     symbol: 'AAPL',
@@ -39,10 +38,9 @@ describe('AssetDetailComponent', () => {
       price: 150,
       changePercent: 1.5,
     };
-    component.loading = true;
-    component.error = '';
-    component.analysis = null;
-    // Wire up private fields via object assignment
+    component.loading = signal(true);
+    component.error = signal('');
+    component.analysis = signal(null);
     Object.assign(component, {
       dialogRef: mockDialogRef,
       signalService: mockSignalService,
@@ -52,9 +50,9 @@ describe('AssetDetailComponent', () => {
   describe('ngOnInit', () => {
     it('should load analysis data', () => {
       component.ngOnInit();
-      expect(component.loading).toBe(false);
-      expect(component.analysis).toBeTruthy();
-      expect(component.analysis?.rsi).toBe(45.2);
+      expect(component.loading()).toBe(false);
+      expect(component.analysis()).toBeTruthy();
+      expect(component.analysis()?.rsi).toBe(45.2);
     });
 
     it('should handle error', () => {
@@ -66,8 +64,8 @@ describe('AssetDetailComponent', () => {
         },
       });
       component.ngOnInit();
-      expect(component.loading).toBe(false);
-      expect(component.error).toBe('Failed to load analysis data.');
+      expect(component.loading()).toBe(false);
+      expect(component.error()).toBe('Failed to load analysis data.');
     });
   });
 
