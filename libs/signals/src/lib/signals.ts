@@ -26,6 +26,13 @@ export interface Signal {
   timestamp: string; // ISO 8601
 }
 
+export interface AgentContribution {
+  source: SignalSource;
+  direction: SignalDirection;
+  confidence: number;
+  reasoning?: string;
+}
+
 export interface AggregatedSignal {
   asset: string;
   assetClass: AssetClass;
@@ -34,6 +41,10 @@ export interface AggregatedSignal {
   direction: SignalDirection;
   confidence: number; // weighted average, 0-100
   signals: Signal[];
+  contributions: AgentContribution[];
+  agreements: string[]; // e.g., ["RSI and MACD agree: BUY"]
+  disagreements: string[]; // e.g., ["RSI says BUY, news says SELL"]
+  reasoningChain: string; // human-readable synthesis explanation
   lastUpdated: string;
 }
 

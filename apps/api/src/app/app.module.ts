@@ -9,6 +9,7 @@ import { MarketDataModule } from '../market-data/market-data.module';
 import { AssetPriceEntity } from '../market-data/asset-price.entity';
 import { TechnicalAnalysisModule } from '../technical-analysis/technical-analysis.module';
 import { NewsSentimentModule } from '../news-sentiment/news-sentiment.module';
+import { SynthesisModule } from '../synthesis/synthesis.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NewsSentimentModule } from '../news-sentiment/news-sentiment.module';
     MarketDataModule,
     TechnicalAnalysisModule,
     NewsSentimentModule,
+    SynthesisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

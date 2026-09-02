@@ -1,0 +1,93 @@
+<h2>Signal Synthesis</h2>
+
+@if (loading()) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+} @else if (error()) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error() }}</mat-card-content>
+</mat-card>
+} @else if (syntheses().length === 0) {
+<div class="state-container empty-state">No synthesis data available.</div>
+} @else {
+<div class="synthesis-grid">
+  @for (s of syntheses(); track s.asset) {
+  <mat-card class="synthesis-card">
+    <mat-card-header>
+      <mat-card-title>
+        {{ s.asset }}
+        <mat-chip
+          [style.background-color]="directionColor(s.direction)"
+          style="color: white"
+          class="direction-chip"
+        >
+          {{ s.direction }}
+        </mat-chip>
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ s.confidence }}% confidence from {{ s.contributions.length }} agents
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="contributions">
+        <div class="section-label">Agent Contributions</div>
+        @for (c of s.contributions; track c.source) {
+        <div class="contribution-row">
+          <span class="source-label">{{ c.source }}</span>
+          <mat-chip
+            [style.background-color]="directionColor(c.direction)"
+            style="color: white"
+            class="small-chip"
+          >
+            {{ c.direction }}
+          </mat-chip>
+          <span class="confidence-value">{{ c.confidence }}%</span>
+        </div>
+        }
+      </div>
+
+      @if (s.agreements.length > 0) {
+      <div class="consensus-section">
+        <div class="section-label">
+          <mat-icon class="section-icon">handshake</mat-icon>
+          Consensus
+        </div>
+        @for (a of s.agreements; track a) {
+        <div class="consensus-item agree">{{ a }}</div>
+        }
+      </div>
+      } @if (s.disagreements.length > 0) {
+      <div class="consensus-section">
+        <div class="section-label">
+          <mat-icon class="section-icon">warning</mat-icon>
+          Conflicts
+        </div>
+        @for (d of s.disagreements; track d) {
+        <div class="consensus-item disagree">{{ d }}</div>
+        }
+      </div>
+      }
+
+      <div class="reasoning-section">
+        <div class="section-label">Reasoning Chain</div>
+        <pre class="reasoning-text">{{ s.reasoningChain }}</pre>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>
+}
+
+<div class="panel-footer" [hidden]="loading() || error()">
+  <span></span>
+  <button
+    mat-icon-button
+    (click)="refresh()"
+    [disabled]="refreshing()"
+    aria-label="Refresh"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
