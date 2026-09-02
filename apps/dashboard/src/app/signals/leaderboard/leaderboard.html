@@ -1,0 +1,72 @@
+<h2>Agent Leaderboard</h2>
+
+@if (loading()) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+} @else if (error()) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error() }}</mat-card-content>
+</mat-card>
+} @else if (leaderboard.data.length === 0) {
+<div class="state-container empty-state">
+  No outcome data yet. Signals need time to be evaluated (1, 3, and 7 days).
+</div>
+} @else {
+<table mat-table [dataSource]="leaderboard" class="leaderboard-table">
+  <ng-container matColumnDef="rank">
+    <th mat-header-cell *matHeaderCellDef>#</th>
+    <td mat-cell *matCellDef="let entry">
+      @if (rankIcon(entry.rank)) {
+      <mat-icon class="rank-icon">{{ rankIcon(entry.rank) }}</mat-icon>
+      } @else { {{ entry.rank }} }
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="source">
+    <th mat-header-cell *matHeaderCellDef>Agent</th>
+    <td mat-cell *matCellDef="let entry" class="source-cell">
+      {{ entry.source }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="accuracyRate">
+    <th mat-header-cell *matHeaderCellDef>Accuracy</th>
+    <td
+      mat-cell
+      *matCellDef="let entry"
+      [style.color]="accuracyColor(entry.accuracyRate)"
+      class="accuracy-cell"
+    >
+      {{ entry.accuracyRate | percent : '1.0-0' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="correct">
+    <th mat-header-cell *matHeaderCellDef>Correct</th>
+    <td mat-cell *matCellDef="let entry" class="correct-cell">
+      {{ entry.correct }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="incorrect">
+    <th mat-header-cell *matHeaderCellDef>Wrong</th>
+    <td mat-cell *matCellDef="let entry" class="incorrect-cell">
+      {{ entry.incorrect }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="pending">
+    <th mat-header-cell *matHeaderCellDef>Pending</th>
+    <td mat-cell *matCellDef="let entry">{{ entry.pending }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="total">
+    <th mat-header-cell *matHeaderCellDef>Total</th>
+    <td mat-cell *matCellDef="let entry">{{ entry.total }}</td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+}

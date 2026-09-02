@@ -1,0 +1,45 @@
+h2 {
+  margin: 0 0 16px;
+}
+
+.state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 0;
+}
+
+.empty-state {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 16px;
+}
+
+.error-card {
+  background-color: #fdecea;
+  color: #611a15;
+}
+
+.leaderboard-table {
+  width: 100%;
+}
+
+.rank-icon {
+  color: #ff9800;
+}
+
+.source-cell {
+  font-weight: 500;
+}
+
+.accuracy-cell {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.correct-cell {
+  color: #4caf50;
+}
+
+.incorrect-cell {
+  color: #f44336;
+}
