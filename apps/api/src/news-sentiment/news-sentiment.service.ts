@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { SignalsService } from '../signals/signals.service';
 import {
@@ -24,12 +24,18 @@ export interface AssetSentiment {
 }
 
 @Injectable()
-export class NewsSentimentService {
+export class NewsSentimentService implements OnModuleInit {
   private readonly logger = new Logger(NewsSentimentService.name);
   private readonly finnhubToken = process.env['FINNHUB_API_KEY'] ?? '';
   private sentimentCache: Map<string, AssetSentiment> = new Map();
 
   constructor(private readonly signalsService: SignalsService) {}
+
+  async onModuleInit(): Promise<void> {
+    if (this.finnhubToken) {
+      setTimeout(() => this.runSentimentAnalysis(), 5000);
+    }
+  }
 
   async fetchHeadlines(symbol: string): Promise<NewsHeadline[]> {
     if (!this.finnhubToken) {
