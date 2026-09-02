@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -23,13 +23,15 @@ import { SignalService, AssetSentiment } from '../../services/signal.service';
   templateUrl: './news-panel.html',
   styleUrl: './news-panel.scss',
 })
-export class NewsPanelComponent implements OnInit {
+export class NewsPanelComponent implements OnInit, OnDestroy {
   private readonly signalService = inject(SignalService);
 
   sentiments: AssetSentiment[] = [];
   loading = true;
   refreshing = false;
   error = '';
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryCount = 0;
 
   ngOnInit(): void {
     this.loadData();
@@ -40,9 +42,18 @@ export class NewsPanelComponent implements OnInit {
     this.loadData();
   }
 
+  ngOnDestroy(): void {
+    if (this.retryTimer) clearTimeout(this.retryTimer);
+  }
+
   private loadData(): void {
     this.signalService.getNewsSentiment().subscribe({
       next: (data) => {
+        if (data.length === 0 && this.retryCount < 3) {
+          this.retryCount++;
+          this.retryTimer = setTimeout(() => this.loadData(), 3000);
+          return;
+        }
         this.sentiments = data;
         this.loading = false;
         this.refreshing = false;
