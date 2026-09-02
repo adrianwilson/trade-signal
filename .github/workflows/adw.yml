@@ -16,7 +16,7 @@ env:
 
 jobs:
   adw:
-    if: contains(github.event.comment.body, 'adw') && github.event.comment.user.login == github.repository_owner
+    if: contains(github.event.comment.body, 'adw')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
