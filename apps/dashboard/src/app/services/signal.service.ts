@@ -18,6 +18,13 @@ export interface AssetSentiment {
   headlines: NewsHeadline[];
 }
 
+export interface WatchlistItem {
+  id: string;
+  asset: string;
+  assetClass: string;
+  addedAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SignalService {
   private readonly http = inject(HttpClient);
@@ -53,6 +60,21 @@ export class SignalService {
 
   getSynthesis(): Observable<AggregatedSignal[]> {
     return this.http.get<AggregatedSignal[]>(`${this.baseUrl}/synthesis`);
+  }
+
+  getWatchlist(): Observable<WatchlistItem[]> {
+    return this.http.get<WatchlistItem[]>(`${this.baseUrl}/watchlist`);
+  }
+
+  addToWatchlist(asset: string, assetClass: string): Observable<WatchlistItem> {
+    return this.http.post<WatchlistItem>(`${this.baseUrl}/watchlist`, {
+      asset,
+      assetClass,
+    });
+  }
+
+  removeFromWatchlist(asset: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/watchlist/${asset}`);
   }
 
   getMarketQuotes(): Observable<

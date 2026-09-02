@@ -13,9 +13,11 @@ Most signal platforms are black boxes. Trade Signal shows the reasoning chain: e
 ## Phases
 
 ### Phase 1: Foundation (COMPLETE)
+
 The app skeleton is built. Angular Material dashboard with signal table, NestJS API with CRUD endpoints, shared types in `libs/signals`.
 
 **Delivered:**
+
 - Angular dashboard with toolbar, sidenav, signal table
 - NestJS API with in-memory signal store (6 seed signals)
 - Shared types: Signal, AggregatedSignal, AgentLogEntry, ManualSignalInput
@@ -24,9 +26,11 @@ The app skeleton is built. Angular Material dashboard with signal table, NestJS 
 ---
 
 ### Phase 2: Persistent Storage
+
 Replace in-memory arrays with a real database so signals survive server restarts.
 
 **Issues:**
+
 - Add PostgreSQL (or SQLite for dev) to the API
 - Create database schema for signals, agent logs, and assets
 - Migrate SignalsService from in-memory array to database
@@ -36,9 +40,11 @@ Replace in-memory arrays with a real database so signals survive server restarts
 ---
 
 ### Phase 3: Live Market Data
+
 Connect to real price feeds so the dashboard shows actual market data.
 
 **Issues:**
+
 - Integrate Alpha Vantage (free tier) or Yahoo Finance API
 - Create Market Data Agent service in the API
 - Fetch OHLCV data on a schedule (cron job via NestJS)
@@ -49,9 +55,11 @@ Connect to real price feeds so the dashboard shows actual market data.
 ---
 
 ### Phase 4: Technical Analysis Agent
+
 Calculate indicators from price history and generate signals automatically.
 
 **Issues:**
+
 - Implement RSI (Relative Strength Index) calculation
 - Implement MACD (Moving Average Convergence Divergence)
 - Implement moving averages (SMA, EMA)
@@ -63,9 +71,11 @@ Calculate indicators from price history and generate signals automatically.
 ---
 
 ### Phase 5: News Sentiment Agent
+
 Ingest news headlines and score sentiment per asset.
 
 **Issues:**
+
 - Integrate a news API (NewsAPI, Finnhub, or RSS feeds)
 - Create News Sentiment Agent service
 - Use LLM (Claude API) to score article sentiment (-1 to +1) per asset
@@ -77,9 +87,11 @@ Ingest news headlines and score sentiment per asset.
 ---
 
 ### Phase 6: Signal Synthesis Agent
+
 Aggregate signals from all agents into a final verdict with reasoning.
 
 **Issues:**
+
 - Create Signal Synthesis Agent that consumes signals from all other agents
 - Implement weighted confidence calculation based on agent agreement
 - Generate AggregatedSignal with reasoning chain explaining the verdict
@@ -91,9 +103,11 @@ Aggregate signals from all agents into a final verdict with reasoning.
 ---
 
 ### Phase 7: User Features
+
 Make the app personal -- watchlists, alerts, portfolio tracking.
 
 **Issues:**
+
 - Add user authentication (JWT or session-based)
 - Implement watchlist (save assets to monitor)
 - Implement alert system (notify on high-confidence signals via email or push)
@@ -104,9 +118,11 @@ Make the app personal -- watchlists, alerts, portfolio tracking.
 ---
 
 ### Phase 8: Trust & Transparency
+
 Prove the signals work. Track accuracy, calibrate confidence, backtest.
 
 **Issues:**
+
 - Track signal outcomes (was the BUY signal right after N days?)
 - Calculate historical accuracy per agent and per asset class
 - Add confidence calibration chart (does 80% confidence win 80%?)
@@ -117,9 +133,11 @@ Prove the signals work. Track accuracy, calibrate confidence, backtest.
 ---
 
 ### Phase 9: Multi-Asset Expansion
+
 Extend beyond equities to crypto, forex, and options.
 
 **Issues:**
+
 - Add crypto data source (CoinGecko API)
 - Add forex data source
 - Adapt technical analysis indicators for crypto/forex timeframes
@@ -129,9 +147,11 @@ Extend beyond equities to crypto, forex, and options.
 ---
 
 ### Phase 10: Real-Time
+
 Move from polling to real-time updates.
 
 **Issues:**
+
 - Add WebSocket support (NestJS gateway)
 - Stream signal updates to dashboard in real-time
 - Add live price ticker to toolbar
@@ -150,6 +170,7 @@ gh issue create --template feature.yml \
 ```
 
 Then process via the pipeline:
+
 ```bash
 # Local isolated
 ./scripts/sdlc.sh <issue-number>
@@ -161,6 +182,7 @@ Then process via the pipeline:
 ## Metrics
 
 Track pipeline performance in `app_docs/agentic_kpis.md`. Each phase should show:
+
 - Decreasing attempts (pipeline gets better at your codebase)
 - Increasing plan size (features get more complex)
 - Stable or increasing streak (consistent quality)

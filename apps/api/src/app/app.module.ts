@@ -12,6 +12,8 @@ import { NewsSentimentModule } from '../news-sentiment/news-sentiment.module';
 import { SynthesisModule } from '../synthesis/synthesis.module';
 import { AuthModule } from '../auth/auth.module';
 import { UserEntity } from '../auth/user.entity';
+import { WatchlistModule } from '../watchlist/watchlist.module';
+import { WatchlistEntity } from '../watchlist/watchlist.entity';
 
 @Module({
   imports: [
@@ -19,7 +21,7 @@ import { UserEntity } from '../auth/user.entity';
       type: 'better-sqlite3',
       database:
         process.env['NODE_ENV'] === 'test' ? ':memory:' : 'data/signals.sqlite',
-      entities: [SignalEntity, AssetPriceEntity, UserEntity],
+      entities: [SignalEntity, AssetPriceEntity, UserEntity, WatchlistEntity],
       synchronize: true,
     }),
     ScheduleModule.forRoot(),
@@ -29,6 +31,7 @@ import { UserEntity } from '../auth/user.entity';
     NewsSentimentModule,
     SynthesisModule,
     AuthModule,
+    WatchlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

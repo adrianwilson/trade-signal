@@ -1,0 +1,24 @@
+h2 {
+  margin: 0 0 16px;
+}
+
+.state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 0;
+}
+
+.empty-state {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 16px;
+}
+
+.error-card {
+  background-color: #fdecea;
+  color: #611a15;
+}
+
+.watchlist-table {
+  width: 100%;
+}

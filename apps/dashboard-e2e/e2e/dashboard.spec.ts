@@ -4,7 +4,7 @@ test.describe('Trading Signal Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await expect(
-      page.locator('h2', { hasText: 'Trading Signals' })
+      page.locator('h2', { hasText: 'Trading Signals' }),
     ).toBeVisible();
   });
 
@@ -36,7 +36,7 @@ test.describe('Trading Signal Dashboard', () => {
       const chip = chips.nth(i);
       const text = (await chip.innerText()).trim();
       const bgColor = await chip.evaluate(
-        (el) => getComputedStyle(el).backgroundColor
+        (el) => getComputedStyle(el).backgroundColor,
       );
 
       switch (text) {

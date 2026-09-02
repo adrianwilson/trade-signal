@@ -15,17 +15,21 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav mode="side" opened class="sidenav">
     <mat-nav-list>
+      <a mat-list-item routerLink="/synthesis" routerLinkActive="active">
+        <mat-icon matListItemIcon>hub</mat-icon>
+        <span matListItemTitle>Synthesis</span>
+      </a>
+      <a mat-list-item routerLink="/watchlist" routerLinkActive="active">
+        <mat-icon matListItemIcon>star</mat-icon>
+        <span matListItemTitle>Watchlist</span>
+      </a>
       <a mat-list-item routerLink="/signals" routerLinkActive="active">
         <mat-icon matListItemIcon>table_chart</mat-icon>
-        <span matListItemTitle>Signals</span>
+        <span matListItemTitle>Activity Log</span>
       </a>
       <a mat-list-item routerLink="/news" routerLinkActive="active">
         <mat-icon matListItemIcon>newspaper</mat-icon>
         <span matListItemTitle>News Sentiment</span>
-      </a>
-      <a mat-list-item routerLink="/synthesis" routerLinkActive="active">
-        <mat-icon matListItemIcon>hub</mat-icon>
-        <span matListItemTitle>Synthesis</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>

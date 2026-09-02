@@ -1,0 +1,69 @@
+<h2>Watchlist</h2>
+
+@if (loading()) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+} @else if (error()) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error() }}</mat-card-content>
+</mat-card>
+} @else if (watchlist.data.length === 0) {
+<div class="state-container empty-state">
+  Your watchlist is empty. Click the star icon on signals to add assets.
+</div>
+} @else {
+<table mat-table [dataSource]="watchlist" class="watchlist-table">
+  <ng-container matColumnDef="asset">
+    <th mat-header-cell *matHeaderCellDef>Asset</th>
+    <td mat-cell *matCellDef="let item">{{ item.asset }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="assetClass">
+    <th mat-header-cell *matHeaderCellDef>Class</th>
+    <td mat-cell *matCellDef="let item">{{ item.assetClass }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="direction">
+    <th mat-header-cell *matHeaderCellDef>Signal</th>
+    <td mat-cell *matCellDef="let item">
+      @if (item.synthesis) {
+      <mat-chip
+        [style.background-color]="directionColor(item.synthesis.direction)"
+        style="color: white"
+      >
+        {{ item.synthesis.direction }}
+      </mat-chip>
+      } @else { — }
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="confidence">
+    <th mat-header-cell *matHeaderCellDef>Confidence</th>
+    <td mat-cell *matCellDef="let item">
+      @if (item.synthesis) { {{ item.synthesis.confidence }}% } @else { — }
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="addedAt">
+    <th mat-header-cell *matHeaderCellDef>Added</th>
+    <td mat-cell *matCellDef="let item">{{ item.addedAt | date : 'short' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef></th>
+    <td mat-cell *matCellDef="let item">
+      <button
+        mat-icon-button
+        (click)="remove(item.asset)"
+        aria-label="Remove from watchlist"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+}
