@@ -1,6 +1,7 @@
 # Feature: Add Playwright E2E Test Infrastructure and Initial Tests
 
 ## Metadata
+
 - **issue_number:** 5
 - **adw_id:** ef37f991
 - **issue_json:** {"number":5,"title":"Add Playwright e2e test infrastructure and initial tests","state":"OPEN","labels":["enhancement"],"body":"Add Playwright to the Nx workspace, create dashboard-e2e project, write initial e2e tests, configure e2e to start both API and dashboard before running, add e2e step to /test command."}
@@ -12,6 +13,7 @@ Unit and integration tests validate code in isolation, but nothing verifies the 
 This is the final issue in ZTE Roadmap Phase Z1 (Validation Floor). After this, the pipeline's test gate covers unit tests, integration tests, coverage enforcement, and e2e tests.
 
 ## User Story
+
 As a developer
 I want e2e tests that verify the full application works end-to-end
 So that the pipeline catches integration and wiring bugs before merging
@@ -31,6 +33,7 @@ Use the `@nx/playwright` plugin to scaffold a `dashboard-e2e` project that:
 5. Updates the ZTE roadmap to mark the e2e item complete.
 
 ## Relevant Files
+
 Use these files to implement the feature:
 
 - `nx.json` — Workspace config; will gain `@nx/playwright` plugin registration after generator runs.
@@ -53,6 +56,7 @@ Use these files to implement the feature:
 - `apps/dashboard-e2e/.eslintrc.json` or `apps/dashboard-e2e/eslint.config.mjs` — Lint config (created by generator).
 
 ## Implementation Plan
+
 ### Phase 1: Foundation
 
 Install `@nx/playwright` and run the Nx Playwright generator to scaffold the `dashboard-e2e` project. This creates the project structure, config files, and Nx target wiring. Install Playwright browsers (chromium at minimum) for headless testing.
@@ -66,6 +70,7 @@ Configure `playwright.config.ts` with two `webServer` entries (API on port 3000,
 Update `.claude/commands/test.md` to add an e2e test step. Update `docs/zte-roadmap.md` to mark the e2e item complete. Run the full validation suite to confirm zero regressions and that e2e tests pass in headless mode.
 
 ## Step by Step Tasks
+
 IMPORTANT: Execute every step in order, top to bottom.
 
 ### 1. Install @nx/playwright and scaffold the e2e project
@@ -128,6 +133,7 @@ IMPORTANT: Execute every step in order, top to bottom.
 - Run every command in `Validation Commands` below and confirm all pass with zero regressions.
 
 ## Testing Strategy
+
 ### Unit Tests
 
 No new unit tests are required. This feature adds e2e tests, not unit-testable logic. Existing unit tests must continue to pass with coverage enforcement.
@@ -166,6 +172,7 @@ This feature IS the e2e test infrastructure. The tests themselves are:
 - All e2e tests pass in headless mode.
 
 ## Validation Commands
+
 Execute every command to validate the feature works correctly with zero regressions.
 
 - `npx nx run dashboard-e2e:e2e --skip-nx-cache` - Run e2e tests; must start both servers and pass all test cases in headless mode

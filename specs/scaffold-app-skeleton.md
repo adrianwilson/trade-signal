@@ -1,20 +1,25 @@
 # Feature: Scaffold App Skeleton
 
 ## Feature Description
+
 Wire up the full-stack skeleton so the Angular dashboard and NestJS API are functional and connected. This includes: installing Angular Material and building a shell layout (toolbar, sidenav), creating a signals table page with routing, building NestJS CRUD endpoints for signals using the shared `@org/signals` types, connecting the frontend to the backend via an Angular `HttpClient` service, and enabling CORS so the two dev servers can communicate. After this feature ships, the app has a working end-to-end loop: the dashboard fetches and displays signals from the API.
 
 ## User Story
+
 As a trader
 I want to see a dashboard with a table of trading signals fetched from the API
 So that I can view buy/sell/hold recommendations across asset classes in one place
 
 ## Problem Statement
+
 The repo is scaffolded but empty. The Angular app shows the Nx welcome page, the NestJS API returns "Hello API", the shared types exist but nothing consumes them, and there is no routing, layout, or data flow. Nothing works end-to-end.
 
 ## Solution Statement
+
 Build the minimum viable skeleton in three layers: (1) a NestJS `SignalsModule` with an in-memory store and CRUD controller, (2) an Angular Material shell with toolbar + sidenav + signals table page, and (3) an `HttpClient`-based `SignalService` connecting the two. CORS on the API allows the Angular dev server (port 4200) to call the API (port 3000). The shared `@org/signals` types are used on both sides to keep the contract in sync.
 
 ## Relevant Files
+
 Use these files to implement the feature:
 
 - `libs/signals/src/lib/signals.ts` -- shared types (`Signal`, `AggregatedSignal`, `ManualSignalInput`, etc.) consumed by both API and dashboard
@@ -36,6 +41,7 @@ Use these files to implement the feature:
 - `tsconfig.base.json` -- root TS config
 
 ### New Files
+
 - `apps/api/src/signals/signals.module.ts` -- NestJS module for signal endpoints
 - `apps/api/src/signals/signals.controller.ts` -- REST controller: GET /api/signals, GET /api/signals/:id, POST /api/signals
 - `apps/api/src/signals/signals.service.ts` -- in-memory signal store with CRUD operations
@@ -52,35 +58,45 @@ Use these files to implement the feature:
 - `apps/dashboard/src/app/services/signal.service.spec.ts` -- service tests
 
 ## Implementation Plan
+
 ### Phase 1: Foundation
+
 Install Angular Material and Angular CDK as dependencies. Configure the Material theme in `styles.scss`, add font links to `index.html`, and register `provideAnimationsAsync` and `provideHttpClient` in `app.config.ts`. Enable CORS in the NestJS `main.ts` bootstrap.
 
 ### Phase 2: Core Implementation
+
 **API side:** Create a `SignalsModule` with a `SignalsService` (in-memory array of `Signal` objects seeded with sample data) and a `SignalsController` exposing `GET /api/signals`, `GET /api/signals/:id`, and `POST /api/signals`. Import `@org/signals` types for the data contracts. Register the module in `AppModule`.
 
 **Dashboard side:** Create a `LayoutComponent` with Material `mat-toolbar` and `mat-sidenav-container`. Create a `SignalTableComponent` that displays signals in a `mat-table` with columns for asset, direction, confidence, source, and timestamp. Create a `SignalService` that uses `HttpClient` to call the API. Wire up routing: `/` redirects to `/signals`, `/signals` loads the table inside the layout.
 
 ### Phase 3: Integration
+
 Replace the Nx welcome component with the new layout shell in `app.ts`. Update the existing `app.spec.ts` to reflect the new root component. Verify the full loop: `npx nx serve api` starts the API with seed data, `npx nx serve dashboard` starts the frontend, navigating to `http://localhost:4200/signals` shows the table populated from the API.
 
 ## Step by Step Tasks
+
 IMPORTANT: Execute every step in order, top to bottom.
 
 ### Step 1: Install Angular Material
+
 - Run `npm install @angular/material @angular/cdk @angular/animations` at the workspace root
 - Verify the packages appear in `package.json` dependencies
 
 ### Step 2: Configure Angular Material theme and fonts
+
 - Edit `apps/dashboard/src/styles.scss` to import a Material prebuilt theme (e.g., `@angular/material/prebuilt-themes/azure-blue.css`) and add base body styles (margin: 0, font-family: Roboto)
 - Edit `apps/dashboard/src/index.html` to add Google Fonts link for Roboto and Material Icons
 
 ### Step 3: Update Angular app config
+
 - Edit `apps/dashboard/src/app/app.config.ts` to add `provideHttpClient()` from `@angular/common/http` and `provideAnimationsAsync()` from `@angular/platform-browser/animations/async`
 
 ### Step 4: Enable CORS on the NestJS API
+
 - Edit `apps/api/src/main.ts` to call `app.enableCors({ origin: 'http://localhost:4200' })` before `app.listen()`
 
 ### Step 5: Create the NestJS SignalsService
+
 - Create `apps/api/src/signals/signals.service.ts`
 - Implement an `@Injectable()` class with an in-memory `Signal[]` array
 - Seed it with 5-6 sample signals across different asset classes (equity, crypto, forex)
@@ -88,6 +104,7 @@ IMPORTANT: Execute every step in order, top to bottom.
 - Import types from `@org/signals`
 
 ### Step 6: Create the NestJS SignalsController
+
 - Create `apps/api/src/signals/signals.controller.ts`
 - `@Controller('signals')` with three endpoints:
   - `@Get()` -> `findAll()` returns all signals
@@ -96,14 +113,17 @@ IMPORTANT: Execute every step in order, top to bottom.
 - Import types from `@org/signals`
 
 ### Step 7: Create the NestJS SignalsModule and register it
+
 - Create `apps/api/src/signals/signals.module.ts` with `SignalsController` and `SignalsService`
 - Edit `apps/api/src/app/app.module.ts` to import `SignalsModule`
 
 ### Step 8: Write API unit tests
+
 - Create `apps/api/src/signals/signals.service.spec.ts` -- test findAll returns seed data, findOne returns correct signal, create adds a signal
 - Create `apps/api/src/signals/signals.controller.spec.ts` -- test controller methods delegate to service, test NotFoundException on missing id
 
 ### Step 9: Create the Angular SignalService
+
 - Create `apps/dashboard/src/app/services/signal.service.ts`
 - `@Injectable({ providedIn: 'root' })` class using `HttpClient`
 - Methods: `getSignals(): Observable<Signal[]>`, `getSignal(id: string): Observable<Signal>`, `createSignal(input: ManualSignalInput): Observable<Signal>`
@@ -111,11 +131,13 @@ IMPORTANT: Execute every step in order, top to bottom.
 - Import types from `@org/signals`
 
 ### Step 10: Create the Layout component
+
 - Create `apps/dashboard/src/app/layout/layout.ts` -- standalone component importing `MatToolbarModule`, `MatSidenavModule`, `MatListModule`, `RouterModule`
 - Create `apps/dashboard/src/app/layout/layout.html` -- toolbar with app title, sidenav with nav links, `<router-outlet>` in the content area
 - Create `apps/dashboard/src/app/layout/layout.scss` -- full-height layout, sidenav width
 
 ### Step 11: Create the SignalTable component
+
 - Create `apps/dashboard/src/app/signals/signal-table/signal-table.ts` -- standalone component importing `MatTableModule`, `MatChipsModule`, `DatePipe`
 - Inject `SignalService`, fetch signals on init, assign to `MatTableDataSource`
 - Columns: asset, assetClass, direction, confidence, source, timestamp
@@ -123,26 +145,32 @@ IMPORTANT: Execute every step in order, top to bottom.
 - Create `apps/dashboard/src/app/signals/signal-table/signal-table.scss` -- table styling
 
 ### Step 12: Wire up routing
+
 - Edit `apps/dashboard/src/app/app.routes.ts`:
   - `''` path redirects to `/signals`
   - `''` path with `LayoutComponent` as parent, children: `{ path: 'signals', component: SignalTableComponent }`
 
 ### Step 13: Update root App component
+
 - Edit `apps/dashboard/src/app/app.ts` to remove `NxWelcome` import, keep only `RouterModule`
 - Delete `apps/dashboard/src/app/nx-welcome.ts` (no longer needed)
 - Update template to just `<router-outlet />`
 
 ### Step 14: Write dashboard unit tests
+
 - Create `apps/dashboard/src/app/services/signal.service.spec.ts` -- test HTTP calls with `HttpClientTestingModule`
 - Create `apps/dashboard/src/app/signals/signal-table/signal-table.spec.ts` -- test component renders table with mock data
 - Update `apps/dashboard/src/app/app.spec.ts` -- remove NxWelcome references, test that App renders router-outlet
 
 ### Step 15: Validate
+
 - Run all validation commands listed below
 - Verify zero build errors, zero test failures, zero lint errors
 
 ## Testing Strategy
+
 ### Unit Tests
+
 - **SignalsService (API):** findAll returns seeded signals, findOne by valid/invalid ID, create generates ID and timestamp
 - **SignalsController (API):** delegates to service, throws NotFoundException for missing ID
 - **SignalService (Dashboard):** HTTP GET/POST calls hit correct URLs with `HttpClientTestingModule`
@@ -150,9 +178,11 @@ IMPORTANT: Execute every step in order, top to bottom.
 - **App component:** renders a router-outlet
 
 ### Integration Tests
+
 - Manual verification: run both `npx nx serve api` and `npx nx serve dashboard`, navigate to `http://localhost:4200/signals`, confirm the table shows seed data from the API
 
 ### Edge Cases
+
 - API returns empty signals array -- table should show empty state or no rows
 - Signal ID not found -- API returns 404
 - POST with missing fields -- NestJS validation (future enhancement, not in this scaffold)
@@ -160,6 +190,7 @@ IMPORTANT: Execute every step in order, top to bottom.
 - Dashboard loaded before API is ready -- HttpClient error handling (future enhancement)
 
 ## Acceptance Criteria
+
 - `npx nx serve dashboard` starts the Angular app on port 4200 with a Material toolbar, sidenav, and signals table page
 - `npx nx serve api` starts the NestJS API on port 3000 with CORS enabled
 - `GET http://localhost:3000/api/signals` returns a JSON array of seeded Signal objects matching the `@org/signals` type
@@ -173,6 +204,7 @@ IMPORTANT: Execute every step in order, top to bottom.
 - `npx nx run-many -t lint` succeeds with zero errors
 
 ## Validation Commands
+
 Execute every command to validate the feature works correctly with zero regressions.
 
 - `npx nx run-many -t build` - Build all projects (dashboard, api, signals) to validate zero compilation errors
@@ -180,6 +212,7 @@ Execute every command to validate the feature works correctly with zero regressi
 - `npx nx run-many -t lint` - Lint all projects to validate code quality and consistency
 
 ## Notes
+
 - **In-memory store:** The API uses a plain array for signal storage. This is intentional for the scaffold -- a real database will be added later.
 - **No validation pipes:** NestJS request validation (class-validator, DTOs) is deferred to a follow-up. The POST endpoint accepts raw JSON for now.
 - **Hardcoded API URL:** The dashboard `SignalService` uses `http://localhost:3000/api` directly. A proxy config or environment variable system should be added later.
