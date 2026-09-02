@@ -18,6 +18,28 @@ export interface AssetSentiment {
   headlines: NewsHeadline[];
 }
 
+export interface CalibrationBucket {
+  bucket: string;
+  range: [number, number];
+  expectedAccuracy: number;
+  actualAccuracy: number;
+  total: number;
+  correct: number;
+}
+
+export interface RetrospectiveSummary {
+  totalSignals: number;
+  evaluatedSignals: number;
+  correctSignals: number;
+  overallAccuracy: number;
+  hypotheticalTrades: number;
+  hypotheticalPnlPercent: number;
+  byDirection: {
+    BUY: { count: number; correct: number; avgReturn: number };
+    SELL: { count: number; correct: number; avgReturn: number };
+  };
+}
+
 export interface LeaderboardEntry {
   rank: number;
   source: string;
@@ -106,6 +128,18 @@ export class SignalService {
   analyzeNewsSentiment(symbol: string): Observable<AssetSentiment> {
     return this.http.get<AssetSentiment>(
       `${this.baseUrl}/news-sentiment/${symbol}`,
+    );
+  }
+
+  getCalibration(): Observable<CalibrationBucket[]> {
+    return this.http.get<CalibrationBucket[]>(
+      `${this.baseUrl}/outcomes/calibration`,
+    );
+  }
+
+  getRetrospective(): Observable<RetrospectiveSummary> {
+    return this.http.get<RetrospectiveSummary>(
+      `${this.baseUrl}/outcomes/retrospective`,
     );
   }
 
