@@ -6,7 +6,10 @@ export class NewsSentimentController {
   constructor(private readonly newsSentimentService: NewsSentimentService) {}
 
   @Get()
-  getAll() {
+  async getAll() {
+    const cached = this.newsSentimentService.getAllSentiment();
+    if (cached.length > 0) return cached;
+    await this.newsSentimentService.runSentimentAnalysis();
     return this.newsSentimentService.getAllSentiment();
   }
 
