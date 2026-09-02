@@ -18,6 +18,16 @@ export interface AssetSentiment {
   headlines: NewsHeadline[];
 }
 
+export interface AlertItem {
+  id: string;
+  asset: string;
+  direction: string;
+  confidence: number;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface WatchlistItem {
   id: string;
   asset: string;
@@ -75,6 +85,26 @@ export class SignalService {
 
   removeFromWatchlist(asset: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/watchlist/${asset}`);
+  }
+
+  getAlerts(): Observable<AlertItem[]> {
+    return this.http.get<AlertItem[]>(`${this.baseUrl}/alerts`);
+  }
+
+  getUnreadAlertCount(): Observable<number> {
+    return this.http.get<number>(`${this.baseUrl}/alerts/unread-count`);
+  }
+
+  markAlertAsRead(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/alerts/${id}/read`, {});
+  }
+
+  markAllAlertsAsRead(): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/alerts/read-all`, {});
+  }
+
+  generateAlerts(): Observable<AlertItem[]> {
+    return this.http.get<AlertItem[]>(`${this.baseUrl}/alerts/generate`);
   }
 
   getMarketQuotes(): Observable<

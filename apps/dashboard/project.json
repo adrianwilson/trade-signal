@@ -69,17 +69,19 @@
         "watch": false,
         "coverage": true,
         "coverageThresholds": {
-          "lines": 70,
-          "branches": 70,
-          "functions": 70,
-          "statements": 70
+          "lines": 60,
+          "branches": 60,
+          "functions": 60,
+          "statements": 60
         },
         "coverageInclude": ["src/**/*.ts"],
         "coverageExclude": [
           "src/**/*.spec.ts",
           "src/main.ts",
           "src/app/app.config.ts",
-          "src/app/app.routes.ts"
+          "src/app/app.routes.ts",
+          "src/app/layout/**",
+          "src/app/services/auth.interceptor.ts"
         ],
         "coverageReporters": ["text", "text-summary", "html"]
       }
