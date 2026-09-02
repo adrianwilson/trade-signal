@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Signal, ManualSignalInput } from '@org/signals';
+import { Signal, ManualSignalInput, AggregatedSignal } from '@org/signals';
 
 export interface NewsHeadline {
   title: string;
@@ -49,6 +49,10 @@ export class SignalService {
     return this.http.get<AssetSentiment>(
       `${this.baseUrl}/news-sentiment/${symbol}`,
     );
+  }
+
+  getSynthesis(): Observable<AggregatedSignal[]> {
+    return this.http.get<AggregatedSignal[]>(`${this.baseUrl}/synthesis`);
   }
 
   getMarketQuotes(): Observable<

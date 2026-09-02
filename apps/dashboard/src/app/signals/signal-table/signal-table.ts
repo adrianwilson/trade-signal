@@ -46,7 +46,8 @@ export class SignalTableComponent implements OnInit {
     'source',
     'timestamp',
   ];
-  signals = new MatTableDataSource<TradeSignal>([]);
+  signals: MatTableDataSource<TradeSignal> =
+    new MatTableDataSource<TradeSignal>([]);
   quotes = signal<
     Record<string, { price: number; changePercent: number; updatedAt?: string }>
   >({});

@@ -1,0 +1,83 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
+import { SynthesisViewComponent } from './synthesis-view';
+import type { AggregatedSignal } from '@org/signals';
+
+describe('SynthesisViewComponent', () => {
+  let component: SynthesisViewComponent;
+  let mockSignalService: { getSynthesis: ReturnType<typeof vi.fn> };
+
+  const mockSyntheses: AggregatedSignal[] = [
+    {
+      asset: 'AAPL',
+      assetClass: 'equity',
+      price: 0,
+      priceChange: 0,
+      direction: 'BUY',
+      confidence: 75,
+      signals: [],
+      contributions: [
+        { source: 'rsi', direction: 'BUY', confidence: 80 },
+        { source: 'macd', direction: 'BUY', confidence: 70 },
+      ],
+      agreements: ['RSI and MACD agree: BUY'],
+      disagreements: [],
+      reasoningChain: 'AAPL: BUY with 75% confidence based on 2 agents.',
+      lastUpdated: '2026-09-02T10:00:00Z',
+    },
+  ];
+
+  beforeEach(() => {
+    mockSignalService = {
+      getSynthesis: vi.fn().mockReturnValue(of(mockSyntheses)),
+    };
+
+    component = Object.create(SynthesisViewComponent.prototype);
+    component.syntheses = signal<AggregatedSignal[]>([]);
+    component.loading = signal(true);
+    component.refreshing = signal(false);
+    component.error = signal('');
+    Object.assign(component, { signalService: mockSignalService });
+  });
+
+  describe('ngOnInit', () => {
+    it('should load synthesis data', () => {
+      component.ngOnInit();
+      expect(component.loading()).toBe(false);
+      expect(component.syntheses().length).toBe(1);
+      expect(component.syntheses()[0].asset).toBe('AAPL');
+    });
+
+    it('should handle error', () => {
+      mockSignalService.getSynthesis.mockReturnValue(
+        throwError(() => new Error('fail')),
+      );
+      component.ngOnInit();
+      expect(component.loading()).toBe(false);
+      expect(component.error()).toContain('Failed to load');
+    });
+  });
+
+  describe('refresh', () => {
+    it('should reload data', () => {
+      component.refresh();
+      expect(component.refreshing()).toBe(false);
+      expect(component.syntheses().length).toBe(1);
+    });
+  });
+
+  describe('directionColor', () => {
+    it('should return green for BUY', () => {
+      expect(component.directionColor('BUY')).toBe('#4caf50');
+    });
+
+    it('should return red for SELL', () => {
+      expect(component.directionColor('SELL')).toBe('#f44336');
+    });
+
+    it('should return orange for HOLD', () => {
+      expect(component.directionColor('HOLD')).toBe('#ff9800');
+    });
+  });
+});
