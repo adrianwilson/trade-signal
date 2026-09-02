@@ -18,6 +18,8 @@ import { AlertsModule } from '../alerts/alerts.module';
 import { AlertEntity } from '../alerts/alert.entity';
 import { PortfolioModule } from '../portfolio/portfolio.module';
 import { PortfolioEntity } from '../portfolio/portfolio.entity';
+import { OutcomesModule } from '../outcomes/outcomes.module';
+import { OutcomeEntity } from '../outcomes/outcome.entity';
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { PortfolioEntity } from '../portfolio/portfolio.entity';
         WatchlistEntity,
         AlertEntity,
         PortfolioEntity,
+        OutcomeEntity,
       ],
       synchronize: true,
     }),
@@ -45,6 +48,7 @@ import { PortfolioEntity } from '../portfolio/portfolio.entity';
     WatchlistModule,
     AlertsModule,
     PortfolioModule,
+    OutcomesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

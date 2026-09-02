@@ -6,6 +6,7 @@ import { SynthesisViewComponent } from './signals/synthesis-view/synthesis-view'
 import { LoginComponent } from './auth/login/login';
 import { WatchlistComponent } from './signals/watchlist/watchlist';
 import { PortfolioComponent } from './signals/portfolio/portfolio';
+import { LeaderboardComponent } from './signals/leaderboard/leaderboard';
 
 export const appRoutes: Route[] = [
   { path: 'login', component: LoginComponent },
@@ -16,6 +17,7 @@ export const appRoutes: Route[] = [
       { path: 'synthesis', component: SynthesisViewComponent },
       { path: 'watchlist', component: WatchlistComponent },
       { path: 'portfolio', component: PortfolioComponent },
+      { path: 'leaderboard', component: LeaderboardComponent },
       { path: 'signals', component: SignalTableComponent },
       { path: 'news', component: NewsPanelComponent },
       { path: '', redirectTo: 'synthesis', pathMatch: 'full' },

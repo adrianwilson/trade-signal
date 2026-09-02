@@ -18,6 +18,16 @@ export interface AssetSentiment {
   headlines: NewsHeadline[];
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  source: string;
+  total: number;
+  correct: number;
+  incorrect: number;
+  pending: number;
+  accuracyRate: number;
+}
+
 export interface AlertItem {
   id: string;
   asset: string;
@@ -96,6 +106,12 @@ export class SignalService {
   analyzeNewsSentiment(symbol: string): Observable<AssetSentiment> {
     return this.http.get<AssetSentiment>(
       `${this.baseUrl}/news-sentiment/${symbol}`,
+    );
+  }
+
+  getLeaderboard(): Observable<LeaderboardEntry[]> {
+    return this.http.get<LeaderboardEntry[]>(
+      `${this.baseUrl}/outcomes/leaderboard`,
     );
   }
 
