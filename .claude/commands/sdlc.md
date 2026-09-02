@@ -44,7 +44,18 @@ Execute each phase below in order. Each phase is one agent, one purpose. Between
   - Repeat up to 3 times
 - Commit any test fixes
 
-## Phase 6: Review
+## Phase 6: UI Verification
+
+- Run `/prepare_app` to ensure dashboard and API are running
+- Run `/verify_ui` with the issue number, ADW ID, and spec file
+- This uses the `/browse` gstack skill to visually verify the running application
+- If UI issues are found:
+  - Fix the rendering/data issues
+  - Re-run `/verify_ui` to verify (up to 2 cycles)
+- Commit any UI fixes
+- Skip this phase if the issue has no UI changes (API-only, chore, etc.)
+
+## Phase 7: Review
 
 - Run `/review` with the ADW ID and spec file
 - If blocker issues are found:
@@ -53,18 +64,18 @@ Execute each phase below in order. Each phase is one agent, one purpose. Between
   - Re-run `/review` to verify (up to 2 cycles)
 - Commit any review fixes
 
-## Phase 7: Document
+## Phase 8: Document
 
 - Run `/document` with the ADW ID and spec file
 - Commit the documentation
 
-## Phase 8: Finalize
+## Phase 9: Finalize
 
 - Run `/finalize` with the spec file path to transform the build plan into a living design anchor
 - Strips execution details (tasks, phases), keeps design decisions, architecture, acceptance criteria
 - Commit the finalized spec
 
-## Phase 9: Ship
+## Phase 10: Ship
 
 - Run `/pull_request` to create a PR linking the spec, issue, and ADW ID
 
@@ -75,6 +86,7 @@ After all phases complete, summarize:
 - Branch name
 - Spec file path
 - Test results (pass/fail)
+- UI verification results (pass/fail/skipped, any findings)
 - Review results (pass/fail, any issues)
 - Documentation file path
 - PR URL
