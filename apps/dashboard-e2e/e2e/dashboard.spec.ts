@@ -1,20 +1,35 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Trading Signal Dashboard', () => {
-  test.beforeEach(async ({ page }) => {
+test.describe('Dashboard - Synthesis (Landing Page)', () => {
+  test('should load synthesis view as default', async ({ page }) => {
     await page.goto('/');
     await expect(
+      page.locator('h2', { hasText: 'Signal Synthesis' }),
+    ).toBeVisible({ timeout: 15000 });
+  });
+
+  test('should display synthesis cards with direction chips', async ({
+    page,
+  }) => {
+    await page.goto('/synthesis');
+    await expect(
+      page.locator('h2', { hasText: 'Signal Synthesis' }),
+    ).toBeVisible({ timeout: 15000 });
+    const chips = page.locator('mat-chip');
+    await expect(chips.first()).toBeVisible({ timeout: 15000 });
+  });
+});
+
+test.describe('Dashboard - Activity Log', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/signals');
+    await expect(
       page.locator('h2', { hasText: 'Trading Signals' }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
   });
 
-  test('should load the dashboard', async ({ page }) => {
+  test('should load the signal table', async ({ page }) => {
     await expect(page).toHaveTitle(/dashboard/i);
-  });
-
-  test('should display the signal table heading', async ({ page }) => {
-    const heading = page.locator('h2', { hasText: 'Trading Signals' });
-    await expect(heading).toBeVisible();
   });
 
   test('should display at least 5 signal rows', async ({ page }) => {
