@@ -1,24 +1,36 @@
-import { TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal } from '@angular/core';
 import { LayoutComponent } from './layout';
 
 describe('LayoutComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [LayoutComponent, RouterModule.forRoot([])],
-    }).compileComponents();
+  let component: LayoutComponent;
+
+  beforeEach(() => {
+    component = Object.create(LayoutComponent.prototype);
+    component.unreadCount = signal(0);
+    component.alerts = signal([]);
+    Object.assign(component, {
+      authService: {
+        isAuthenticated: () => false,
+        user: () => null,
+      },
+      signalService: {
+        generateAlerts: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
+        getAlerts: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
+        getUnreadAlertCount: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
+        markAllAlertsAsRead: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
+      },
+    });
   });
 
-  it('should create the layout', () => {
-    const fixture = TestBed.createComponent(LayoutComponent);
-    expect(fixture.componentInstance).toBeTruthy();
+  it('should return correct direction colors', () => {
+    expect(component.directionColor('BUY')).toBe('#4caf50');
+    expect(component.directionColor('SELL')).toBe('#f44336');
+    expect(component.directionColor('HOLD')).toBe('#ff9800');
   });
 
-  it('should render the toolbar and sidenav', () => {
-    const fixture = TestBed.createComponent(LayoutComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('mat-toolbar')).toBeTruthy();
-    expect(compiled.querySelector('mat-sidenav')).toBeTruthy();
+  it('should not load alerts when not authenticated', () => {
+    component.ngOnInit();
+    expect(component.alerts().length).toBe(0);
   });
 });

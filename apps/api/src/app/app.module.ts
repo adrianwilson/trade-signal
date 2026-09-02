@@ -14,6 +14,8 @@ import { AuthModule } from '../auth/auth.module';
 import { UserEntity } from '../auth/user.entity';
 import { WatchlistModule } from '../watchlist/watchlist.module';
 import { WatchlistEntity } from '../watchlist/watchlist.entity';
+import { AlertsModule } from '../alerts/alerts.module';
+import { AlertEntity } from '../alerts/alert.entity';
 import { PortfolioModule } from '../portfolio/portfolio.module';
 import { PortfolioEntity } from '../portfolio/portfolio.entity';
 
@@ -28,6 +30,7 @@ import { PortfolioEntity } from '../portfolio/portfolio.entity';
         AssetPriceEntity,
         UserEntity,
         WatchlistEntity,
+        AlertEntity,
         PortfolioEntity,
       ],
       synchronize: true,
@@ -40,6 +43,7 @@ import { PortfolioEntity } from '../portfolio/portfolio.entity';
     SynthesisModule,
     AuthModule,
     WatchlistModule,
+    AlertsModule,
     PortfolioModule,
   ],
   controllers: [AppController],
