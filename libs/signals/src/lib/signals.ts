@@ -45,6 +45,8 @@ export interface AggregatedSignal {
   agreements: string[]; // e.g., ["RSI and MACD agree: BUY"]
   disagreements: string[]; // e.g., ["RSI says BUY, news says SELL"]
   reasoningChain: string; // human-readable synthesis explanation
+  conviction: number; // 0-100 conviction score
+  convictionLabel: 'strong' | 'moderate' | 'weak' | 'late';
   lastUpdated: string;
 }
 
