@@ -29,11 +29,11 @@ describe('LoginComponent', () => {
     mockRouter = { navigate: vi.fn() };
 
     component = Object.create(LoginComponent.prototype);
-    component.email = 'test@test.com';
-    component.password = 'password';
+    component.email = signal('test@test.com');
+    component.password = signal('password');
     component.error = signal('');
     component.loading = signal(false);
-    component.activeTab = 0;
+    component.activeTab = signal(0);
     Object.assign(component, {
       authService: mockAuthService,
       router: mockRouter,
@@ -47,11 +47,11 @@ describe('LoginComponent', () => {
         'test@test.com',
         'password',
       );
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/signals']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/synthesis']);
     });
 
     it('should call register when activeTab is 1', () => {
-      component.activeTab = 1;
+      component.activeTab.set(1);
       component.submit();
       expect(mockAuthService.register).toHaveBeenCalledWith(
         'test@test.com',

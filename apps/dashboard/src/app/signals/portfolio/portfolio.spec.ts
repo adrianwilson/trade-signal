@@ -40,9 +40,9 @@ describe('PortfolioComponent', () => {
     component.loading = signal(true);
     component.error = signal('');
     component.showAddForm = signal(false);
-    component.newAsset = '';
-    component.newQuantity = 0;
-    component.newAvgPrice = 0;
+    component.newAsset = signal('');
+    component.newQuantity = signal(0);
+    component.newAvgPrice = signal(0);
     Object.assign(component, {
       signalService: mockSignalService,
       authService: { isAuthenticated: computed(() => !!authToken()) },
