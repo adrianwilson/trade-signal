@@ -12,6 +12,21 @@ h2 {
 .empty-state {
   color: rgba(0, 0, 0, 0.54);
   font-size: 16px;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: rgba(0, 0, 0, 0.2);
+}
+
+.login-cta {
+  background-color: var(--ts-primary) !important;
+  color: white !important;
 }
 
 .error-card {

@@ -58,10 +58,14 @@ Execute each phase below in order. Each phase is one agent, one purpose. Between
 ## Phase 7: UX Review
 
 - Run `/design-review` against the running application
-- This uses the `/browse` gstack skill to audit visual quality: spacing, hierarchy, consistency, color, typography, and AI slop patterns
+- This uses the `/browse` gstack skill to audit visual quality AND component usability:
+  - **Component inventory:** every component on affected pages inventoried for visibility, data loading, and interactivity
+  - **Visual quality:** spacing, hierarchy, consistency, color, typography, AI slop patterns
+  - **Usability:** buttons respond, navigation works, forms are functional, dialogs open/close
+  - **State coverage:** loading, loaded, empty, error, and auth states all handled
 - Focus on pages affected by this issue, but flag regressions on other pages too
 - If issues are found:
-  - Fix styling/layout/UX issues
+  - Fix styling/layout/UX/component issues
   - Re-run `/design-review` to verify (up to 2 cycles)
 - Commit any UX fixes
 - Skip this phase if the issue has no UI changes (API-only, chore, etc.)
@@ -98,8 +102,8 @@ After all phases complete, summarize:
 - Branch name
 - Spec file path
 - Test results (pass/fail)
-- UI verification results (pass/fail/skipped, any findings)
-- UX review results (pass/fail/skipped, any findings)
+- UI verification results (pass/fail/skipped, component inventory count, any findings)
+- UX review results (pass/fail/skipped, visual + usability findings)
 - Review results (pass/fail, any issues)
 - Documentation file path
 - PR URL

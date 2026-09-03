@@ -1,8 +1,24 @@
 @use '@angular/material' as mat;
 
+:root {
+  --ts-primary: #1b5e20;
+  --ts-primary-light: #2e7d32;
+  --ts-primary-dark: #0d3311;
+  --ts-accent: #ff9800;
+  --ts-bg: #fafafa;
+  --ts-surface: #ffffff;
+  --ts-text: #212121;
+  --ts-text-secondary: rgba(0, 0, 0, 0.54);
+  --ts-buy: #4caf50;
+  --ts-sell: #f44336;
+  --ts-hold: #ff9800;
+}
+
 html,
 body {
   height: 100%;
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--ts-bg);
+  color: var(--ts-text);
 }

@@ -122,7 +122,7 @@ export class SynthesisService implements OnModuleInit {
     return signals.map((s) => ({
       source: s.source,
       direction: s.direction,
-      confidence: s.confidence,
+      confidence: Math.min(s.confidence, 100),
       reasoning: s.reasoning,
     }));
   }

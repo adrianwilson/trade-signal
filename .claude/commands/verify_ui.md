@@ -1,6 +1,6 @@
 # UI Verification
 
-Visually verify the running application using the `/browse` skill to catch rendering issues, broken layouts, and missing data that unit tests can't detect.
+Visually verify the running application using the `/browse` skill to catch rendering issues, broken layouts, missing data, and component usability problems that unit tests can't detect.
 
 ## Variables
 
@@ -21,20 +21,50 @@ spec_file: $3
 - Identify which routes/pages were affected
 - Determine what should be visible to the user
 
-### 2. Browse the Application
+### 2. Component Inventory
 
-Use the `/browse` gstack skill to navigate the running application:
+For EVERY route in the application (not just affected ones), build a component inventory:
 
-- Start at `http://localhost:4200`
-- Navigate to each affected route
-- For each page:
-  - Verify the page loads without blank/empty states
-  - Verify data renders (tables populated, cards showing content, charts visible)
-  - Verify navigation links work
-  - Verify interactive elements respond (buttons, clicks, dialogs)
-  - Take screenshots for evidence
+For each page (`/synthesis`, `/watchlist`, `/portfolio`, `/leaderboard`, `/trust`, `/signals`, `/news`, `/login`):
 
-### 3. Verify New Features
+1. **Navigate** to the page via `/browse`
+2. **Inventory all visible components:**
+   - List every distinct UI component on the page (tables, cards, forms, chips, buttons, spinners, icons, menus)
+   - For each component, record: type, content visible (yes/no), interactive (yes/no)
+3. **Verify visibility:**
+   - Is every component rendering? (not hidden, not zero-height, not empty)
+   - Is text readable? (not clipped, not overflowing, not overlapping)
+   - Are images/icons loading? (not broken, not missing)
+4. **Verify data loading:**
+   - Do tables have rows?
+   - Do cards have content?
+   - Are loading spinners resolving to content (not stuck)?
+   - Are empty states showing appropriate messages (not blank)?
+5. **Check console:** `$B console` for JS errors on each page
+
+### 3. Usability Checks
+
+For each interactive component found in the inventory:
+
+1. **Buttons:** Click each button. Does it respond? Does the expected action happen?
+2. **Links/Navigation:** Click each nav item. Does it route correctly? Does the active state update?
+3. **Forms:** If forms exist, can fields be focused? Can values be entered?
+4. **Dialogs/Modals:** If triggered by click, do they open? Do they close?
+5. **Tables:** If rows are clickable, do clicks work? Do hover states show?
+6. **Dropdowns/Selects:** Do they open? Can options be selected?
+7. **Refresh buttons:** Do they trigger data reload?
+
+### 4. State Verification
+
+For each page, verify all UI states:
+
+1. **Loading state:** Does a spinner/skeleton show while data loads?
+2. **Loaded state:** Does content replace the loading indicator?
+3. **Empty state:** If no data, is there a helpful message (not a blank page)?
+4. **Error state:** If API is down, is there a clear error message?
+5. **Auth state:** Pages requiring auth show login prompt (not error) when unauthenticated
+
+### 5. Verify New Features
 
 Based on the spec, verify each acceptance criterion that has a UI component:
 
@@ -43,11 +73,12 @@ Based on the spec, verify each acceptance criterion that has a UI component:
 - Do user interactions work (click, hover, navigate)?
 - Are error states handled (API down, empty data)?
 
-### 4. Check for Regressions
+### 6. Check for Regressions
 
-- Verify the signal table still loads at `/signals`
-- Verify existing navigation still works
+- Verify all pages still load (not just affected ones)
+- Verify navigation between all pages works
 - Verify no console errors in the browser
+- Take screenshots of each page for evidence
 
 ## Report
 
@@ -58,7 +89,24 @@ Return results as JSON:
   "issue_number": "string",
   "adw_id": "string",
   "pages_tested": number,
+  "components_inventoried": number,
   "passed": boolean,
+  "component_inventory": [
+    {
+      "page": "string - route",
+      "components": [
+        {
+          "type": "string - table | card | form | button | chip | icon | menu | dialog",
+          "description": "string - what this component shows",
+          "visible": boolean,
+          "interactive": boolean,
+          "data_loaded": boolean,
+          "usable": boolean,
+          "issue": "optional string - problem found"
+        }
+      ]
+    }
+  ],
   "findings": [
     {
       "page": "string - URL or route tested",
