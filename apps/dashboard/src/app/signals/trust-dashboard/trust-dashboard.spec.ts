@@ -14,20 +14,18 @@ describe('TrustDashboardComponent', () => {
     component.error = signal('');
     Object.assign(component, {
       signalService: {
-        getCalibration: vi
-          .fn()
-          .mockReturnValue(
-            of([
-              {
-                bucket: '80-100',
-                range: [80, 100],
-                expectedAccuracy: 0.9,
-                actualAccuracy: 0.75,
-                total: 4,
-                correct: 3,
-              },
-            ]),
-          ),
+        getCalibration: vi.fn().mockReturnValue(
+          of([
+            {
+              bucket: '80-100',
+              range: [80, 100],
+              expectedAccuracy: 0.9,
+              actualAccuracy: 0.75,
+              total: 4,
+              correct: 3,
+            },
+          ]),
+        ),
         getRetrospective: vi.fn().mockReturnValue(
           of({
             totalSignals: 10,
