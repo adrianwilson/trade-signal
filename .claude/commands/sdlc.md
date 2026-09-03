@@ -93,6 +93,7 @@ Execute each phase below in order. Each phase is one agent, one purpose. Between
 ## Report
 
 After all phases complete, summarize:
+
 - Issue number and classification
 - Branch name
 - Spec file path

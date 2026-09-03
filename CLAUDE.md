@@ -81,6 +81,7 @@ After `git push`, run `git status` and confirm the branch is NOT ahead of remote
 ## Dependency change rules
 
 When adding a constructor dependency to any service:
+
 - `grep -r "ServiceName" --include="*.spec.ts"` to find ALL test files that instantiate the service
 - Add the new dependency to EVERY test's providers/mocks
 - This is the #1 cause of CI test failures in this project
