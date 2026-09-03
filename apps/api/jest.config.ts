@@ -5,6 +5,7 @@ export default {
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
+  forceExit: true,
   transform: {
     '^.+\\.[tj]s$': [
       '@swc/jest',
