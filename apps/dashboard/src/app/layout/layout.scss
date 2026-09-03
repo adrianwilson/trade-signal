@@ -25,6 +25,15 @@ mat-toolbar {
   padding: 24px;
 }
 
+.nav-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ts-text-secondary);
+  padding: 16px 16px 4px;
+}
+
 .active {
   font-weight: 500;
   background-color: rgba(27, 94, 32, 0.08) !important;

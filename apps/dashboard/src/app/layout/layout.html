@@ -48,6 +48,7 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav mode="side" opened class="sidenav">
     <mat-nav-list>
+      <div class="nav-section-label">Trading</div>
       <a mat-list-item routerLink="/synthesis" routerLinkActive="active">
         <mat-icon matListItemIcon>hub</mat-icon>
         <span matListItemTitle>Synthesis</span>
@@ -60,6 +61,8 @@
         <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
         <span matListItemTitle>Portfolio</span>
       </a>
+
+      <div class="nav-section-label">Analytics</div>
       <a mat-list-item routerLink="/leaderboard" routerLinkActive="active">
         <mat-icon matListItemIcon>leaderboard</mat-icon>
         <span matListItemTitle>Leaderboard</span>
@@ -68,13 +71,13 @@
         <mat-icon matListItemIcon>verified</mat-icon>
         <span matListItemTitle>Trust</span>
       </a>
+      <a mat-list-item routerLink="/news" routerLinkActive="active">
+        <mat-icon matListItemIcon>newspaper</mat-icon>
+        <span matListItemTitle>News</span>
+      </a>
       <a mat-list-item routerLink="/signals" routerLinkActive="active">
         <mat-icon matListItemIcon>table_chart</mat-icon>
         <span matListItemTitle>Activity Log</span>
-      </a>
-      <a mat-list-item routerLink="/news" routerLinkActive="active">
-        <mat-icon matListItemIcon>newspaper</mat-icon>
-        <span matListItemTitle>News Sentiment</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>
