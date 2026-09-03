@@ -52,9 +52,9 @@
 - `foc` = Focus on what matters most. What's the true signal? Boil down to the most important thing.
 - `ref` = Rewrite with reference points.
 
-# Pre-Push Validation (MANDATORY)
+# Pre-Push Validation (MANDATORY — NO EXCEPTIONS)
 
-Before every `git push`, run these checks in order. Do NOT push if any fail:
+Saving time is NOT a priority. Catching errors before CI is. Run ALL steps below before every `git push`. Do NOT skip steps. Do NOT cherry-pick steps you think are relevant. Run them all, every time.
 
 1. **Format:** `pnpm exec nx format:check --base=HEAD~1` — if it fails, run `pnpm exec nx format:write`, re-stage, and re-commit
 2. **Typecheck:** `pnpm exec nx run-many -t typecheck` — catches TS errors that `build` misses

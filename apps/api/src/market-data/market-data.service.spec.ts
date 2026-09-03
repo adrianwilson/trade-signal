@@ -5,6 +5,7 @@ import { AssetPriceEntity } from './asset-price.entity';
 import { SignalsService } from '../signals/signals.service';
 import { SignalEntity } from '../signals/signal.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CoinGeckoService } from './coingecko.service';
 
 jest.mock('yahoo-finance2', () => ({
   __esModule: true,
@@ -43,7 +44,7 @@ describe('MarketDataService', () => {
         TypeOrmModule.forFeature([AssetPriceEntity, SignalEntity]),
         ScheduleModule.forRoot(),
       ],
-      providers: [MarketDataService, SignalsService],
+      providers: [MarketDataService, SignalsService, CoinGeckoService],
     }).compile();
 
     service = module.get<MarketDataService>(MarketDataService);

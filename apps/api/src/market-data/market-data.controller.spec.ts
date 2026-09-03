@@ -7,6 +7,7 @@ import { MarketDataService } from './market-data.service';
 import { AssetPriceEntity } from './asset-price.entity';
 import { SignalsService } from '../signals/signals.service';
 import { SignalEntity } from '../signals/signal.entity';
+import { CoinGeckoService } from './coingecko.service';
 
 jest.mock('yahoo-finance2', () => ({
   __esModule: true,
@@ -37,7 +38,7 @@ describe('MarketDataController', () => {
         ScheduleModule.forRoot(),
       ],
       controllers: [MarketDataController],
-      providers: [MarketDataService, SignalsService],
+      providers: [MarketDataService, SignalsService, CoinGeckoService],
     }).compile();
 
     controller = module.get<MarketDataController>(MarketDataController);
