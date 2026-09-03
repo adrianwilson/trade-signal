@@ -17,6 +17,8 @@ describe('LeaderboardComponent', () => {
       incorrect: 2,
       pending: 0,
       accuracyRate: 0.8,
+      recentAccuracyRate: 0.9,
+      trend: 'hot' as const,
     },
     {
       rank: 2,
@@ -26,6 +28,8 @@ describe('LeaderboardComponent', () => {
       incorrect: 5,
       pending: 0,
       accuracyRate: 0.5,
+      recentAccuracyRate: 0.3,
+      trend: 'cold' as const,
     },
   ];
 
@@ -34,6 +38,7 @@ describe('LeaderboardComponent', () => {
     component.leaderboard = new MatTableDataSource<LeaderboardEntry>([]);
     component.loading = signal(true);
     component.error = signal('');
+    component.activeWindow = signal<number | undefined>(undefined);
     Object.assign(component, {
       signalService: {
         getLeaderboard: vi.fn().mockReturnValue(of(mockData)),
@@ -71,6 +76,28 @@ describe('LeaderboardComponent', () => {
 
     it('should return red for < 50%', () => {
       expect(component.accuracyColor(0.3)).toBe('#f44336');
+    });
+  });
+
+  describe('trendIcon', () => {
+    it('should return fire for hot', () => {
+      expect(component.trendIcon('hot')).toBe('local_fire_department');
+    });
+
+    it('should return snowflake for cold', () => {
+      expect(component.trendIcon('cold')).toBe('ac_unit');
+    });
+
+    it('should return empty for stable', () => {
+      expect(component.trendIcon('stable')).toBe('');
+    });
+  });
+
+  describe('setWindow', () => {
+    it('should update active window and reload', () => {
+      component.setWindow(7);
+      expect(component.activeWindow()).toBe(7);
+      expect(component.loading()).toBe(false);
     });
   });
 });

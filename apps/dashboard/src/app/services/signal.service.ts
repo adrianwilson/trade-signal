@@ -48,6 +48,8 @@ export interface LeaderboardEntry {
   incorrect: number;
   pending: number;
   accuracyRate: number;
+  recentAccuracyRate: number | null;
+  trend: 'hot' | 'cold' | 'stable' | null;
 }
 
 export interface AlertItem {
@@ -143,9 +145,10 @@ export class SignalService {
     );
   }
 
-  getLeaderboard(): Observable<LeaderboardEntry[]> {
+  getLeaderboard(windowDays?: number): Observable<LeaderboardEntry[]> {
+    const params = windowDays ? `?window=${windowDays}` : '';
     return this.http.get<LeaderboardEntry[]>(
-      `${this.baseUrl}/outcomes/leaderboard`,
+      `${this.baseUrl}/outcomes/leaderboard${params}`,
     );
   }
 

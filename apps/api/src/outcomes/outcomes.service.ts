@@ -18,6 +18,8 @@ export interface AgentAccuracy {
 
 export interface LeaderboardEntry extends AgentAccuracy {
   rank: number;
+  recentAccuracyRate: number | null;
+  trend: 'hot' | 'cold' | 'stable' | null;
 }
 
 export interface CalibrationBucket {
@@ -54,17 +56,39 @@ export class OutcomesService {
     private readonly marketDataService: MarketDataService,
   ) {}
 
-  async getLeaderboard(): Promise<LeaderboardEntry[]> {
-    const outcomes = await this.repository.find();
-    const bySource = new Map<string, OutcomeEntity[]>();
+  async getLeaderboard(windowDays?: number): Promise<LeaderboardEntry[]> {
+    const allOutcomes = await this.repository.find();
+    const cutoff = windowDays
+      ? new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString()
+      : null;
 
+    const outcomes = cutoff
+      ? allOutcomes.filter((o) => o.evaluatedAt && o.evaluatedAt >= cutoff)
+      : allOutcomes;
+
+    const bySource = new Map<string, OutcomeEntity[]>();
     for (const o of outcomes) {
       const list = bySource.get(o.source) ?? [];
       list.push(o);
       bySource.set(o.source, list);
     }
 
-    const entries: AgentAccuracy[] = [];
+    // Calculate 7-day accuracy for trend detection
+    const recentCutoff = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const recentBySource = new Map<string, OutcomeEntity[]>();
+    for (const o of allOutcomes) {
+      if (o.evaluatedAt && o.evaluatedAt >= recentCutoff) {
+        const list = recentBySource.get(o.source) ?? [];
+        list.push(o);
+        recentBySource.set(o.source, list);
+      }
+    }
+
+    const entries: (AgentAccuracy & {
+      recentAccuracyRate: number | null;
+    })[] = [];
     for (const [source, items] of bySource) {
       const evaluated = items.filter((i) => i.outcome !== 'pending');
       const correct = evaluated.filter((i) => i.outcome === 'correct').length;
@@ -72,19 +96,45 @@ export class OutcomesService {
         (i) => i.outcome === 'incorrect',
       ).length;
       const pending = items.filter((i) => i.outcome === 'pending').length;
+      const accuracyRate =
+        evaluated.length > 0 ? correct / evaluated.length : 0;
+
+      const recentItems = recentBySource.get(source) ?? [];
+      const recentEval = recentItems.filter((i) => i.outcome !== 'pending');
+      const recentCorrect = recentEval.filter(
+        (i) => i.outcome === 'correct',
+      ).length;
+      const recentAccuracyRate =
+        recentEval.length > 0 ? recentCorrect / recentEval.length : null;
+
       entries.push({
         source,
         total: items.length,
         correct,
         incorrect,
         pending,
-        accuracyRate: evaluated.length > 0 ? correct / evaluated.length : 0,
+        accuracyRate,
+        recentAccuracyRate,
       });
     }
 
     return entries
       .sort((a, b) => b.accuracyRate - a.accuracyRate)
-      .map((e, i) => ({ ...e, rank: i + 1 }));
+      .map((e, i) => ({
+        ...e,
+        rank: i + 1,
+        trend: this.calculateTrend(e.accuracyRate, e.recentAccuracyRate),
+      }));
+  }
+
+  private calculateTrend(
+    allTime: number,
+    recent: number | null,
+  ): 'hot' | 'cold' | 'stable' | null {
+    if (recent === null) return null;
+    if (recent > allTime + 0.1) return 'hot';
+    if (recent < allTime - 0.1) return 'cold';
+    return 'stable';
   }
 
   async getAccuracyByAssetClass(): Promise<

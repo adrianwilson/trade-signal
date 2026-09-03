@@ -136,12 +136,13 @@ describe('MarketDataService', () => {
       expect(quotes['AAPL'].price).toBe(150.25);
     });
 
-    it('should skip assets where getQuote returns null', async () => {
+    it('should fall back to CoinGecko for crypto when Yahoo fails', async () => {
       const yf = require('yahoo-finance2');
-      // Fail all quote calls
+      // Fail all Yahoo quote calls
       (yf.default.quote as jest.Mock).mockRejectedValue(new Error('all fail'));
       const quotes = await service.getBulkQuotes();
-      expect(Object.keys(quotes).length).toBe(0);
+      // Equity/forex assets fail (Yahoo only), crypto may still work via CoinGecko
+      expect(quotes['AAPL']).toBeUndefined();
       // Restore
       (yf.default.quote as jest.Mock).mockResolvedValue({
         regularMarketPrice: 150.25,
