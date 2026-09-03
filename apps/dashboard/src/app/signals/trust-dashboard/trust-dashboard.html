@@ -1,0 +1,110 @@
+<h2>Trust & Transparency</h2>
+
+@if (loading()) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+</div>
+} @else if (error()) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error() }}</mat-card-content>
+</mat-card>
+} @else {
+
+<div class="trust-grid">
+  @if (retrospective(); as r) {
+  <mat-card class="summary-card">
+    <mat-card-header>
+      <mat-card-title>Retrospective</mat-card-title>
+      <mat-card-subtitle>
+        What if you followed every signal?
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-value">{{ r.evaluatedSignals }}</div>
+          <div class="stat-label">Signals Evaluated</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">
+            {{ r.overallAccuracy | percent : '1.0-0' }}
+          </div>
+          <div class="stat-label">Overall Accuracy</div>
+        </div>
+        <div class="stat">
+          <div
+            class="stat-value"
+            [style.color]="pnlColor(r.hypotheticalPnlPercent)"
+          >
+            {{ r.hypotheticalPnlPercent | number : '1.2-2' }}%
+          </div>
+          <div class="stat-label">Avg Return per Trade</div>
+        </div>
+      </div>
+
+      <div class="direction-breakdown">
+        <div class="direction-row">
+          <span class="direction-label buy">BUY</span>
+          <span
+            >{{ r.byDirection.BUY.correct }}/{{ r.byDirection.BUY.count }}
+            correct</span
+          >
+          <span [style.color]="pnlColor(r.byDirection.BUY.avgReturn)">
+            {{ r.byDirection.BUY.avgReturn | number : '1.2-2' }}% avg return
+          </span>
+        </div>
+        <div class="direction-row">
+          <span class="direction-label sell">SELL</span>
+          <span
+            >{{ r.byDirection.SELL.correct }}/{{ r.byDirection.SELL.count }}
+            correct</span
+          >
+          <span [style.color]="pnlColor(r.byDirection.SELL.avgReturn)">
+            {{ r.byDirection.SELL.avgReturn | number : '1.2-2' }}% avg return
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <mat-card class="calibration-card">
+    <mat-card-header>
+      <mat-card-title>Confidence Calibration</mat-card-title>
+      <mat-card-subtitle>
+        Does 80% confidence = 80% accuracy?
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (calibration().length === 0) {
+      <div class="empty-state">No calibration data yet.</div>
+      } @else { @for (b of calibration(); track b.bucket) {
+      <div class="calibration-row">
+        <span class="bucket-label">{{ b.bucket }}%</span>
+        <div class="bar-container">
+          <div
+            class="bar expected"
+            [style.width]="calibrationBarWidth(b.expectedAccuracy)"
+          ></div>
+          <div
+            class="bar actual"
+            [style.width]="calibrationBarWidth(b.actualAccuracy)"
+          ></div>
+        </div>
+        <span class="bar-values">
+          {{ b.actualAccuracy | percent : '1.0-0' }} ({{ b.correct }}/{{ b.total
+          }})
+        </span>
+      </div>
+      } }
+      <div class="legend">
+        <span class="legend-item"
+          ><span class="dot expected"></span> Expected</span
+        >
+        <span class="legend-item"><span class="dot actual"></span> Actual</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+}

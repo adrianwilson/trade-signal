@@ -183,4 +183,84 @@ describe('OutcomesService', () => {
       expect(count).toBe(0);
     });
   });
+
+  describe('getCalibration', () => {
+    it('should return calibration buckets', async () => {
+      mockSignals.findAll.mockResolvedValue([
+        { id: 's1', confidence: 85 },
+        { id: 's2', confidence: 45 },
+      ]);
+      mockRepo.find.mockResolvedValue([
+        { signalId: 's1', outcome: 'correct' },
+        { signalId: 's2', outcome: 'incorrect' },
+      ]);
+      const buckets = await service.getCalibration();
+      expect(buckets.length).toBe(5);
+      const high = buckets.find((b) => b.bucket === '80-100');
+      expect(high?.correct).toBe(1);
+      expect(high?.actualAccuracy).toBe(1);
+    });
+
+    it('should return zero accuracy for empty buckets', async () => {
+      const buckets = await service.getCalibration();
+      for (const b of buckets) {
+        expect(b.actualAccuracy).toBe(0);
+      }
+    });
+  });
+
+  describe('getRetrospective', () => {
+    it('should calculate overall accuracy', async () => {
+      mockRepo.find.mockResolvedValue([
+        {
+          direction: 'BUY',
+          outcome: 'correct',
+          priceAtSignal: 100,
+          priceAfterDays: 110,
+        },
+        {
+          direction: 'BUY',
+          outcome: 'incorrect',
+          priceAtSignal: 100,
+          priceAfterDays: 90,
+        },
+        {
+          direction: 'SELL',
+          outcome: 'correct',
+          priceAtSignal: 100,
+          priceAfterDays: 90,
+        },
+      ]);
+      const retro = await service.getRetrospective();
+      expect(retro.evaluatedSignals).toBe(3);
+      expect(retro.correctSignals).toBe(2);
+      expect(retro.overallAccuracy).toBeCloseTo(0.667, 2);
+    });
+
+    it('should return zero for no outcomes', async () => {
+      const retro = await service.getRetrospective();
+      expect(retro.totalSignals).toBe(0);
+      expect(retro.overallAccuracy).toBe(0);
+    });
+
+    it('should break down by direction', async () => {
+      mockRepo.find.mockResolvedValue([
+        {
+          direction: 'BUY',
+          outcome: 'correct',
+          priceAtSignal: 100,
+          priceAfterDays: 110,
+        },
+        {
+          direction: 'SELL',
+          outcome: 'correct',
+          priceAtSignal: 100,
+          priceAfterDays: 90,
+        },
+      ]);
+      const retro = await service.getRetrospective();
+      expect(retro.byDirection.BUY.count).toBe(1);
+      expect(retro.byDirection.SELL.count).toBe(1);
+    });
+  });
 });

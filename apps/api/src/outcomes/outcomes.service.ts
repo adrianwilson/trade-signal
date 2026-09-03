@@ -20,6 +20,28 @@ export interface LeaderboardEntry extends AgentAccuracy {
   rank: number;
 }
 
+export interface CalibrationBucket {
+  bucket: string;
+  range: [number, number];
+  expectedAccuracy: number;
+  actualAccuracy: number;
+  total: number;
+  correct: number;
+}
+
+export interface RetrospectiveSummary {
+  totalSignals: number;
+  evaluatedSignals: number;
+  correctSignals: number;
+  overallAccuracy: number;
+  hypotheticalTrades: number;
+  hypotheticalPnlPercent: number;
+  byDirection: {
+    BUY: { count: number; correct: number; avgReturn: number };
+    SELL: { count: number; correct: number; avgReturn: number };
+  };
+}
+
 @Injectable()
 export class OutcomesService {
   private readonly logger = new Logger(OutcomesService.name);
@@ -185,6 +207,100 @@ export class OutcomesService {
     }
 
     return evaluated;
+  }
+
+  async getCalibration(): Promise<CalibrationBucket[]> {
+    const signals = await this.signalsService.findAll();
+    const outcomes = await this.repository.find();
+
+    const signalConfidence = new Map<string, number>();
+    for (const s of signals) {
+      signalConfidence.set(s.id, s.confidence);
+    }
+
+    const buckets: [string, number, number][] = [
+      ['0-20', 0, 20],
+      ['20-40', 20, 40],
+      ['40-60', 40, 60],
+      ['60-80', 60, 80],
+      ['80-100', 80, 100],
+    ];
+
+    return buckets.map(([label, low, high]) => {
+      const inBucket = outcomes.filter((o) => {
+        const conf = signalConfidence.get(o.signalId) ?? 0;
+        return (
+          conf >= low &&
+          conf < (high === 100 ? 101 : high) &&
+          o.outcome !== 'pending'
+        );
+      });
+      const correct = inBucket.filter((o) => o.outcome === 'correct').length;
+      return {
+        bucket: label,
+        range: [low, high] as [number, number],
+        expectedAccuracy: (low + high) / 2 / 100,
+        actualAccuracy: inBucket.length > 0 ? correct / inBucket.length : 0,
+        total: inBucket.length,
+        correct,
+      };
+    });
+  }
+
+  async getRetrospective(): Promise<RetrospectiveSummary> {
+    const outcomes = await this.repository.find();
+    const evaluated = outcomes.filter((o) => o.outcome !== 'pending');
+    const correct = evaluated.filter((o) => o.outcome === 'correct');
+
+    const buys = evaluated.filter((o) => o.direction === 'BUY');
+    const sells = evaluated.filter((o) => o.direction === 'SELL');
+    const buyCorrect = buys.filter((o) => o.outcome === 'correct');
+    const sellCorrect = sells.filter((o) => o.outcome === 'correct');
+
+    const calcAvgReturn = (items: OutcomeEntity[]) => {
+      const withPrice = items.filter((o) => o.priceAfterDays !== null);
+      if (withPrice.length === 0) return 0;
+      const returns = withPrice.map((o) => {
+        const change =
+          ((o.priceAfterDays! - o.priceAtSignal) / o.priceAtSignal) * 100;
+        return o.direction === 'SELL' ? -change : change;
+      });
+      return returns.reduce((a, b) => a + b, 0) / returns.length;
+    };
+
+    const allReturns = evaluated
+      .filter((o) => o.priceAfterDays !== null)
+      .map((o) => {
+        const change =
+          ((o.priceAfterDays! - o.priceAtSignal) / o.priceAtSignal) * 100;
+        return o.direction === 'SELL' ? -change : change;
+      });
+    const totalPnl =
+      allReturns.length > 0
+        ? allReturns.reduce((a, b) => a + b, 0) / allReturns.length
+        : 0;
+
+    return {
+      totalSignals: outcomes.length,
+      evaluatedSignals: evaluated.length,
+      correctSignals: correct.length,
+      overallAccuracy:
+        evaluated.length > 0 ? correct.length / evaluated.length : 0,
+      hypotheticalTrades: evaluated.length,
+      hypotheticalPnlPercent: totalPnl,
+      byDirection: {
+        BUY: {
+          count: buys.length,
+          correct: buyCorrect.length,
+          avgReturn: calcAvgReturn(buys),
+        },
+        SELL: {
+          count: sells.length,
+          correct: sellCorrect.length,
+          avgReturn: calcAvgReturn(sells),
+        },
+      },
+    };
   }
 
   @Cron('0 0 */6 * * *')

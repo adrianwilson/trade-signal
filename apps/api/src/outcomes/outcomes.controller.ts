@@ -15,6 +15,16 @@ export class OutcomesController {
     return this.outcomesService.getAccuracyByAssetClass();
   }
 
+  @Get('calibration')
+  getCalibration() {
+    return this.outcomesService.getCalibration();
+  }
+
+  @Get('retrospective')
+  getRetrospective() {
+    return this.outcomesService.getRetrospective();
+  }
+
   @Get('evaluate')
   async runEvaluation() {
     const recorded = await this.outcomesService.recordSignalOutcomes();

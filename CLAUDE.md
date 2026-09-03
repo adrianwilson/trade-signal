@@ -52,6 +52,20 @@
 - `foc` = Focus on what matters most. What's the true signal? Boil down to the most important thing.
 - `ref` = Rewrite with reference points.
 
+# Pre-Push Validation (MANDATORY)
+
+Before every `git push`, run these checks in order. Do NOT push if any fail:
+
+1. **Format:** `pnpm exec nx format:check --base=HEAD~1` — if it fails, run `pnpm exec nx format:write`, re-stage, and re-commit
+2. **Typecheck:** `pnpm exec nx run-many -t typecheck` — catches TS errors that `build` misses
+3. **Build:** `pnpm exec nx run-many -t build` — includes bundle budget enforcement
+4. **Lint:** `pnpm exec nx run-many -t lint` — 0 errors required (warnings OK)
+5. **Tests:** `pnpm exec nx run-many -t test` — includes coverage thresholds
+
+CRITICAL: Run `format:check` AFTER `git add`, not before. The staging step can change formatting state. If format:check fails after staging, run `format:write`, re-add, and amend the commit.
+
+When changing routes or default navigation, also verify e2e tests: `pnpm exec nx run dashboard-e2e:e2e`
+
 # Context Rules
 
 - NEVER commit or push without the user explicitly reviewing and approving the changes first. Always show what will be committed and wait for approval.
