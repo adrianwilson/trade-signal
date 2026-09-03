@@ -7,9 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
-import { DatePipe } from '@angular/common';
+import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { SignalService, AlertItem } from '../services/signal.service';
+import { WebSocketService } from '../services/websocket.service';
 
 @Component({
   selector: 'app-layout',
@@ -24,18 +25,22 @@ import { SignalService, AlertItem } from '../services/signal.service';
     MatBadgeModule,
     MatMenuModule,
     DatePipe,
+    CurrencyPipe,
+    DecimalPipe,
   ],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
 export class LayoutComponent implements OnInit {
   readonly authService = inject(AuthService);
+  readonly wsService = inject(WebSocketService);
   private readonly signalService = inject(SignalService);
 
   unreadCount = signal(0);
   alerts = signal<AlertItem[]>([]);
 
   ngOnInit(): void {
+    this.wsService.connect();
     if (this.authService.isAuthenticated()) {
       this.loadAlerts();
     }

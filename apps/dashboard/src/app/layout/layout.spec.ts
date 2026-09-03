@@ -14,6 +14,11 @@ describe('LayoutComponent', () => {
         isAuthenticated: () => false,
         user: () => null,
       },
+      wsService: {
+        connect: vi.fn(),
+        connected: signal(false),
+        livePrices: signal(new Map()),
+      },
       signalService: {
         generateAlerts: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
         getAlerts: vi.fn().mockReturnValue({ subscribe: vi.fn() }),

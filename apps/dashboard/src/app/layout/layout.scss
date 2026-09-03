@@ -40,6 +40,44 @@ mat-toolbar {
   color: var(--ts-primary) !important;
 }
 
+.live-ticker {
+  display: flex;
+  gap: 16px;
+  margin: 0 16px;
+  overflow-x: auto;
+}
+
+.ticker-item {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ticker-asset {
+  font-weight: 500;
+}
+
+.ticker-price,
+.ticker-change {
+  font-family: monospace;
+}
+
+.ws-status {
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  margin-right: 8px;
+
+  &.connected {
+    color: #a5d6a7;
+  }
+
+  &.disconnected {
+    color: #ef9a9a;
+  }
+}
+
 .user-email {
   font-size: 14px;
   margin-right: 8px;

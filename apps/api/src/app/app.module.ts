@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { EventsModule } from '../events/events.module';
 import { SignalsModule } from '../signals/signals.module';
 import { SignalEntity } from '../signals/signal.entity';
 import { MarketDataModule } from '../market-data/market-data.module';
@@ -39,6 +40,7 @@ import { OutcomeEntity } from '../outcomes/outcome.entity';
       synchronize: true,
     }),
     ScheduleModule.forRoot(),
+    EventsModule,
     SignalsModule,
     MarketDataModule,
     TechnicalAnalysisModule,
