@@ -1,6 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
@@ -29,7 +28,6 @@ type PositionRow = PortfolioPosition & {
   selector: 'app-portfolio',
   standalone: true,
   imports: [
-    FormsModule,
     RouterModule,
     MatTableModule,
     MatChipsModule,
@@ -65,9 +63,9 @@ export class PortfolioComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   showAddForm = signal(false);
-  newAsset = '';
-  newQuantity = 0;
-  newAvgPrice = 0;
+  newAsset = signal('');
+  newQuantity = signal(0);
+  newAvgPrice = signal(0);
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated()) {
@@ -123,19 +121,19 @@ export class PortfolioComponent implements OnInit {
   }
 
   addPosition(): void {
-    if (!this.newAsset || !this.newQuantity || !this.newAvgPrice) return;
+    if (!this.newAsset() || !this.newQuantity() || !this.newAvgPrice()) return;
     this.signalService
       .addPortfolioPosition(
-        this.newAsset.toUpperCase(),
+        this.newAsset().toUpperCase(),
         'equity',
-        this.newQuantity,
-        this.newAvgPrice,
+        this.newQuantity(),
+        this.newAvgPrice(),
       )
       .subscribe({
         next: () => {
-          this.newAsset = '';
-          this.newQuantity = 0;
-          this.newAvgPrice = 0;
+          this.newAsset.set('');
+          this.newQuantity.set(0);
+          this.newAvgPrice.set(0);
           this.showAddForm.set(false);
           this.loadData();
         },

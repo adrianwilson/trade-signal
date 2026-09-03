@@ -4,8 +4,8 @@
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>Asset Class</mat-label>
     <mat-select
-      [(ngModel)]="selectedClass"
-      (ngModelChange)="selectedClass.set($event)"
+      [value]="selectedClass()"
+      (selectionChange)="selectedClass.set($event.value)"
     >
       @for (cls of assetClasses(); track cls) {
       <mat-option [value]="cls">{{ cls === 'all' ? 'All' : cls }}</mat-option>

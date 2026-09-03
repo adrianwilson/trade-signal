@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,7 +12,6 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [
-    FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -28,25 +26,25 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  email = '';
-  password = '';
+  email = signal('');
+  password = signal('');
   error = signal('');
   loading = signal(false);
-  activeTab = 0;
+  activeTab = signal(0);
 
   submit(): void {
     this.error.set('');
     this.loading.set(true);
 
     const action =
-      this.activeTab === 0
-        ? this.authService.login(this.email, this.password)
-        : this.authService.register(this.email, this.password);
+      this.activeTab() === 0
+        ? this.authService.login(this.email(), this.password())
+        : this.authService.register(this.email(), this.password());
 
     action.subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/signals']);
+        this.router.navigate(['/synthesis']);
       },
       error: (err) => {
         this.loading.set(false);
