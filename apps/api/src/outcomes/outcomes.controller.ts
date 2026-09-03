@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { OutcomesService } from './outcomes.service';
 
 @Controller('outcomes')
@@ -6,8 +6,11 @@ export class OutcomesController {
   constructor(private readonly outcomesService: OutcomesService) {}
 
   @Get('leaderboard')
-  getLeaderboard() {
-    return this.outcomesService.getLeaderboard();
+  getLeaderboard(@Query('window') window?: string) {
+    const windowDays = window ? parseInt(window, 10) : undefined;
+    return this.outcomesService.getLeaderboard(
+      windowDays && !isNaN(windowDays) ? windowDays : undefined,
+    );
   }
 
   @Get('by-asset-class')
