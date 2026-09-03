@@ -1,8 +1,27 @@
 <mat-toolbar color="primary">
   <mat-icon>show_chart</mat-icon>
   <span style="margin-left: 8px">Trade Signal</span>
+  <div class="live-ticker">
+    @for (entry of wsService.livePrices().entries(); track entry[0]) {
+    <span class="ticker-item">
+      <span class="ticker-asset">{{ entry[0] }}</span>
+      <span class="ticker-price">{{ entry[1].price | currency }}</span>
+      <span
+        class="ticker-change"
+        [style.color]="entry[1].changePercent >= 0 ? '#a5d6a7' : '#ef9a9a'"
+      >
+        {{ entry[1].changePercent >= 0 ? '+' : '' }}{{ entry[1].changePercent |
+        number:'1.2-2' }}%
+      </span>
+    </span>
+    }
+  </div>
   <span style="flex: 1"></span>
-  @if (authService.isAuthenticated()) {
+  @if (wsService.connected()) {
+  <mat-icon class="ws-status connected">wifi</mat-icon>
+  } @else {
+  <mat-icon class="ws-status disconnected">wifi_off</mat-icon>
+  } @if (authService.isAuthenticated()) {
   <button
     mat-icon-button
     [matMenuTriggerFor]="alertMenu"

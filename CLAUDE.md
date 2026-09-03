@@ -56,13 +56,37 @@
 
 Saving time is NOT a priority. Catching errors before CI is. Run ALL steps below before every `git push`. Do NOT skip steps. Do NOT cherry-pick steps you think are relevant. Run them all, every time.
 
-1. **Format:** `pnpm exec nx format:check --base=HEAD~1` — if it fails, run `pnpm exec nx format:write`, re-stage, and re-commit
-2. **Typecheck:** `pnpm exec nx run-many -t typecheck` — catches TS errors that `build` misses
+## Before validation: sync with main
+
+```bash
+git fetch origin main && git merge origin/main
+```
+
+Resolve any conflicts before proceeding. This prevents branch divergence failures where PR A's dependency breaks PR B's tests.
+
+## Validation steps (run ALL, in order)
+
+1. **Format:** `pnpm exec nx format:check --all` — if it fails, run `pnpm exec nx format:write`, re-stage, and re-commit. Use `--all` not `--base=HEAD~1` to catch ALL unformatted files including pre-existing ones.
+2. **Typecheck:** `pnpm exec nx reset && pnpm exec nx run-many -t typecheck` — always reset cache first. Stale cache hides errors.
 3. **Build:** `pnpm exec nx run-many -t build` — includes bundle budget enforcement
 4. **Lint:** `pnpm exec nx run-many -t lint` — 0 errors required (warnings OK)
-5. **Tests:** `pnpm exec nx run-many -t test` — includes coverage thresholds
+5. **Tests:** `pnpm exec nx run-many -t test` — includes coverage thresholds. If `run-many` hangs, run each project separately with `--forceExit`.
 
 CRITICAL: Run `format:check` AFTER `git add`, not before. The staging step can change formatting state. If format:check fails after staging, run `format:write`, re-add, and amend the commit.
+
+## After pushing: verify
+
+After `git push`, run `git status` and confirm the branch is NOT ahead of remote. Unpushed commits mean CI runs against old code.
+
+## Dependency change rules
+
+When adding a constructor dependency to any service:
+
+- `grep -r "ServiceName" --include="*.spec.ts"` to find ALL test files that instantiate the service
+- Add the new dependency to EVERY test's providers/mocks
+- This is the #1 cause of CI test failures in this project
+
+## Route change rules
 
 When changing routes or default navigation, also verify e2e tests: `pnpm exec nx run dashboard-e2e:e2e`
 

@@ -1,9 +1,10 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Signal, ManualSignalInput } from '@org/signals';
 import { randomUUID } from 'crypto';
 import { SignalEntity } from './signal.entity';
+import { EventsGateway } from '../events/events.gateway';
 
 const SEED_SIGNALS: Signal[] = [
   {
@@ -73,6 +74,7 @@ export class SignalsService implements OnModuleInit {
   constructor(
     @InjectRepository(SignalEntity)
     private readonly repository: Repository<SignalEntity>,
+    @Optional() private readonly eventsGateway?: EventsGateway,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -101,6 +103,10 @@ export class SignalsService implements OnModuleInit {
       reasoning: input.notes,
       timestamp: new Date().toISOString(),
     };
-    return this.repository.save(signal);
+    const saved = await this.repository.save(signal);
+    this.eventsGateway?.emitSignalCreated(
+      saved as unknown as Record<string, unknown>,
+    );
+    return saved;
   }
 }
