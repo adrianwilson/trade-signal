@@ -38,9 +38,11 @@
   <mat-spinner diameter="48"></mat-spinner>
 </div>
 } @else if (error()) {
-<mat-card class="error-card">
-  <mat-card-content>{{ error() }}</mat-card-content>
-</mat-card>
+<div class="state-container empty-state">
+  <mat-icon class="empty-icon">account_balance_wallet</mat-icon>
+  <div>Sign in to track your portfolio</div>
+  <a mat-raised-button routerLink="/login" class="login-cta">Login</a>
+</div>
 } @else if (portfolio.data.length === 0) {
 <div class="state-container empty-state">
   No positions yet. Click + to add your first position.

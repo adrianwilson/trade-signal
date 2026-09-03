@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,6 +15,7 @@ import type { AggregatedSignal } from '@org/signals';
   selector: 'app-watchlist',
   standalone: true,
   imports: [
+    RouterModule,
     MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
