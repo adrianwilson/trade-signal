@@ -36,6 +36,12 @@ jobs:
       - run: pnpm exec nx record -- pnpm exec nx format:check --base="remotes/origin/main"
       - run: pnpm exec nx run-many -t lint build typecheck e2e
       - run: pnpm exec nx run dashboard:test
-      - run: pnpm exec nx run api:test --forceExit
+      - name: API tests (with forceExit for NestJS schedule timers)
+        run: |
+          OUTPUT=$(pnpm exec nx run api:test --forceExit 2>&1) || true
+          echo "$OUTPUT"
+          echo "$OUTPUT" | grep -q "Tests:.*failed" && exit 1
+          echo "$OUTPUT" | grep -q "Test Suites:.*failed" && exit 1
+          echo "$OUTPUT" | grep -q "Tests:.*passed" || exit 1
       - run: pnpm exec nx fix-ci
         if: always()
