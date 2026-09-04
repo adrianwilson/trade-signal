@@ -124,6 +124,18 @@ export class PaperTradingComponent implements OnInit {
     });
   }
 
+  resetAccount(): void {
+    const acc = this.account();
+    if (!acc) return;
+    const confirmed = window.confirm(
+      'Reset your paper trading account? This will delete all trades and restore the balance to $100,000.',
+    );
+    if (!confirmed) return;
+    this.signalService.resetPaperAccount(acc.id).subscribe({
+      next: () => this.loadAccountData(acc.id),
+    });
+  }
+
   pnlColor(pnl: number | null): string {
     if (!pnl) return '#9e9e9e';
     return pnl > 0 ? '#4caf50' : '#f44336';

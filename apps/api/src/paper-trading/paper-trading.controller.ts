@@ -43,6 +43,11 @@ export class PaperTradingController {
     return this.paperService.closePosition(id, asset);
   }
 
+  @Post('accounts/:id/reset')
+  resetAccount(@Param('id') id: string) {
+    return this.paperService.resetAccount(id);
+  }
+
   @Get('accounts/:id/trades')
   getTrades(@Param('id') id: string) {
     return this.paperService.getTrades(id);

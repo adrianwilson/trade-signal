@@ -1,5 +1,12 @@
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 h2 {
-  margin: 0 0 16px;
+  margin: 0;
 }
 
 h3 {

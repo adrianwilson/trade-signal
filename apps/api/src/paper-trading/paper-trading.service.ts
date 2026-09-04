@@ -232,6 +232,15 @@ export class PaperTradingService {
     return openTrades;
   }
 
+  async resetAccount(accountId: string): Promise<PaperAccountEntity> {
+    const account = await this.accountRepo.findOneBy({ id: accountId });
+    if (!account) throw new NotFoundException('Account not found');
+
+    await this.tradeRepo.delete({ accountId });
+    account.cashBalance = STARTING_BALANCE;
+    return this.accountRepo.save(account);
+  }
+
   async getTrades(accountId: string): Promise<PaperTradeEntity[]> {
     return this.tradeRepo.find({
       where: { accountId },

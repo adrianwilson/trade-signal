@@ -1,4 +1,11 @@
-<h2>Paper Trading</h2>
+<div class="header-row">
+  <h2>Paper Trading</h2>
+  @if (account()) {
+  <button mat-stroked-button color="warn" (click)="resetAccount()">
+    <mat-icon>restart_alt</mat-icon> Reset Account
+  </button>
+  }
+</div>
 
 @if (loading()) {
 <div class="state-container">
