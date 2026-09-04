@@ -22,24 +22,31 @@ Transform a completed spec from a build plan into a design anchor document. Foll
 # <Feature/Bug/Chore/Refactor>: <name>
 
 ## Description
+
 <what it does, why it exists, and what user problem it solves>
 
 ## Design Decisions
+
 <key choices made during implementation and the reasoning behind them. Include alternatives that were considered and why they were rejected.>
 
 ## Architecture
+
 <how this feature integrates with the system. Name the files, modules, and patterns involved. Include a brief description of the data flow if applicable.>
 
 ## Key Files
+
 <list the primary files that make up this feature with a one-line description of each>
 
 ## Acceptance Criteria
+
 <updated to reflect what was actually built, not what was originally planned>
 
 ## Validation Commands
+
 <commands to verify this feature still works correctly>
 
 ## Notes
+
 <any caveats, known limitations, or future considerations>
 ```
 

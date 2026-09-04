@@ -25,6 +25,7 @@ issue_json: $3
 ## Relevant Files
 
 Focus on the following files:
+
 - `README.md` - Contains the project overview and instructions.
 - `apps/api/**` - Contains the NestJS backend API.
 - `apps/dashboard/**` - Contains the Angular frontend dashboard.
@@ -38,32 +39,39 @@ Focus on the following files:
 # Chore: <chore name>
 
 ## Metadata
+
 - **issue_number:** {issue_number}
 - **adw_id:** {adw_id}
 - **issue_json:** {issue_json}
 
 ## Chore Description
+
 <describe the chore in detail>
 
 ## Relevant Files
+
 Use these files to resolve the chore:
 
 <find and list the files that are relevant to the chore describe why they are relevant in bullet points. If there are new files that need to be created to accomplish the chore, list them in an h3 'New Files' section.>
 
 ## Step by Step Tasks
+
 IMPORTANT: Execute every step in order, top to bottom.
 
 <list step by step tasks as h3 headers plus bullet points. use as many h3 headers as needed to accomplish the chore. Order matters, start with the foundational shared changes required to fix the chore then move on to the specific changes required to fix the chore. Your last step should be running the `Validation Commands` to validate the chore is complete with zero regressions.>
 
 ## Validation Commands
+
 Execute every command to validate the chore is complete with zero regressions.
 
 <list commands you'll use to validate with 100% confidence the chore is complete with zero regressions. every command must execute without errors so be specific about what you want to run to validate the chore is complete with zero regressions. Don't validate with curl commands.>
+
 - `npx nx run-many -t build` - Build all projects to validate zero regressions
 - `npx nx run-many -t test` - Run all tests to validate the chore is complete with zero regressions
 - `npx nx run-many -t lint` - Lint all projects to validate code quality
 
 ## Notes
+
 <optionally list any additional notes or context that are relevant to the chore that will be helpful to the developer>
 ```
 

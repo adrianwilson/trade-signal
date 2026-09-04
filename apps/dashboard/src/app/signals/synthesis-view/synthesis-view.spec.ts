@@ -24,6 +24,7 @@ describe('SynthesisViewComponent', () => {
       agreements: ['RSI and MACD agree: BUY'],
       disagreements: [],
       reasoningChain: 'AAPL: BUY with 75% confidence based on 2 agents.',
+      reasoningSource: 'template' as const,
       conviction: 80,
       convictionLabel: 'strong' as const,
       lastUpdated: '2026-09-02T10:00:00Z',

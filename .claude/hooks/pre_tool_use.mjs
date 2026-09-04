@@ -21,14 +21,7 @@ function isDangerousRmCommand(command) {
   }
 
   if (/\brm\s+.*-[a-z]*r/.test(normalized)) {
-    const dangerousPaths = [
-      /^\s*\/\s*$/,
-      /\/\*/,
-      /~/,
-      /\$HOME/,
-      /\.\./,
-      /\*$/,
-    ];
+    const dangerousPaths = [/^\s*\/\s*$/, /\/\*/, /~/, /\$HOME/, /\.\./, /\*$/];
     for (const p of dangerousPaths) {
       if (p.test(normalized)) return true;
     }

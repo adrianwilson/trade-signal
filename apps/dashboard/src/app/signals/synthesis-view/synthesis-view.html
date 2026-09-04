@@ -117,7 +117,17 @@
       }
 
       <div class="reasoning-section">
-        <div class="section-label">Reasoning Chain</div>
+        <div class="section-label">
+          Reasoning Chain
+          <span
+            class="reasoning-source-badge"
+            [class]="'source-' + (s.reasoningSource ?? 'template')"
+          >
+            @if (s.reasoningSource === 'ai') {
+            <mat-icon class="source-icon">smart_toy</mat-icon> AI } @else {
+            <mat-icon class="source-icon">code</mat-icon> Template }
+          </span>
+        </div>
         <pre class="reasoning-text">{{ s.reasoningChain }}</pre>
       </div>
 

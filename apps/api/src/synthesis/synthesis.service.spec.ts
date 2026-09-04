@@ -1,10 +1,12 @@
 import { SynthesisService } from './synthesis.service';
 import type { SignalsService } from '../signals/signals.service';
+import type { LlmService } from '../llm/llm.service';
 import type { Signal, AgentContribution } from '@org/signals';
 
 describe('SynthesisService', () => {
   let service: SynthesisService;
   let mockSignals: Partial<SignalsService>;
+  let mockLlm: Partial<LlmService>;
 
   const testSignals: Signal[] = [
     {
@@ -57,7 +59,13 @@ describe('SynthesisService', () => {
     mockSignals = {
       findAll: jest.fn().mockResolvedValue(testSignals),
     };
-    service = new SynthesisService(mockSignals as SignalsService);
+    mockLlm = {
+      generateReasoning: jest.fn().mockResolvedValue(null),
+    };
+    service = new SynthesisService(
+      mockSignals as SignalsService,
+      mockLlm as LlmService,
+    );
   });
 
   describe('synthesize', () => {
@@ -84,8 +92,8 @@ describe('SynthesisService', () => {
   });
 
   describe('aggregateSignals', () => {
-    it('should produce BUY when majority agrees', () => {
-      const result = service.aggregateSignals(
+    it('should produce BUY when majority agrees', async () => {
+      const result = await service.aggregateSignals(
         'AAPL',
         testSignals.filter((s) => s.asset === 'AAPL'),
       );
@@ -93,16 +101,16 @@ describe('SynthesisService', () => {
       expect(result.confidence).toBeGreaterThan(0);
     });
 
-    it('should include contributions from each source', () => {
-      const result = service.aggregateSignals(
+    it('should include contributions from each source', async () => {
+      const result = await service.aggregateSignals(
         'AAPL',
         testSignals.filter((s) => s.asset === 'AAPL'),
       );
       expect(result.contributions.length).toBe(3);
     });
 
-    it('should include reasoning chain', () => {
-      const result = service.aggregateSignals(
+    it('should use template reasoning when LLM returns null', async () => {
+      const result = await service.aggregateSignals(
         'AAPL',
         testSignals.filter((s) => s.asset === 'AAPL'),
       );
@@ -111,8 +119,21 @@ describe('SynthesisService', () => {
       expect(result.reasoningChain).toContain('MACD');
     });
 
-    it('should include conviction score and label', () => {
-      const result = service.aggregateSignals(
+    it('should use LLM reasoning when available', async () => {
+      (mockLlm.generateReasoning as jest.Mock).mockResolvedValue(
+        'AAPL shows strong bullish momentum from technical indicators.',
+      );
+      const result = await service.aggregateSignals(
+        'AAPL',
+        testSignals.filter((s) => s.asset === 'AAPL'),
+      );
+      expect(result.reasoningChain).toBe(
+        'AAPL shows strong bullish momentum from technical indicators.',
+      );
+    });
+
+    it('should include conviction score and label', async () => {
+      const result = await service.aggregateSignals(
         'AAPL',
         testSignals.filter((s) => s.asset === 'AAPL'),
       );

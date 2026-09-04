@@ -43,7 +43,7 @@ with Sandbox() as sandbox:
     # Run Python code
     execution = sandbox.run_code("print('Hello, E2B!')")
     print(execution.text)  # Output: Hello, E2B!
-    
+
     # List files in sandbox
     files = sandbox.files.list('/')
     print(files)
@@ -59,7 +59,7 @@ with Sandbox() as sandbox:
     # Upload a CSV file
     csv_data = "name,age,city\nJohn,25,NYC\nJane,30,LA"
     sandbox.files.write('/tmp/data.csv', csv_data)
-    
+
     # Analyze data with pandas
     code = """
 import pandas as pd
@@ -80,10 +80,10 @@ plt.ylabel('Age')
 plt.savefig('/tmp/plot.png')
 print("\\nPlot saved to /tmp/plot.png")
 """
-    
+
     execution = sandbox.run_code(code)
     print(execution.text)
-    
+
     # Download the generated plot
     plot_data = sandbox.files.read('/tmp/plot.png')
     with open('plot.png', 'wb') as f:
@@ -101,6 +101,7 @@ npm install @e2b/code-interpreter dotenv
 ### 2. Environment Setup
 
 Create a `.env` file:
+
 ```
 E2B_API_KEY=your_api_key_here
 ```
@@ -108,31 +109,31 @@ E2B_API_KEY=your_api_key_here
 ### 3. Basic Usage
 
 ```typescript
-import 'dotenv/config'
-import { Sandbox } from '@e2b/code-interpreter'
+import 'dotenv/config';
+import { Sandbox } from '@e2b/code-interpreter';
 
-const sandbox = await Sandbox.create()
+const sandbox = await Sandbox.create();
 
 // Execute Python code
-const execution = await sandbox.runCode('print("Hello from E2B!")')
-console.log(execution.logs)
+const execution = await sandbox.runCode('print("Hello from E2B!")');
+console.log(execution.logs);
 
 // List files
-const files = await sandbox.files.list('/')
-console.log(files)
+const files = await sandbox.files.list('/');
+console.log(files);
 
-await sandbox.kill()
+await sandbox.kill();
 ```
 
 ### 4. LLM Integration Example
 
 ```typescript
-import { openai } from '@ai-sdk/openai'
-import { generateText } from 'ai'
-import { Sandbox } from '@e2b/code-interpreter'
-import z from 'zod'
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+import { Sandbox } from '@e2b/code-interpreter';
+import z from 'zod';
 
-const model = openai('gpt-4o')
+const model = openai('gpt-4o');
 
 const { text } = await generateText({
   model,
@@ -144,17 +145,17 @@ const { text } = await generateText({
         code: z.string().describe('Python code to execute'),
       }),
       execute: async ({ code }) => {
-        const sandbox = await Sandbox.create()
-        const { text, results } = await sandbox.runCode(code)
-        await sandbox.kill()
-        return results
+        const sandbox = await Sandbox.create();
+        const { text, results } = await sandbox.runCode(code);
+        await sandbox.kill();
+        return results;
       },
     },
   },
-  maxSteps: 2
-})
+  maxSteps: 2,
+});
 
-console.log(text)
+console.log(text);
 ```
 
 ## Sandbox Management
@@ -174,11 +175,11 @@ sandbox.set_timeout(600)  # 10 minutes
 ```typescript
 // TypeScript
 const sandbox = await Sandbox.create({
-  timeoutMs: 300_000  // 5 minutes
-})
+  timeoutMs: 300_000, // 5 minutes
+});
 
 // Extend timeout during runtime
-await sandbox.setTimeout(600_000)  // 10 minutes
+await sandbox.setTimeout(600_000); // 10 minutes
 ```
 
 ### Sandbox Information
@@ -212,13 +213,13 @@ resumed_sandbox = Sandbox.resume(sandbox_id)
 with Sandbox() as sandbox:
     # Install Python packages
     sandbox.commands.run('pip install requests beautifulsoup4')
-    
+
     # Install system packages
     sandbox.commands.run('apt-get update && apt-get install -y curl git')
-    
+
     # Install Node.js packages
     sandbox.commands.run('npm install axios')
-    
+
     # Now use the packages
     sandbox.run_code("""
 import requests
@@ -232,6 +233,7 @@ print(response.json()['name'])
 For pre-installed packages, create a custom template:
 
 1. **Install E2B CLI**:
+
 ```bash
 npm install -g @e2b/cli
 # or
@@ -239,12 +241,14 @@ brew install e2b
 ```
 
 2. **Login and Initialize**:
+
 ```bash
 e2b auth login
 e2b template init
 ```
 
 3. **Edit `e2b.Dockerfile`**:
+
 ```dockerfile
 FROM e2bdev/code-interpreter:latest
 
@@ -254,11 +258,13 @@ RUN apt-get update && apt-get install -y curl git vim
 ```
 
 4. **Build Template**:
+
 ```bash
 e2b template build -c "/root/.jupyter/start-up.sh"
 ```
 
 5. **Use Custom Template**:
+
 ```python
 sandbox = Sandbox(template='your_template_id')
 ```
@@ -271,21 +277,21 @@ sandbox = Sandbox(template='your_template_id')
 with Sandbox() as sandbox:
     # Write text file
     sandbox.files.write('/tmp/hello.txt', 'Hello, World!')
-    
+
     # Write binary file
     with open('local_image.png', 'rb') as f:
         image_data = f.read()
     sandbox.files.write('/tmp/image.png', image_data)
-    
+
     # Read file
     content = sandbox.files.read('/tmp/hello.txt', text=True)
     print(content)
-    
+
     # List directory
     files = sandbox.files.list('/tmp')
     for file in files:
         print(f"{file.name}: {file.type}")
-    
+
     # Download file
     result_data = sandbox.files.read('/tmp/result.csv')
     with open('local_result.csv', 'wb') as f:
@@ -300,17 +306,17 @@ Sandboxes have full internet access and can host services:
 with Sandbox() as sandbox:
     # Start a web server
     process = sandbox.commands.run('python -m http.server 8000', background=True)
-    
+
     # Get public URL
     host = sandbox.get_host(8000)
     url = f"https://{host}"
     print(f"Server running at: {url}")
-    
+
     # Make requests from outside
     import requests
     response = requests.get(url)
     print(response.text)
-    
+
     # Clean up
     process.kill()
 ```
@@ -371,7 +377,7 @@ with Sandbox() as sandbox:
 with Sandbox() as sandbox:
     # Upload dataset
     sandbox.files.write('/tmp/sales.csv', sales_data)
-    
+
     # Generate analysis code with LLM
     analysis_code = """
 import pandas as pd
@@ -388,9 +394,9 @@ df.hist(bins=20, ax=axes)
 plt.tight_layout()
 plt.savefig('/tmp/analysis.png')
 """
-    
+
     execution = sandbox.run_code(analysis_code)
-    
+
     # Download results
     chart = sandbox.files.read('/tmp/analysis.png')
     with open('analysis.png', 'wb') as f:
@@ -412,7 +418,7 @@ def fibonacci(n):
 for i in range(10):
     print(f"fib({i}) = {fibonacci(i)}")
 """
-    
+
     execution = sandbox.run_code(generated_code)
     print("Code execution result:", execution.text)
 ```
@@ -423,7 +429,7 @@ for i in range(10):
 with Sandbox() as sandbox:
     # Install required packages
     sandbox.commands.run('pip install requests beautifulsoup4')
-    
+
     scraping_code = """
 import requests
 from bs4 import BeautifulSoup
@@ -447,9 +453,9 @@ print(df.head())
 # Save results
 df.to_csv('/tmp/quotes.csv', index=False)
 """
-    
+
     execution = sandbox.run_code(scraping_code)
-    
+
     # Download scraped data
     quotes_data = sandbox.files.read('/tmp/quotes.csv', text=True)
     print("Scraped data:", quotes_data[:200])
@@ -510,7 +516,7 @@ finally:
 ```python
 with Sandbox() as sandbox:
     execution = sandbox.run_code("print(1/0)")  # This will error
-    
+
     if execution.error:
         print(f"Error occurred: {execution.error}")
         print(f"Error type: {execution.error.name}")
@@ -525,11 +531,11 @@ with Sandbox() as sandbox:
 with Sandbox() as sandbox:
     # For background processes
     process = sandbox.commands.run('python long_script.py', background=True)
-    
+
     # Check if still running
     if process.is_alive():
         print("Process still running...")
-    
+
     # Kill if needed
     process.kill()
 ```
@@ -540,10 +546,10 @@ with Sandbox() as sandbox:
 with Sandbox() as sandbox:
     # Create directories
     sandbox.commands.run('mkdir -p /tmp/project/data')
-    
+
     # Set permissions
     sandbox.commands.run('chmod +x /tmp/script.sh')
-    
+
     # Basic environment variables (see detailed section below)
     result = sandbox.commands.run('export MY_VAR=value && echo $MY_VAR')
     print(result.stdout)
@@ -556,6 +562,7 @@ E2B sandboxes provide flexible environment variable management for secure config
 ### Default Environment Variables
 
 #### Detecting Sandbox Environment
+
 Every E2B sandbox automatically sets `E2B_SANDBOX=true`, allowing code to detect when running in a sandbox:
 
 ```python
@@ -568,9 +575,9 @@ else:
 ```
 
 ```javascript
-const sandbox = await Sandbox.create()
-const result = await sandbox.commands.run('echo $E2B_SANDBOX')
-console.log(result.stdout) // Output: true
+const sandbox = await Sandbox.create();
+const result = await sandbox.commands.run('echo $E2B_SANDBOX');
+console.log(result.stdout); // Output: true
 ```
 
 ### Setting Environment Variables
@@ -578,6 +585,7 @@ console.log(result.stdout) // Output: true
 E2B supports three ways to set environment variables with different scopes and priorities:
 
 #### 1. Global Environment Variables (Sandbox Creation)
+
 Set environment variables that persist for the entire sandbox session:
 
 ```python
@@ -596,21 +604,22 @@ sandbox.run_code('import os; print(os.environ["DATABASE_URL"])')
 
 ```javascript
 // JavaScript/TypeScript
-import { Sandbox } from '@e2b/code-interpreter'
+import { Sandbox } from '@e2b/code-interpreter';
 
 const sandbox = await Sandbox.create({
   envs: {
-    'DATABASE_URL': 'postgresql://localhost:5432/mydb',
-    'API_KEY': 'secret-key-123',
-    'DEBUG': 'true'
-  }
-})
+    DATABASE_URL: 'postgresql://localhost:5432/mydb',
+    API_KEY: 'secret-key-123',
+    DEBUG: 'true',
+  },
+});
 
 // All commands will have access to these variables
-await sandbox.commands.run('echo $DATABASE_URL')
+await sandbox.commands.run('echo $DATABASE_URL');
 ```
 
 #### 2. Code Execution Environment Variables
+
 Set environment variables for specific code execution (overrides global variables):
 
 ```python
@@ -629,20 +638,21 @@ with Sandbox() as sandbox:
 
 ```javascript
 // JavaScript/TypeScript
-const sandbox = await Sandbox.create()
+const sandbox = await Sandbox.create();
 
 const result = await sandbox.runCode(
   'import os; print(os.environ.get("API_KEY"))',
   {
     envs: {
-      'API_KEY': 'temporary-key-456',
-      'ENVIRONMENT': 'testing'
-    }
-  }
-)
+      API_KEY: 'temporary-key-456',
+      ENVIRONMENT: 'testing',
+    },
+  },
+);
 ```
 
 #### 3. Command Execution Environment Variables
+
 Set environment variables for specific command execution:
 
 ```python
@@ -661,25 +671,27 @@ with Sandbox() as sandbox:
 
 ```javascript
 // JavaScript/TypeScript
-const sandbox = await Sandbox.create()
+const sandbox = await Sandbox.create();
 
 await sandbox.commands.run('echo $MY_VAR', {
   envs: {
-    'MY_VAR': 'command-specific-value'
-  }
-})
+    MY_VAR: 'command-specific-value',
+  },
+});
 ```
 
 ### Environment Variable Priority
 
 Variables are resolved in this order (highest to lowest priority):
+
 1. **Command/Code execution variables** (highest priority)
-2. **Global sandbox variables** 
+2. **Global sandbox variables**
 3. **Default sandbox variables** (like `E2B_SANDBOX`)
 
 ### Common Use Cases
 
 #### Secure API Key Management
+
 ```python
 # Pass secrets safely to sandbox code
 with Sandbox(envs={'OPENAI_API_KEY': os.environ['OPENAI_API_KEY']}) as sandbox:
@@ -698,6 +710,7 @@ print(response.choices[0].message.content)
 ```
 
 #### Configuration Management
+
 ```python
 # Different configurations for different environments
 config_envs = {
@@ -719,6 +732,7 @@ with Sandbox(envs=config_envs[env]) as sandbox:
 ```
 
 #### Dynamic Environment Setup
+
 ```python
 # Set environment based on runtime conditions
 def create_sandbox_with_env(user_id, permissions):
@@ -728,7 +742,7 @@ def create_sandbox_with_env(user_id, permissions):
         'SESSION_ID': generate_session_id(),
         'SANDBOX_MODE': 'user_session'
     }
-    
+
     return Sandbox(envs=envs)
 
 # Usage
@@ -739,16 +753,19 @@ sandbox.run_code('import os; print(f"User {os.environ[\"USER_ID\"]} permissions:
 ### Best Practices
 
 #### Security
+
 - Never log or print sensitive environment variables
 - Use sandbox-scoped variables for secrets rather than global system env vars
 - Clean up sensitive variables after use
 
 #### Performance
+
 - Set common variables globally to avoid repetitive passing
 - Use command-specific variables for one-off customizations
 - Consider variable resolution overhead for high-frequency operations
 
 #### Debugging
+
 ```python
 # Debug environment variables in sandbox
 with Sandbox() as sandbox:
@@ -756,7 +773,7 @@ with Sandbox() as sandbox:
     result = sandbox.commands.run('env | sort')
     print("Available environment variables:")
     print(result.stdout)
-    
+
     # Check specific variable
     check = sandbox.commands.run('echo "E2B_SANDBOX is set to: $E2B_SANDBOX"')
     print(check.stdout)
@@ -786,11 +803,11 @@ with Sandbox() as sandbox:
     # Check system info
     info = sandbox.commands.run('uname -a && python --version && node --version')
     print(info.stdout)
-    
+
     # Monitor resources
     resources = sandbox.commands.run('free -h && df -h')
     print(resources.stdout)
-    
+
     # Check network
     network = sandbox.commands.run('curl -I https://google.com')
     print(network.stdout)
