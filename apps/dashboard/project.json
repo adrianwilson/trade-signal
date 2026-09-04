@@ -81,7 +81,8 @@
           "src/app/app.config.ts",
           "src/app/app.routes.ts",
           "src/app/layout/**",
-          "src/app/services/auth.interceptor.ts"
+          "src/app/services/auth.interceptor.ts",
+          "src/app/services/websocket.service.ts"
         ],
         "coverageReporters": ["text", "text-summary", "html"]
       }
