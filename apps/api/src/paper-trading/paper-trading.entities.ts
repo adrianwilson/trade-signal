@@ -73,4 +73,13 @@ export class PaperTradeEntity {
 
   @Column({ type: 'real', nullable: true })
   pnlPercent!: number | null;
+
+  @Column({ type: 'real', nullable: true })
+  stopLoss!: number | null;
+
+  @Column({ type: 'real', nullable: true })
+  takeProfit!: number | null;
+
+  @Column({ type: 'text', nullable: true })
+  closeReason!: string | null;
 }

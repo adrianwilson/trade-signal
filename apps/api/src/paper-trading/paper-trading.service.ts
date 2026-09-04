@@ -1,12 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Cron } from '@nestjs/schedule';
 import { PaperAccountEntity, PaperTradeEntity } from './paper-trading.entities';
 import { SignalsService } from '../signals/signals.service';
 import { MarketDataService } from '../market-data/market-data.service';
 import { randomUUID } from 'crypto';
 
 const STARTING_BALANCE = 100_000;
+const DEFAULT_SL_PCT = 0.05; // 5% stop-loss
+const DEFAULT_TP_PCT = 0.1; // 10% take-profit
 
 export interface PaperAccountSummary {
   id: string;
@@ -21,6 +24,8 @@ export interface PaperAccountSummary {
     avgPrice: number;
     currentPrice: number | null;
     unrealizedPnl: number | null;
+    stopLoss: number | null;
+    takeProfit: number | null;
   }[];
   createdAt: string;
 }
@@ -41,6 +46,8 @@ export interface PaperPerformance {
 
 @Injectable()
 export class PaperTradingService {
+  private readonly logger = new Logger(PaperTradingService.name);
+
   constructor(
     @InjectRepository(PaperAccountEntity)
     private readonly accountRepo: Repository<PaperAccountEntity>,
@@ -81,16 +88,27 @@ export class PaperTradingService {
     // Group open trades by asset to get positions
     const positions = new Map<
       string,
-      { quantity: number; totalCost: number; asset: string }
+      {
+        quantity: number;
+        totalCost: number;
+        asset: string;
+        stopLoss: number | null;
+        takeProfit: number | null;
+      }
     >();
     for (const trade of openTrades) {
       const pos = positions.get(trade.asset) ?? {
         quantity: 0,
         totalCost: 0,
         asset: trade.asset,
+        stopLoss: null,
+        takeProfit: null,
       };
       pos.quantity += trade.quantity;
       pos.totalCost += trade.quantity * trade.entryPrice;
+      // Use the first trade's SL/TP (all trades for same asset share the same)
+      if (!pos.stopLoss) pos.stopLoss = trade.stopLoss;
+      if (!pos.takeProfit) pos.takeProfit = trade.takeProfit;
       positions.set(trade.asset, pos);
     }
 
@@ -115,6 +133,8 @@ export class PaperTradingService {
         avgPrice,
         currentPrice,
         unrealizedPnl,
+        stopLoss: pos.stopLoss,
+        takeProfit: pos.takeProfit,
       });
     }
 
@@ -168,12 +188,20 @@ export class PaperTradingService {
 
     const cost = quantity * quote.price;
 
+    const isBuy = signal.direction === 'BUY';
+    const stopLoss = isBuy
+      ? Math.round(quote.price * (1 - DEFAULT_SL_PCT) * 100) / 100
+      : Math.round(quote.price * (1 + DEFAULT_SL_PCT) * 100) / 100;
+    const takeProfit = isBuy
+      ? Math.round(quote.price * (1 + DEFAULT_TP_PCT) * 100) / 100
+      : Math.round(quote.price * (1 - DEFAULT_TP_PCT) * 100) / 100;
+
     const trade: PaperTradeEntity = {
       id: randomUUID(),
       accountId,
       asset: signal.asset,
       assetClass: signal.assetClass,
-      side: signal.direction === 'BUY' ? 'buy' : 'sell',
+      side: isBuy ? 'buy' : 'sell',
       quantity,
       entryPrice: quote.price,
       exitPrice: null,
@@ -186,6 +214,9 @@ export class PaperTradingService {
       exitedAt: null,
       pnl: null,
       pnlPercent: null,
+      stopLoss,
+      takeProfit,
+      closeReason: null,
     };
 
     await this.tradeRepo.save(trade);
@@ -199,6 +230,7 @@ export class PaperTradingService {
   async closePosition(
     accountId: string,
     asset: string,
+    reason: 'manual' | 'stop-loss' | 'take-profit' = 'manual',
   ): Promise<PaperTradeEntity[]> {
     const account = await this.accountRepo.findOneBy({ id: accountId });
     if (!account) throw new NotFoundException('Account not found');
@@ -228,6 +260,7 @@ export class PaperTradingService {
       trade.exitedAt = new Date().toISOString();
       trade.pnl = pnl;
       trade.pnlPercent = (pnl / (trade.entryPrice * trade.quantity)) * 100;
+      trade.closeReason = reason;
       await this.tradeRepo.save(trade);
       account.cashBalance += exitPrice * trade.quantity;
     }
@@ -243,6 +276,58 @@ export class PaperTradingService {
     await this.tradeRepo.delete({ accountId });
     account.cashBalance = STARTING_BALANCE;
     return this.accountRepo.save(account);
+  }
+
+  @Cron('0 */5 * * * *')
+  async checkStopLossTakeProfit(): Promise<void> {
+    const openTrades = await this.tradeRepo.findBy({ status: 'open' });
+    if (openTrades.length === 0) return;
+
+    const assetPrices = new Map<string, number>();
+    const accountIds = new Set<string>();
+
+    for (const trade of openTrades) {
+      if (!trade.stopLoss && !trade.takeProfit) continue;
+
+      let price = assetPrices.get(trade.asset);
+      if (price === undefined) {
+        try {
+          const symbol = this.marketDataService.mapSymbol(
+            trade.asset,
+            trade.assetClass,
+          );
+          const quote = await this.marketDataService.getQuote(
+            symbol,
+            trade.asset,
+          );
+          price = quote?.price ?? undefined;
+          if (price !== undefined) assetPrices.set(trade.asset, price);
+        } catch {
+          continue;
+        }
+      }
+      if (price === undefined) continue;
+
+      let reason: 'stop-loss' | 'take-profit' | null = null;
+
+      if (trade.side === 'buy') {
+        if (trade.stopLoss && price <= trade.stopLoss) reason = 'stop-loss';
+        else if (trade.takeProfit && price >= trade.takeProfit)
+          reason = 'take-profit';
+      } else {
+        if (trade.stopLoss && price >= trade.stopLoss) reason = 'stop-loss';
+        else if (trade.takeProfit && price <= trade.takeProfit)
+          reason = 'take-profit';
+      }
+
+      if (reason) {
+        accountIds.add(trade.accountId);
+        this.logger.log(
+          `${reason.toUpperCase()}: ${trade.asset} ${trade.side} at ${price} (entry: ${trade.entryPrice})`,
+        );
+        await this.closePosition(trade.accountId, trade.asset, reason);
+      }
+    }
   }
 
   async getTrades(accountId: string): Promise<PaperTradeEntity[]> {
