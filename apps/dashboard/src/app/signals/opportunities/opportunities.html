@@ -1,0 +1,104 @@
+<div class="header-row">
+  <h2>Opportunities</h2>
+  <button
+    mat-icon-button
+    (click)="refresh()"
+    [disabled]="loading()"
+    aria-label="Refresh"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
+
+@if (loading()) {
+<div class="state-container">
+  <mat-spinner diameter="48"></mat-spinner>
+  <div class="scan-hint">Scanning 40 assets for signals...</div>
+</div>
+} @else if (error()) {
+<mat-card class="error-card">
+  <mat-card-content>{{ error() }}</mat-card-content>
+</mat-card>
+} @else if (opportunities().length === 0) {
+<div class="state-container empty-state">
+  <mat-icon class="empty-icon">search_off</mat-icon>
+  <div>No high-confidence opportunities found right now.</div>
+  <div class="empty-hint">Scanner checks 40 assets every 15 minutes.</div>
+</div>
+} @else {
+<table mat-table [dataSource]="opportunities()" class="opportunities-table">
+  <ng-container matColumnDef="rank">
+    <th mat-header-cell *matHeaderCellDef>#</th>
+    <td mat-cell *matCellDef="let opp; let i = index">{{ i + 1 }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="asset">
+    <th mat-header-cell *matHeaderCellDef>Asset</th>
+    <td mat-cell *matCellDef="let opp">
+      <span class="asset-name">{{ opp.asset }}</span>
+      <span class="asset-class">{{ opp.assetClass }}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="direction">
+    <th mat-header-cell *matHeaderCellDef>Signal</th>
+    <td mat-cell *matCellDef="let opp">
+      <mat-chip
+        [style.background-color]="directionColor(opp.direction)"
+        style="color: white"
+      >
+        {{ opp.direction }}
+      </mat-chip>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="confidence">
+    <th mat-header-cell *matHeaderCellDef>Confidence</th>
+    <td mat-cell *matCellDef="let opp">
+      <strong>{{ opp.confidence }}%</strong>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="rsi">
+    <th mat-header-cell *matHeaderCellDef>RSI</th>
+    <td mat-cell *matCellDef="let opp">
+      @if (opp.rsi !== null) { {{ opp.rsi | number : '1.1-1' }} } @else { — }
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="macd">
+    <th mat-header-cell *matHeaderCellDef>MACD</th>
+    <td mat-cell *matCellDef="let opp">
+      <mat-chip
+        [style.background-color]="directionColor(opp.macdSignal)"
+        style="color: white"
+        class="small-chip"
+      >
+        {{ opp.macdSignal }}
+      </mat-chip>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="price">
+    <th mat-header-cell *matHeaderCellDef>Price</th>
+    <td mat-cell *matCellDef="let opp">
+      @if (opp.price) { {{ opp.price | currency }} } @else { — }
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="change">
+    <th mat-header-cell *matHeaderCellDef>Change</th>
+    <td
+      mat-cell
+      *matCellDef="let opp"
+      [style.color]="changeColor(opp.changePercent)"
+    >
+      @if (opp.changePercent !== null) { {{ opp.changePercent >= 0 ? '+' : ''
+      }}{{ opp.changePercent | number : '1.2-2' }}% } @else { — }
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
+}

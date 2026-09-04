@@ -118,6 +118,20 @@ export interface PaperPerformance {
   >;
 }
 
+export interface Opportunity {
+  asset: string;
+  assetClass: string;
+  direction: string;
+  confidence: number;
+  rsi: number | null;
+  macdSignal: string;
+  smaSignal: string;
+  bollingerSignal: string;
+  price: number | null;
+  changePercent: number | null;
+  scannedAt: string;
+}
+
 export interface WatchlistItem {
   id: string;
   asset: string;
@@ -289,6 +303,12 @@ export class SignalService {
   getPaperPerformance(accountId: string): Observable<PaperPerformance> {
     return this.http.get<PaperPerformance>(
       `${this.baseUrl}/paper/accounts/${accountId}/performance`,
+    );
+  }
+
+  getOpportunities(): Observable<Opportunity[]> {
+    return this.http.get<Opportunity[]>(
+      `${this.baseUrl}/scanner/opportunities`,
     );
   }
 

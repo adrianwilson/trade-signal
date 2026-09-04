@@ -9,6 +9,7 @@ import { PortfolioComponent } from './signals/portfolio/portfolio';
 import { LeaderboardComponent } from './signals/leaderboard/leaderboard';
 import { TrustDashboardComponent } from './signals/trust-dashboard/trust-dashboard';
 import { PaperTradingComponent } from './signals/paper-trading/paper-trading';
+import { OpportunitiesComponent } from './signals/opportunities/opportunities';
 
 export const appRoutes: Route[] = [
   { path: 'login', component: LoginComponent },
@@ -17,6 +18,7 @@ export const appRoutes: Route[] = [
     component: LayoutComponent,
     children: [
       { path: 'synthesis', component: SynthesisViewComponent },
+      { path: 'opportunities', component: OpportunitiesComponent },
       { path: 'watchlist', component: WatchlistComponent },
       { path: 'paper', component: PaperTradingComponent },
       { path: 'portfolio', component: PortfolioComponent },
