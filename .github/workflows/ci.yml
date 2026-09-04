@@ -34,6 +34,7 @@ jobs:
       - run: pnpm exec nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e"
 
       - run: pnpm exec nx record -- pnpm exec nx format:check --base="remotes/origin/main"
-      - run: pnpm exec nx run-many -t lint test build typecheck e2e
+      - run: pnpm exec nx run-many -t lint build typecheck e2e
+      - run: pnpm exec nx run-many -t test -- --forceExit
       - run: pnpm exec nx fix-ci
         if: always()
