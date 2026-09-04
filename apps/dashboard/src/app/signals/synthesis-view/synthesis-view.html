@@ -1,17 +1,30 @@
 <div class="header-row">
   <h2>Signal Synthesis</h2>
   @if (!loading()) {
-  <mat-form-field appearance="outline" class="filter-field">
-    <mat-label>Asset Class</mat-label>
-    <mat-select
-      [value]="selectedClass()"
-      (selectionChange)="selectedClass.set($event.value)"
+  <div class="header-controls">
+    <mat-button-toggle-group
+      [value]="selectedTimeframe()"
+      (change)="onTimeframeChange($event.value)"
+      class="timeframe-toggle"
     >
-      @for (cls of assetClasses(); track cls) {
-      <mat-option [value]="cls">{{ cls === 'all' ? 'All' : cls }}</mat-option>
+      @for (tf of timeframes; track tf) {
+      <mat-button-toggle [value]="tf"
+        >{{ timeframeLabels[tf] }}</mat-button-toggle
+      >
       }
-    </mat-select>
-  </mat-form-field>
+    </mat-button-toggle-group>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Asset Class</mat-label>
+      <mat-select
+        [value]="selectedClass()"
+        (selectionChange)="selectedClass.set($event.value)"
+      >
+        @for (cls of assetClasses(); track cls) {
+        <mat-option [value]="cls">{{ cls === 'all' ? 'All' : cls }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
   }
 </div>
 
@@ -27,7 +40,7 @@
 <div class="state-container empty-state">No synthesis data available.</div>
 } @else {
 <div class="synthesis-grid">
-  @for (s of syntheses(); track s.asset) {
+  @for (s of syntheses(); track trackSynthesis($index, s)) {
   <mat-card class="synthesis-card">
     <mat-card-header>
       <mat-card-title>
@@ -48,6 +61,18 @@
         >
           {{ s.convictionLabel }}
         </span>
+        @if (s.timeframe) {
+        <span class="timeframe-badge">
+          {{ timeframeLabels[s.timeframe] || s.timeframe }}
+        </span>
+        } @if (s.timeframeAlignment) {
+        <span
+          class="alignment-badge"
+          [class]="'alignment-' + s.timeframeAlignment"
+        >
+          {{ s.timeframeAlignment }}
+        </span>
+        }
       </mat-card-subtitle>
     </mat-card-header>
 

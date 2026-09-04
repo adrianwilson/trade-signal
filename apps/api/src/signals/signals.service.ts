@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Signal, ManualSignalInput } from '@org/signals';
+import { Signal, ManualSignalInput, Timeframe } from '@org/signals';
 import { randomUUID } from 'crypto';
 import { SignalEntity } from './signal.entity';
 import { EventsGateway } from '../events/events.gateway';
@@ -92,7 +92,9 @@ export class SignalsService implements OnModuleInit {
     return this.repository.findOneBy({ id }) as Promise<Signal | null>;
   }
 
-  async create(input: ManualSignalInput): Promise<Signal> {
+  async create(
+    input: ManualSignalInput & { timeframe?: Timeframe },
+  ): Promise<Signal> {
     const signal: Signal = {
       id: randomUUID(),
       asset: input.asset,
@@ -101,6 +103,7 @@ export class SignalsService implements OnModuleInit {
       confidence: input.confidence,
       source: input.source ?? 'manual',
       reasoning: input.notes,
+      timeframe: input.timeframe ?? 'swing',
       timestamp: new Date().toISOString(),
     };
     const saved = await this.repository.save(signal);

@@ -6,6 +6,7 @@ import type {
   SignalDirection,
   AggregatedSignal,
   AgentContribution,
+  Timeframe,
 } from '@org/signals';
 
 const SOURCE_WEIGHTS: Record<string, number> = {
@@ -43,32 +44,75 @@ export class SynthesisService implements OnModuleInit {
 
   async synthesize(): Promise<AggregatedSignal[]> {
     const signals = await this.signalsService.findAll();
-    const grouped = this.groupByAsset(signals);
+    const grouped = this.groupByAssetAndTimeframe(signals);
     const results: AggregatedSignal[] = [];
 
-    for (const [asset, assetSignals] of grouped) {
-      const result = this.aggregateSignals(asset, assetSignals);
+    for (const [key, groupSignals] of grouped) {
+      const [asset, timeframe] = key.split(':');
+      const result = this.aggregateSignals(asset, groupSignals);
+      result.timeframe = (timeframe as Timeframe) || undefined;
       results.push(result);
-      this.synthesisCache.set(asset, result);
+      this.synthesisCache.set(key, result);
     }
+
+    // Calculate cross-timeframe alignment for each asset
+    this.applyTimeframeAlignment(results);
 
     return results;
   }
 
-  getAll(): AggregatedSignal[] {
-    return Array.from(this.synthesisCache.values());
+  getAll(timeframe?: string): AggregatedSignal[] {
+    const all = Array.from(this.synthesisCache.values());
+    if (!timeframe || timeframe === 'all') return all;
+    return all.filter((s) => s.timeframe === timeframe);
   }
 
   getByAsset(asset: string): AggregatedSignal | null {
-    return this.synthesisCache.get(asset) ?? null;
+    // Try exact match first (legacy), then swing
+    return (
+      this.synthesisCache.get(asset) ??
+      this.synthesisCache.get(`${asset}:swing`) ??
+      null
+    );
   }
 
-  private groupByAsset(signals: Signal[]): Map<string, Signal[]> {
+  calculateTimeframeAlignment(
+    asset: string,
+    results: AggregatedSignal[],
+  ): 'aligned' | 'mixed' | 'divergent' | undefined {
+    const assetResults = results.filter(
+      (r) => r.asset === asset && r.timeframe,
+    );
+    if (assetResults.length < 2) return undefined;
+
+    const directions = assetResults.map((r) => r.direction);
+    const unique = new Set(directions);
+
+    if (unique.size === 1) return 'aligned';
+    if (unique.has('BUY') && unique.has('SELL')) return 'divergent';
+    return 'mixed';
+  }
+
+  private applyTimeframeAlignment(results: AggregatedSignal[]): void {
+    const assets = new Set(results.map((r) => r.asset));
+    for (const asset of assets) {
+      const alignment = this.calculateTimeframeAlignment(asset, results);
+      for (const r of results) {
+        if (r.asset === asset) {
+          r.timeframeAlignment = alignment;
+        }
+      }
+    }
+  }
+
+  private groupByAssetAndTimeframe(signals: Signal[]): Map<string, Signal[]> {
     const grouped = new Map<string, Signal[]>();
     for (const signal of signals) {
-      const existing = grouped.get(signal.asset) ?? [];
+      const tf = signal.timeframe ?? 'swing';
+      const key = `${signal.asset}:${tf}`;
+      const existing = grouped.get(key) ?? [];
       existing.push(signal);
-      grouped.set(signal.asset, existing);
+      grouped.set(key, existing);
     }
     return grouped;
   }

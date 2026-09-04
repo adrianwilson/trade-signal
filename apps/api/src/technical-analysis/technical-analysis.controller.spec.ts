@@ -7,7 +7,7 @@ describe('TechnicalAnalysisController', () => {
 
   beforeEach(() => {
     mockService = {
-      analyze: jest.fn().mockResolvedValue({
+      analyzeTimeframe: jest.fn().mockResolvedValue({
         symbol: 'AAPL',
         rsi: 45.5,
         rsiSignal: 'HOLD',
@@ -26,10 +26,22 @@ describe('TechnicalAnalysisController', () => {
       const result = await controller.analyze('AAPL');
       expect(result.symbol).toBe('AAPL');
       expect(result.rsi).toBe(45.5);
-      expect(mockService.analyze).toHaveBeenCalledWith(
+      expect(mockService.analyzeTimeframe).toHaveBeenCalledWith(
         'AAPL',
         'AAPL',
         'equity',
+        'swing',
+      );
+    });
+
+    it('should pass timeframe query param', async () => {
+      const result = await controller.analyze('AAPL', 'intraday');
+      expect(result.symbol).toBe('AAPL');
+      expect(mockService.analyzeTimeframe).toHaveBeenCalledWith(
+        'AAPL',
+        'AAPL',
+        'equity',
+        'intraday',
       );
     });
   });

@@ -1,5 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { TechnicalAnalysisService } from './technical-analysis.service';
+import type { Timeframe } from '@org/signals';
+import { TIMEFRAME_CONFIG } from './timeframes';
 
 @Controller('technical-analysis')
 export class TechnicalAnalysisController {
@@ -8,7 +10,19 @@ export class TechnicalAnalysisController {
   ) {}
 
   @Get(':symbol')
-  async analyze(@Param('symbol') symbol: string) {
-    return this.technicalAnalysisService.analyze(symbol, symbol, 'equity');
+  async analyze(
+    @Param('symbol') symbol: string,
+    @Query('timeframe') timeframe?: string,
+  ) {
+    const tf =
+      timeframe && timeframe in TIMEFRAME_CONFIG
+        ? (timeframe as Timeframe)
+        : 'swing';
+    return this.technicalAnalysisService.analyzeTimeframe(
+      symbol,
+      symbol,
+      'equity',
+      tf,
+    );
   }
 }

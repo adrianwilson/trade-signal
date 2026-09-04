@@ -53,6 +53,21 @@ describe('SynthesisViewComponent', () => {
       );
       return ['all', ...Array.from(classes)];
     });
+    component.selectedTimeframe = signal('all');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any)['timeframes'] = [
+      'all',
+      'intraday',
+      'swing',
+      'long-term',
+    ];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any)['timeframeLabels'] = {
+      all: 'All',
+      intraday: 'Intraday (1H)',
+      swing: 'Swing (1D)',
+      'long-term': 'Long-term (1W)',
+    };
     component.paperAccountId = signal<string | null>(null);
     component.followedAssets = signal(new Set<string>());
     component.followingInProgress = signal(new Set<string>());
@@ -95,6 +110,18 @@ describe('SynthesisViewComponent', () => {
       expect(component.syntheses().length).toBe(1);
       component.selectedClass.set('crypto');
       expect(component.syntheses().length).toBe(0);
+    });
+  });
+
+  describe('timeframe selection', () => {
+    it('should default to all', () => {
+      expect(component.selectedTimeframe()).toBe('all');
+    });
+
+    it('should call getSynthesis with timeframe on change', () => {
+      component.onTimeframeChange('swing');
+      expect(component.selectedTimeframe()).toBe('swing');
+      expect(mockSignalService.getSynthesis).toHaveBeenCalledWith('swing');
     });
   });
 

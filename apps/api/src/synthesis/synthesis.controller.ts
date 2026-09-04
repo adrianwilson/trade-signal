@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { SynthesisService } from './synthesis.service';
 
 @Controller('synthesis')
@@ -6,10 +6,12 @@ export class SynthesisController {
   constructor(private readonly synthesisService: SynthesisService) {}
 
   @Get()
-  async getAll() {
-    const cached = this.synthesisService.getAll();
+  async getAll(@Query('timeframe') timeframe?: string) {
+    const cached = this.synthesisService.getAll(timeframe);
     if (cached.length > 0) return cached;
-    return this.synthesisService.synthesize();
+    const results = await this.synthesisService.synthesize();
+    if (!timeframe || timeframe === 'all') return results;
+    return results.filter((s) => s.timeframe === timeframe);
   }
 
   @Get(':asset')
