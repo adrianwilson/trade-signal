@@ -23,6 +23,9 @@ export class SignalEntity {
   @Column({ type: 'text', nullable: true })
   reasoning?: string;
 
+  @Column({ type: 'text', default: 'swing' })
+  timeframe!: string;
+
   @Column('text')
   timestamp!: string;
 }

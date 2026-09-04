@@ -11,7 +11,8 @@ import {
   calculateBollingerBands,
 } from './indicators';
 import type { CrossoverResult } from './indicators';
-import type { SignalDirection } from '@org/signals';
+import type { SignalDirection, Timeframe } from '@org/signals';
+import { TIMEFRAME_CONFIG, ALL_TIMEFRAMES } from './timeframes';
 
 export interface AnalysisResult {
   symbol: string;
@@ -39,12 +40,35 @@ export class TechnicalAnalysisService {
     private readonly signalsService: SignalsService,
   ) {}
 
+  async analyzeTimeframe(
+    yahooSymbol: string,
+    asset: string,
+    assetClass: string,
+    timeframe: Timeframe,
+  ): Promise<AnalysisResult> {
+    const config = TIMEFRAME_CONFIG[timeframe];
+    return this.analyze(
+      yahooSymbol,
+      asset,
+      assetClass,
+      config.historyDays,
+      config.interval,
+    );
+  }
+
   async analyze(
     yahooSymbol: string,
     asset: string,
     assetClass: string,
+    days = 220,
+    interval = '1d',
   ): Promise<AnalysisResult> {
-    const history = await this.marketDataService.getHistory(yahooSymbol, 220);
+    const history = await this.marketDataService.getHistory(
+      yahooSymbol,
+      days,
+      undefined,
+      interval,
+    );
     const closes = history.map((h) => h.close);
 
     const rsiValues = calculateRSI(closes, 14);
@@ -166,70 +190,79 @@ export class TechnicalAnalysisService {
         signal.assetClass,
       );
 
-      try {
-        const result = await this.analyze(
-          yahooSymbol,
-          signal.asset,
-          signal.assetClass,
-        );
+      for (const timeframe of ALL_TIMEFRAMES) {
+        try {
+          const result = await this.analyzeTimeframe(
+            yahooSymbol,
+            signal.asset,
+            signal.assetClass,
+            timeframe,
+          );
 
-        if (result.rsi !== null && result.rsiSignal !== 'HOLD') {
-          await this.signalsService.create({
-            asset: signal.asset,
-            assetClass: signal.assetClass as
-              'equity' | 'crypto' | 'forex' | 'options',
-            direction: result.rsiSignal,
-            confidence: Math.round(Math.abs(result.rsi - 50) * 2),
-            notes: `RSI at ${result.rsi.toFixed(1)}`,
-            source: 'rsi',
-          });
-        }
+          const tfLabel = TIMEFRAME_CONFIG[timeframe].label;
+          const assetClass = signal.assetClass as
+            'equity' | 'crypto' | 'forex' | 'options';
 
-        if (result.macd !== null && result.macdSignal !== 'HOLD') {
-          await this.signalsService.create({
-            asset: signal.asset,
-            assetClass: signal.assetClass as
-              'equity' | 'crypto' | 'forex' | 'options',
-            direction: result.macdSignal,
-            confidence: Math.min(
-              Math.round(Math.abs(result.macd.histogram) * 100),
-              100,
-            ),
-            notes: `MACD histogram at ${result.macd.histogram.toFixed(4)}`,
-            source: 'macd',
-          });
-        }
+          if (result.rsi !== null && result.rsiSignal !== 'HOLD') {
+            await this.signalsService.create({
+              asset: signal.asset,
+              assetClass,
+              direction: result.rsiSignal,
+              confidence: Math.round(Math.abs(result.rsi - 50) * 2),
+              notes: `RSI at ${result.rsi.toFixed(1)} [${tfLabel}]`,
+              source: 'rsi',
+              timeframe,
+            });
+          }
 
-        if (result.crossover.occurred) {
-          await this.signalsService.create({
-            asset: signal.asset,
-            assetClass: signal.assetClass as
-              'equity' | 'crypto' | 'forex' | 'options',
-            direction: result.smaSignal,
-            confidence: 75,
-            notes: `SMA crossover: ${result.crossover.type === 'bullish' ? 'Golden cross' : 'Death cross'} (SMA-50 vs SMA-200)`,
-            source: 'sma-crossover',
-          });
-        }
+          if (result.macd !== null && result.macdSignal !== 'HOLD') {
+            await this.signalsService.create({
+              asset: signal.asset,
+              assetClass,
+              direction: result.macdSignal,
+              confidence: Math.min(
+                Math.round(Math.abs(result.macd.histogram) * 100),
+                100,
+              ),
+              notes: `MACD histogram at ${result.macd.histogram.toFixed(4)} [${tfLabel}]`,
+              source: 'macd',
+              timeframe,
+            });
+          }
 
-        if (
-          result.bollingerPercentB !== null &&
-          result.bollingerSignal !== 'HOLD'
-        ) {
-          await this.signalsService.create({
-            asset: signal.asset,
-            assetClass: signal.assetClass as
-              'equity' | 'crypto' | 'forex' | 'options',
-            direction: result.bollingerSignal,
-            confidence: Math.round(
-              Math.abs(result.bollingerPercentB - 0.5) * 200,
-            ),
-            notes: `Bollinger %B at ${result.bollingerPercentB.toFixed(2)}`,
-            source: 'bollinger',
-          });
+          if (result.crossover.occurred) {
+            await this.signalsService.create({
+              asset: signal.asset,
+              assetClass,
+              direction: result.smaSignal,
+              confidence: 75,
+              notes: `SMA crossover: ${result.crossover.type === 'bullish' ? 'Golden cross' : 'Death cross'} (SMA-50 vs SMA-200) [${tfLabel}]`,
+              source: 'sma-crossover',
+              timeframe,
+            });
+          }
+
+          if (
+            result.bollingerPercentB !== null &&
+            result.bollingerSignal !== 'HOLD'
+          ) {
+            await this.signalsService.create({
+              asset: signal.asset,
+              assetClass,
+              direction: result.bollingerSignal,
+              confidence: Math.round(
+                Math.abs(result.bollingerPercentB - 0.5) * 200,
+              ),
+              notes: `Bollinger %B at ${result.bollingerPercentB.toFixed(2)} [${tfLabel}]`,
+              source: 'bollinger',
+              timeframe,
+            });
+          }
+        } catch (err) {
+          this.logger.warn(
+            `Analysis failed for ${signal.asset} [${timeframe}]: ${err}`,
+          );
         }
-      } catch (err) {
-        this.logger.warn(`Analysis failed for ${signal.asset}: ${err}`);
       }
     }
 

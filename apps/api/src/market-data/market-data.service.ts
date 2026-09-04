@@ -114,6 +114,7 @@ export class MarketDataService {
     yahooSymbol: string,
     days = 30,
     originalAsset?: string,
+    interval = '1d',
   ): Promise<HistoryResult[]> {
     if (originalAsset && this.coinGeckoService.isCryptoAsset(originalAsset)) {
       const cgHistory = await this.coinGeckoService.getHistory(
@@ -122,12 +123,13 @@ export class MarketDataService {
       );
       if (cgHistory.length > 0) return cgHistory;
     }
-    return this.getYahooHistory(yahooSymbol, days);
+    return this.getYahooHistory(yahooSymbol, days, interval);
   }
 
   private async getYahooHistory(
     yahooSymbol: string,
     days: number,
+    interval = '1d',
   ): Promise<HistoryResult[]> {
     const now = new Date();
     const start = new Date(now);
@@ -139,6 +141,7 @@ export class MarketDataService {
         {
           period1: start,
           period2: now,
+          interval,
         },
       );
 

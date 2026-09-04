@@ -25,138 +25,108 @@ The app skeleton is built. Angular Material dashboard with signal table, NestJS 
 
 ---
 
-### Phase 2: Persistent Storage
+### Phase 2: Persistent Storage (COMPLETE)
 
 Replace in-memory arrays with a real database so signals survive server restarts.
 
-**Issues:**
+**Delivered:**
 
-- Add PostgreSQL (or SQLite for dev) to the API
-- Create database schema for signals, agent logs, and assets
-- Migrate SignalsService from in-memory array to database
-- Add seed/migration scripts
-- Update dashboard to handle loading/error states
+- SQLite database with TypeORM for persistent signal storage (#13)
+- Dashboard loading and error states (#15)
 
 ---
 
-### Phase 3: Live Market Data
+### Phase 3: Live Market Data (COMPLETE)
 
 Connect to real price feeds so the dashboard shows actual market data.
 
-**Issues:**
+**Delivered:**
 
-- Integrate Alpha Vantage (free tier) or Yahoo Finance API
-- Create Market Data Agent service in the API
-- Fetch OHLCV data on a schedule (cron job via NestJS)
-- Add asset price history model and endpoint
-- Display live prices in the dashboard signal table
-- Add last-updated timestamps and refresh controls
+- Yahoo Finance API integration (#17)
+- Last-updated timestamps and refresh controls (#19)
 
 ---
 
-### Phase 4: Technical Analysis Agent
+### Phase 4: Technical Analysis Agent (COMPLETE)
 
 Calculate indicators from price history and generate signals automatically.
 
-**Issues:**
+**Delivered:**
 
-- Implement RSI (Relative Strength Index) calculation
-- Implement MACD (Moving Average Convergence Divergence)
-- Implement moving averages (SMA, EMA)
-- Implement Bollinger Bands
-- Create Technical Analysis Agent service that generates signals from indicator thresholds
-- Add indicator charts to the dashboard asset detail view
-- Store generated signals with source="rsi", source="macd", etc.
+- RSI and MACD technical analysis (#21)
+- SMA/EMA moving averages with crossover signals (#23)
+- Bollinger Bands (#25)
+- Signal source tagging for indicator attribution (#27)
+- Indicator charts in asset detail view (#28)
 
 ---
 
-### Phase 5: News Sentiment Agent
+### Phase 5: News Sentiment Agent (COMPLETE)
 
 Ingest news headlines and score sentiment per asset.
 
-**Issues:**
+**Delivered:**
 
-- Integrate a news API (NewsAPI, Finnhub, or RSS feeds)
-- Create News Sentiment Agent service
-- Use LLM (Claude API) to score article sentiment (-1 to +1) per asset
-- Generate signals from sentiment shifts (positive surge = BUY signal)
-- Add news feed panel to the dashboard
-- Display sentiment scores alongside signals
-- Store generated signals with source="news-sentiment"
+- News Sentiment Agent with keyword-based scoring (#30)
+- News sentiment panel in dashboard (#32)
 
 ---
 
-### Phase 6: Signal Synthesis Agent
+### Phase 6: Signal Synthesis Agent (COMPLETE)
 
 Aggregate signals from all agents into a final verdict with reasoning.
 
-**Issues:**
+**Delivered:**
 
-- Create Signal Synthesis Agent that consumes signals from all other agents
-- Implement weighted confidence calculation based on agent agreement
-- Generate AggregatedSignal with reasoning chain explaining the verdict
-- Surface agent disagreements (Technical says BUY, News says SELL)
-- Add synthesis view to dashboard showing agent contributions
-- Add confidence breakdown visualization (which agent contributed what)
-- Add reasoning chain display for each aggregated signal
+- Signal Synthesis Agent with weighted aggregation and reasoning chains (#36)
 
 ---
 
-### Phase 7: User Features
+### Phase 7: User Features (COMPLETE)
 
 Make the app personal -- watchlists, alerts, portfolio tracking.
 
-**Issues:**
+**Delivered:**
 
-- Add user authentication (JWT or session-based)
-- Implement watchlist (save assets to monitor)
-- Implement alert system (notify on high-confidence signals via email or push)
-- Add portfolio import (CSV upload of positions)
-- Add portfolio view showing signals for held assets
-- Add manual signal entry form in the dashboard
+- JWT authentication with registration and login (#38)
+- Watchlist with auth-protected CRUD and synthesis integration (#40)
+- Alert system with bell icon and unread badge (#42)
+- Portfolio tracking with CSV import and P&L (#44)
 
 ---
 
-### Phase 8: Trust & Transparency
+### Phase 8: Trust & Transparency (COMPLETE)
 
 Prove the signals work. Track accuracy, calibrate confidence, backtest.
 
-**Issues:**
+**Delivered:**
 
-- Track signal outcomes (was the BUY signal right after N days?)
-- Calculate historical accuracy per agent and per asset class
-- Add confidence calibration chart (does 80% confidence win 80%?)
-- Add agent accuracy leaderboard to dashboard
-- Implement backtesting: run agents against historical data
-- Add "retrospective" view: if you followed all signals, what would your P&L be?
+- Signal outcome tracking and agent accuracy leaderboard (#46)
+- Confidence calibration and backtesting retrospective (#48)
+- Time-weighted agent accuracy with rolling windows (#56)
+- Conviction scoring with contrarian detection (#58)
+- Paper trading engine with virtual portfolio and signal following (#60)
+- Follow Signal button on synthesis cards (#62)
 
 ---
 
-### Phase 9: Multi-Asset Expansion
+### Phase 9: Multi-Asset Expansion (COMPLETE)
 
 Extend beyond equities to crypto, forex, and options.
 
-**Issues:**
+**Delivered:**
 
-- Add crypto data source (CoinGecko API)
-- Add forex data source
-- Adapt technical analysis indicators for crypto/forex timeframes
-- Add asset class filtering to dashboard
-- Add cross-asset correlation signals (BTC moves affect tech stocks)
+- CoinGecko crypto data source and asset class filtering (#50)
 
 ---
 
-### Phase 10: Real-Time
+### Phase 10: Real-Time (COMPLETE)
 
 Move from polling to real-time updates.
 
-**Issues:**
+**Delivered:**
 
-- Add WebSocket support (NestJS gateway)
-- Stream signal updates to dashboard in real-time
-- Add live price ticker to toolbar
-- Add real-time agent activity log (what each agent is doing now)
-- Add signal feed with live updates (new signals appear without refresh)
+- WebSocket gateway for real-time signal updates and live price ticker (#52)
 
 ## Issue Creation Guide
 

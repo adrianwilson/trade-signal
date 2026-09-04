@@ -3,6 +3,7 @@
  */
 
 export type AssetClass = 'equity' | 'crypto' | 'forex' | 'options';
+export type Timeframe = 'intraday' | 'swing' | 'long-term';
 export type SignalDirection = 'BUY' | 'SELL' | 'HOLD';
 export type SignalSource =
   | 'manual'
@@ -23,6 +24,7 @@ export interface Signal {
   source: SignalSource;
   reasoning?: string;
   metadata?: Record<string, unknown>;
+  timeframe?: Timeframe;
   timestamp: string; // ISO 8601
 }
 
@@ -47,6 +49,8 @@ export interface AggregatedSignal {
   reasoningChain: string; // human-readable synthesis explanation
   conviction: number; // 0-100 conviction score
   convictionLabel: 'strong' | 'moderate' | 'weak' | 'late';
+  timeframe?: Timeframe;
+  timeframeAlignment?: 'aligned' | 'mixed' | 'divergent';
   lastUpdated: string;
 }
 

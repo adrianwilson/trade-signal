@@ -15,6 +15,7 @@ describe('SynthesisService', () => {
       confidence: 80,
       source: 'rsi',
       reasoning: 'RSI at 28 — oversold',
+      timeframe: 'swing',
       timestamp: '2026-09-01T10:00:00Z',
     },
     {
@@ -25,6 +26,7 @@ describe('SynthesisService', () => {
       confidence: 70,
       source: 'macd',
       reasoning: 'MACD histogram positive',
+      timeframe: 'swing',
       timestamp: '2026-09-01T10:00:00Z',
     },
     {
@@ -35,6 +37,7 @@ describe('SynthesisService', () => {
       confidence: 60,
       source: 'news-sentiment',
       reasoning: 'Negative headlines',
+      timeframe: 'swing',
       timestamp: '2026-09-01T10:00:00Z',
     },
     {
@@ -45,6 +48,7 @@ describe('SynthesisService', () => {
       confidence: 90,
       source: 'rsi',
       reasoning: 'RSI at 78 — overbought',
+      timeframe: 'swing',
       timestamp: '2026-09-01T10:00:00Z',
     },
   ];
@@ -57,16 +61,25 @@ describe('SynthesisService', () => {
   });
 
   describe('synthesize', () => {
-    it('should aggregate signals by asset', async () => {
+    it('should aggregate signals by asset and timeframe', async () => {
       const results = await service.synthesize();
       expect(results.length).toBe(2);
       expect(results.map((r) => r.asset).sort()).toEqual(['AAPL', 'TSLA']);
+      expect(results[0].timeframe).toBe('swing');
     });
 
     it('should cache results', async () => {
       await service.synthesize();
       expect(service.getAll().length).toBe(2);
       expect(service.getByAsset('AAPL')).not.toBeNull();
+    });
+
+    it('should filter by timeframe', async () => {
+      await service.synthesize();
+      const swing = service.getAll('swing');
+      expect(swing.length).toBe(2);
+      const intraday = service.getAll('intraday');
+      expect(intraday.length).toBe(0);
     });
   });
 
@@ -177,6 +190,48 @@ describe('SynthesisService', () => {
         { source: 'macd', direction: 'BUY', confidence: 70 },
       ];
       expect(service.findDisagreements(contributions)).toEqual([]);
+    });
+  });
+
+  describe('calculateTimeframeAlignment', () => {
+    it('should return aligned when all timeframes agree', () => {
+      const results = [
+        { asset: 'AAPL', direction: 'BUY', timeframe: 'intraday' },
+        { asset: 'AAPL', direction: 'BUY', timeframe: 'swing' },
+        { asset: 'AAPL', direction: 'BUY', timeframe: 'long-term' },
+      ] as import('@org/signals').AggregatedSignal[];
+      expect(service.calculateTimeframeAlignment('AAPL', results)).toBe(
+        'aligned',
+      );
+    });
+
+    it('should return divergent when BUY and SELL conflict', () => {
+      const results = [
+        { asset: 'AAPL', direction: 'BUY', timeframe: 'intraday' },
+        { asset: 'AAPL', direction: 'SELL', timeframe: 'swing' },
+      ] as import('@org/signals').AggregatedSignal[];
+      expect(service.calculateTimeframeAlignment('AAPL', results)).toBe(
+        'divergent',
+      );
+    });
+
+    it('should return mixed when directions differ but no BUY/SELL conflict', () => {
+      const results = [
+        { asset: 'AAPL', direction: 'BUY', timeframe: 'intraday' },
+        { asset: 'AAPL', direction: 'HOLD', timeframe: 'swing' },
+      ] as import('@org/signals').AggregatedSignal[];
+      expect(service.calculateTimeframeAlignment('AAPL', results)).toBe(
+        'mixed',
+      );
+    });
+
+    it('should return undefined when only one timeframe exists', () => {
+      const results = [
+        { asset: 'AAPL', direction: 'BUY', timeframe: 'swing' },
+      ] as import('@org/signals').AggregatedSignal[];
+      expect(
+        service.calculateTimeframeAlignment('AAPL', results),
+      ).toBeUndefined();
     });
   });
 

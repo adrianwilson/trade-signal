@@ -199,8 +199,12 @@ export class SignalService {
     );
   }
 
-  getSynthesis(): Observable<AggregatedSignal[]> {
-    return this.http.get<AggregatedSignal[]>(`${this.baseUrl}/synthesis`);
+  getSynthesis(timeframe?: string): Observable<AggregatedSignal[]> {
+    const params =
+      timeframe && timeframe !== 'all' ? `?timeframe=${timeframe}` : '';
+    return this.http.get<AggregatedSignal[]>(
+      `${this.baseUrl}/synthesis${params}`,
+    );
   }
 
   getWatchlist(): Observable<WatchlistItem[]> {

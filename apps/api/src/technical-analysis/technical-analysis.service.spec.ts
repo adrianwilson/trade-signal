@@ -74,10 +74,55 @@ describe('TechnicalAnalysisService', () => {
     });
   });
 
+  describe('analyzeTimeframe', () => {
+    it('should analyze with intraday config', async () => {
+      const result = await service.analyzeTimeframe(
+        'AAPL',
+        'AAPL',
+        'equity',
+        'intraday',
+      );
+      expect(result.symbol).toBe('AAPL');
+      expect(mockMarketData.getHistory).toHaveBeenCalledWith(
+        'AAPL',
+        5,
+        undefined,
+        '1h',
+      );
+    });
+
+    it('should analyze with long-term config', async () => {
+      const result = await service.analyzeTimeframe(
+        'AAPL',
+        'AAPL',
+        'equity',
+        'long-term',
+      );
+      expect(result.symbol).toBe('AAPL');
+      expect(mockMarketData.getHistory).toHaveBeenCalledWith(
+        'AAPL',
+        365,
+        undefined,
+        '1wk',
+      );
+    });
+  });
+
   describe('runAnalysis', () => {
-    it('should process all unique assets', async () => {
+    it('should process all unique assets across all timeframes', async () => {
       await service.runAnalysis();
-      expect(mockMarketData.getHistory).toHaveBeenCalled();
+      // 3 timeframes x 1 asset = at least 3 getHistory calls
+      expect(
+        (mockMarketData.getHistory as jest.Mock).mock.calls.length,
+      ).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should create signals with timeframe field', async () => {
+      await service.runAnalysis();
+      const createCalls = (mockSignals.create as jest.Mock).mock.calls;
+      if (createCalls.length > 0) {
+        expect(createCalls[0][0]).toHaveProperty('timeframe');
+      }
     });
 
     it('should handle errors gracefully', async () => {
