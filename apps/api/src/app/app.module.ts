@@ -21,6 +21,11 @@ import { PortfolioModule } from '../portfolio/portfolio.module';
 import { PortfolioEntity } from '../portfolio/portfolio.entity';
 import { OutcomesModule } from '../outcomes/outcomes.module';
 import { OutcomeEntity } from '../outcomes/outcome.entity';
+import { PaperTradingModule } from '../paper-trading/paper-trading.module';
+import {
+  PaperAccountEntity,
+  PaperTradeEntity,
+} from '../paper-trading/paper-trading.entities';
 
 @Module({
   imports: [
@@ -36,6 +41,8 @@ import { OutcomeEntity } from '../outcomes/outcome.entity';
         AlertEntity,
         PortfolioEntity,
         OutcomeEntity,
+        PaperAccountEntity,
+        PaperTradeEntity,
       ],
       synchronize: true,
     }),
@@ -51,6 +58,7 @@ import { OutcomeEntity } from '../outcomes/outcome.entity';
     AlertsModule,
     PortfolioModule,
     OutcomesModule,
+    PaperTradingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

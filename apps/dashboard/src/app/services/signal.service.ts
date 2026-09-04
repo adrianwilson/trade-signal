@@ -71,6 +71,53 @@ export interface PortfolioPosition {
   addedAt: string;
 }
 
+export interface PaperAccount {
+  id: string;
+  name: string;
+  cashBalance: number;
+  startingBalance: number;
+  totalValue: number;
+  totalReturn: number;
+  openPositions: {
+    asset: string;
+    quantity: number;
+    avgPrice: number;
+    currentPrice: number | null;
+    unrealizedPnl: number | null;
+  }[];
+  createdAt: string;
+}
+
+export interface PaperTrade {
+  id: string;
+  asset: string;
+  side: string;
+  quantity: number;
+  entryPrice: number;
+  exitPrice: number | null;
+  status: string;
+  signalSource: string | null;
+  confidence: number;
+  reasoning: string | null;
+  enteredAt: string;
+  pnl: number | null;
+  pnlPercent: number | null;
+}
+
+export interface PaperPerformance {
+  totalValue: number;
+  totalReturn: number;
+  totalReturnDollar: number;
+  winRate: number;
+  totalTrades: number;
+  closedTrades: number;
+  openPositionCount: number;
+  bySource: Record<
+    string,
+    { trades: number; winRate: number; avgReturn: number }
+  >;
+}
+
 export interface WatchlistItem {
   id: string;
   asset: string;
@@ -189,6 +236,49 @@ export class SignalService {
 
   generateAlerts(): Observable<AlertItem[]> {
     return this.http.get<AlertItem[]>(`${this.baseUrl}/alerts/generate`);
+  }
+
+  createPaperAccount(): Observable<PaperAccount> {
+    return this.http.post<PaperAccount>(`${this.baseUrl}/paper/accounts`, {});
+  }
+
+  getPaperAccounts(): Observable<PaperAccount[]> {
+    return this.http.get<PaperAccount[]>(`${this.baseUrl}/paper/accounts`);
+  }
+
+  getPaperAccountSummary(accountId: string): Observable<PaperAccount> {
+    return this.http.get<PaperAccount>(
+      `${this.baseUrl}/paper/accounts/${accountId}`,
+    );
+  }
+
+  followSignal(accountId: string, signalId: string): Observable<PaperTrade> {
+    return this.http.post<PaperTrade>(
+      `${this.baseUrl}/paper/accounts/${accountId}/follow-signal`,
+      { signalId },
+    );
+  }
+
+  closePaperPosition(
+    accountId: string,
+    asset: string,
+  ): Observable<PaperTrade[]> {
+    return this.http.post<PaperTrade[]>(
+      `${this.baseUrl}/paper/accounts/${accountId}/close/${asset}`,
+      {},
+    );
+  }
+
+  getPaperTrades(accountId: string): Observable<PaperTrade[]> {
+    return this.http.get<PaperTrade[]>(
+      `${this.baseUrl}/paper/accounts/${accountId}/trades`,
+    );
+  }
+
+  getPaperPerformance(accountId: string): Observable<PaperPerformance> {
+    return this.http.get<PaperPerformance>(
+      `${this.baseUrl}/paper/accounts/${accountId}/performance`,
+    );
   }
 
   getMarketQuotes(): Observable<
