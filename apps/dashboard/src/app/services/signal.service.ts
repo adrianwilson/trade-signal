@@ -84,6 +84,8 @@ export interface PaperAccount {
     avgPrice: number;
     currentPrice: number | null;
     unrealizedPnl: number | null;
+    stopLoss: number | null;
+    takeProfit: number | null;
   }[];
   createdAt: string;
 }
@@ -102,6 +104,9 @@ export interface PaperTrade {
   enteredAt: string;
   pnl: number | null;
   pnlPercent: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  closeReason: string | null;
 }
 
 export interface PaperPerformance {

@@ -93,6 +93,28 @@ describe('PaperTradingService', () => {
     });
   });
 
+  describe('followSignal stop-loss/take-profit defaults', () => {
+    it('should set SL at -5% and TP at +10% for BUY', async () => {
+      const trade = await service.followSignal('acc-1', 's1');
+      expect(trade.stopLoss).toBe(142.5); // 150 * 0.95
+      expect(trade.takeProfit).toBe(165); // 150 * 1.10
+    });
+
+    it('should set SL at +5% and TP at -10% for SELL', async () => {
+      mockSignals.findOne.mockResolvedValue({
+        id: 's2',
+        asset: 'AAPL',
+        assetClass: 'equity',
+        direction: 'SELL',
+        confidence: 80,
+        source: 'rsi',
+      });
+      const trade = await service.followSignal('acc-1', 's2');
+      expect(trade.stopLoss).toBe(157.5); // 150 * 1.05
+      expect(trade.takeProfit).toBe(135); // 150 * 0.90
+    });
+  });
+
   describe('closePosition', () => {
     it('should close open trades and calculate P&L', async () => {
       mockTradeRepo.findBy.mockResolvedValue([
@@ -111,6 +133,69 @@ describe('PaperTradingService', () => {
       const trades = await service.closePosition('acc-1', 'AAPL');
       expect(trades[0].status).toBe('closed');
       expect(trades[0].pnl).toBe(150); // (155-140)*10
+      expect(trades[0].closeReason).toBe('manual');
+    });
+  });
+
+  describe('checkStopLossTakeProfit', () => {
+    it('should close position at stop-loss', async () => {
+      mockTradeRepo.findBy.mockResolvedValue([
+        {
+          id: 't1',
+          accountId: 'acc-1',
+          asset: 'AAPL',
+          assetClass: 'equity',
+          side: 'buy',
+          quantity: 10,
+          entryPrice: 150,
+          stopLoss: 142.5,
+          takeProfit: 165,
+          status: 'open',
+        },
+      ]);
+      mockMarketData.getQuote.mockResolvedValue({ price: 140 });
+      await service.checkStopLossTakeProfit();
+      // closePosition should have been called, which calls findBy again + save
+      expect(mockTradeRepo.save).toHaveBeenCalled();
+    });
+
+    it('should close position at take-profit', async () => {
+      mockTradeRepo.findBy.mockResolvedValue([
+        {
+          id: 't1',
+          accountId: 'acc-1',
+          asset: 'AAPL',
+          assetClass: 'equity',
+          side: 'buy',
+          quantity: 10,
+          entryPrice: 150,
+          stopLoss: 142.5,
+          takeProfit: 165,
+          status: 'open',
+        },
+      ]);
+      mockMarketData.getQuote.mockResolvedValue({ price: 170 });
+      await service.checkStopLossTakeProfit();
+      expect(mockTradeRepo.save).toHaveBeenCalled();
+    });
+
+    it('should skip trades without SL/TP', async () => {
+      mockTradeRepo.findBy.mockResolvedValue([
+        {
+          id: 't1',
+          accountId: 'acc-1',
+          asset: 'AAPL',
+          assetClass: 'equity',
+          side: 'buy',
+          quantity: 10,
+          entryPrice: 150,
+          stopLoss: null,
+          takeProfit: null,
+          status: 'open',
+        },
+      ]);
+      await service.checkStopLossTakeProfit();
+      expect(mockMarketData.getQuote).not.toHaveBeenCalled();
     });
   });
 
