@@ -1,0 +1,66 @@
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 0;
+}
+
+.state-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 0;
+  gap: 12px;
+}
+
+.scan-hint {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.empty-state {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 16px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: rgba(0, 0, 0, 0.26);
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.38);
+}
+
+.error-card {
+  background-color: #fdecea;
+  color: #611a15;
+}
+
+.opportunities-table {
+  width: 100%;
+}
+
+.asset-name {
+  font-weight: 500;
+}
+
+.asset-class {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.54);
+  margin-left: 8px;
+  text-transform: uppercase;
+}
+
+.small-chip {
+  transform: scale(0.85);
+}

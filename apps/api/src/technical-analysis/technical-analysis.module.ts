@@ -8,5 +8,6 @@ import { SignalsModule } from '../signals/signals.module';
   imports: [MarketDataModule, SignalsModule],
   controllers: [TechnicalAnalysisController],
   providers: [TechnicalAnalysisService],
+  exports: [TechnicalAnalysisService],
 })
 export class TechnicalAnalysisModule {}
