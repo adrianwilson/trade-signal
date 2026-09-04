@@ -36,6 +36,7 @@ $ARGUMENTS
 ## Report
 
 Provide a concise summary of:
+
 - Root cause identified
 - Specific fix applied
 - Confirmation that the test now passes
