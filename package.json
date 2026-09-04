@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "prestart": "command -v ollama >/dev/null && (ollama list | grep -q llama3.2 || ollama pull llama3.2) && (pgrep -x ollama >/dev/null || ollama serve &) || true",
+    "prestart": "command -v ollama >/dev/null && (pgrep -x ollama >/dev/null || (ollama serve > /dev/null 2>&1 & sleep 2)) && (ollama list 2>/dev/null | grep -q llama3.2 || ollama pull llama3.2) || true",
     "start": "pnpm exec nx run-many -t serve -p dashboard api --output-style=stream",
     "start:dashboard": "pnpm exec nx serve dashboard",
     "start:api": "pnpm exec nx serve api",
