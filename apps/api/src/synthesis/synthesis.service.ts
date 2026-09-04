@@ -90,6 +90,11 @@ export class SynthesisService implements OnModuleInit {
     );
 
     const assetClass = signals[0]?.assetClass ?? 'equity';
+    const { conviction, convictionLabel } = this.calculateConviction(
+      contributions,
+      direction,
+      latest,
+    );
 
     return {
       asset,
@@ -103,6 +108,8 @@ export class SynthesisService implements OnModuleInit {
       agreements,
       disagreements,
       reasoningChain,
+      conviction,
+      convictionLabel,
       lastUpdated: new Date().toISOString(),
     };
   }
@@ -201,6 +208,60 @@ export class SynthesisService implements OnModuleInit {
     }
 
     return disagreements;
+  }
+
+  private calculateConviction(
+    contributions: AgentContribution[],
+    direction: SignalDirection,
+    signals: Signal[],
+  ): {
+    conviction: number;
+    convictionLabel: 'strong' | 'moderate' | 'weak' | 'late';
+  } {
+    if (contributions.length === 0 || direction === 'HOLD') {
+      return { conviction: 0, convictionLabel: 'weak' };
+    }
+
+    // Agreement score: what fraction agrees with the direction
+    const agreeing = contributions.filter(
+      (c) => c.direction === direction,
+    ).length;
+    const agreementScore = agreeing / contributions.length;
+
+    // Recency: how fresh are the signals
+    const now = Date.now();
+    const avgAge =
+      signals.reduce((sum, s) => {
+        const age = (now - new Date(s.timestamp).getTime()) / (1000 * 60 * 60);
+        return sum + age;
+      }, 0) / signals.length;
+
+    let recencyFactor: number;
+    if (avgAge < 1) recencyFactor = 1.0;
+    else if (avgAge < 4) recencyFactor = 0.8;
+    else if (avgAge < 24) recencyFactor = 0.5;
+    else recencyFactor = 0.3;
+
+    // Counter-momentum: signals opposing recent price movement are stronger
+    // For now, use a neutral 1.0 since we don't have real-time price momentum here
+    // The synthesis doesn't store price change — this will be enhanced when regime detection lands
+    const momentumFactor = 1.0;
+
+    const rawConviction = agreementScore * recencyFactor * momentumFactor * 100;
+    const conviction = Math.min(Math.round(rawConviction), 100);
+
+    let convictionLabel: 'strong' | 'moderate' | 'weak' | 'late';
+    if (agreementScore >= 0.75 && recencyFactor <= 0.3) {
+      convictionLabel = 'late';
+    } else if (conviction >= 70) {
+      convictionLabel = 'strong';
+    } else if (conviction >= 40) {
+      convictionLabel = 'moderate';
+    } else {
+      convictionLabel = 'weak';
+    }
+
+    return { conviction, convictionLabel };
   }
 
   private buildReasoningChain(

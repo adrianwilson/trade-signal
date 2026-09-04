@@ -97,6 +97,18 @@ describe('SynthesisService', () => {
       expect(result.reasoningChain).toContain('RSI');
       expect(result.reasoningChain).toContain('MACD');
     });
+
+    it('should include conviction score and label', () => {
+      const result = service.aggregateSignals(
+        'AAPL',
+        testSignals.filter((s) => s.asset === 'AAPL'),
+      );
+      expect(result.conviction).toBeGreaterThanOrEqual(0);
+      expect(result.conviction).toBeLessThanOrEqual(100);
+      expect(['strong', 'moderate', 'weak', 'late']).toContain(
+        result.convictionLabel,
+      );
+    });
   });
 
   describe('calculateWeightedVerdict', () => {
