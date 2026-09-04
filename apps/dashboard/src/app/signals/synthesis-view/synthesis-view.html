@@ -95,6 +95,29 @@
         <div class="section-label">Reasoning Chain</div>
         <pre class="reasoning-text">{{ s.reasoningChain }}</pre>
       </div>
+
+      @if (authService.isAuthenticated() && paperAccountId() && s.direction !==
+      'HOLD') {
+      <div class="follow-action">
+        @if (followedAssets().has(s.asset)) {
+        <button mat-stroked-button disabled class="followed-btn">
+          <mat-icon>check</mat-icon> Following
+        </button>
+        } @else {
+        <button
+          mat-raised-button
+          [style.background-color]="directionColor(s.direction)"
+          style="color: white"
+          (click)="followSignal(s)"
+          [disabled]="followingInProgress().has(s.asset)"
+        >
+          @if (followingInProgress().has(s.asset)) { Following... } @else {
+          <mat-icon>trending_flat</mat-icon>
+          Follow {{ s.direction }} Signal }
+        </button>
+        }
+      </div>
+      }
     </mat-card-content>
   </mat-card>
   }

@@ -53,7 +53,13 @@ describe('SynthesisViewComponent', () => {
       );
       return ['all', ...Array.from(classes)];
     });
-    Object.assign(component, { signalService: mockSignalService });
+    component.paperAccountId = signal<string | null>(null);
+    component.followedAssets = signal(new Set<string>());
+    component.followingInProgress = signal(new Set<string>());
+    Object.assign(component, {
+      signalService: mockSignalService,
+      authService: { isAuthenticated: () => false },
+    });
   });
 
   describe('ngOnInit', () => {
