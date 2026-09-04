@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { SignalService } from '../../services/signal.service';
+import { AuthService } from '../../services/auth.service';
 import type { AggregatedSignal } from '@org/signals';
 
 @Component({
@@ -26,12 +27,16 @@ import type { AggregatedSignal } from '@org/signals';
 })
 export class SynthesisViewComponent implements OnInit {
   private readonly signalService = inject(SignalService);
+  readonly authService = inject(AuthService);
 
   allSyntheses = signal<AggregatedSignal[]>([]);
   selectedClass = signal('all');
   loading = signal(true);
   refreshing = signal(false);
   error = signal('');
+  paperAccountId = signal<string | null>(null);
+  followedAssets = signal<Set<string>>(new Set());
+  followingInProgress = signal<Set<string>>(new Set());
 
   syntheses = computed(() => {
     const filter = this.selectedClass();
@@ -47,11 +52,40 @@ export class SynthesisViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    if (this.authService.isAuthenticated()) {
+      this.loadPaperAccount();
+    }
   }
 
   refresh(): void {
     this.refreshing.set(true);
     this.loadData();
+  }
+
+  followSignal(synthesis: AggregatedSignal): void {
+    const accountId = this.paperAccountId();
+    if (!accountId || synthesis.signals.length === 0) return;
+
+    const signalId = synthesis.signals[0].id;
+    this.followingInProgress.update((s) => new Set(s).add(synthesis.asset));
+
+    this.signalService.followSignal(accountId, signalId).subscribe({
+      next: () => {
+        this.followedAssets.update((s) => new Set(s).add(synthesis.asset));
+        this.followingInProgress.update((s) => {
+          const next = new Set(s);
+          next.delete(synthesis.asset);
+          return next;
+        });
+      },
+      error: () => {
+        this.followingInProgress.update((s) => {
+          const next = new Set(s);
+          next.delete(synthesis.asset);
+          return next;
+        });
+      },
+    });
   }
 
   private loadData(): void {
@@ -65,6 +99,21 @@ export class SynthesisViewComponent implements OnInit {
         this.error.set('Failed to load synthesis data. Is the API running?');
         this.loading.set(false);
         this.refreshing.set(false);
+      },
+    });
+  }
+
+  private loadPaperAccount(): void {
+    this.signalService.getPaperAccounts().subscribe({
+      next: (accounts) => {
+        if (accounts.length > 0) {
+          this.paperAccountId.set(accounts[0].id);
+        } else {
+          // Auto-create paper account
+          this.signalService.createPaperAccount().subscribe({
+            next: (account) => this.paperAccountId.set(account.id),
+          });
+        }
       },
     });
   }
