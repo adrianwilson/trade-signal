@@ -1,6 +1,6 @@
 name: Refactor
 description: Restructure code without changing behavior
-labels: ["refactor"]
+labels: ['refactor']
 body:
   - type: textarea
     id: description

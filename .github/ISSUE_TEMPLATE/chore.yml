@@ -1,6 +1,6 @@
 name: Chore
 description: Maintenance, cleanup, or infrastructure task
-labels: ["chore"]
+labels: ['chore']
 body:
   - type: textarea
     id: description

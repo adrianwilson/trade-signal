@@ -1,6 +1,6 @@
 name: Feature
 description: Request a new feature for the trade signal platform
-labels: ["feature"]
+labels: ['feature']
 body:
   - type: textarea
     id: description

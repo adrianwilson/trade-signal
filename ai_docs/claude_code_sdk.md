@@ -20,18 +20,18 @@ The Claude Code SDK enables running Claude Code as a subprocess, providing a way
 
 The SDK is available for command line, TypeScript, and Python usage.
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#authentication)  Authentication
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#authentication) Authentication
 
 The Claude Code SDK supports multiple authentication methods:
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#anthropic-api-key)  Anthropic API key
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#anthropic-api-key) Anthropic API key
 
 To use the Claude Code SDK directly with Anthropic's API, we recommend creating a dedicated API key:
 
 1. Create an Anthropic API key in the [Anthropic Console](https://console.anthropic.com/)
 2. Then, set the `ANTHROPIC_API_KEY` environment variable. We recommend storing this key securely (e.g., using a Github [secret](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions))
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#third-party-api-credentials)  Third-Party API credentials
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#third-party-api-credentials) Third-Party API credentials
 
 The SDK also supports third-party API providers:
 
@@ -40,11 +40,11 @@ The SDK also supports third-party API providers:
 
 For detailed configuration instructions for third-party providers, see the [Amazon Bedrock](https://docs.anthropic.com/en/docs/claude-code/amazon-bedrock) and [Google Vertex AI](https://docs.anthropic.com/en/docs/claude-code/google-vertex-ai) documentation.
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#basic-sdk-usage)  Basic SDK usage
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#basic-sdk-usage) Basic SDK usage
 
 The Claude Code SDK allows you to use Claude Code in non-interactive mode from your applications.
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#command-line)  Command line
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#command-line) Command line
 
 Here are a few basic examples for the command line SDK:
 
@@ -65,19 +65,19 @@ $ claude -p "Build a React component" --output-format stream-json
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#typescript)  TypeScript
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#typescript) TypeScript
 
 The TypeScript SDK is included in the main [`@anthropic-ai/claude-code`](https://www.npmjs.com/package/@anthropic-ai/claude-code) package on NPM:
 
 Copy
 
 ```ts
-import { query, type SDKMessage } from "@anthropic-ai/claude-code";
+import { query, type SDKMessage } from '@anthropic-ai/claude-code';
 
 const messages: SDKMessage[] = [];
 
 for await (const message of query({
-  prompt: "Write a haiku about foo.py",
+  prompt: 'Write a haiku about foo.py',
   abortController: new AbortController(),
   options: {
     maxTurns: 3,
@@ -87,20 +87,19 @@ for await (const message of query({
 }
 
 console.log(messages);
-
 ```
 
 The TypeScript SDK accepts all arguments supported by the command line SDK, as well as:
 
-| Argument | Description | Default |
-| --- | --- | --- |
-| `abortController` | Abort controller | `new AbortController()` |
-| `cwd` | Current working directory | `process.cwd()` |
-| `executable` | Which JavaScript runtime to use | `node` when running with Node.js, `bun` when running with Bun |
-| `executableArgs` | Arguments to pass to the executable | `[]` |
-| `pathToClaudeCodeExecutable` | Path to the Claude Code executable | Executable that ships with `@anthropic-ai/claude-code` |
+| Argument                     | Description                         | Default                                                       |
+| ---------------------------- | ----------------------------------- | ------------------------------------------------------------- |
+| `abortController`            | Abort controller                    | `new AbortController()`                                       |
+| `cwd`                        | Current working directory           | `process.cwd()`                                               |
+| `executable`                 | Which JavaScript runtime to use     | `node` when running with Node.js, `bun` when running with Bun |
+| `executableArgs`             | Arguments to pass to the executable | `[]`                                                          |
+| `pathToClaudeCodeExecutable` | Path to the Claude Code executable  | Executable that ships with `@anthropic-ai/claude-code`        |
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#python)  Python
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#python) Python
 
 The Python SDK is available as [`claude-code-sdk`](https://github.com/anthropics/claude-code-sdk-python) on PyPI:
 
@@ -161,11 +160,11 @@ async for message in query(prompt="Hello", options=options):
 
 ```
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#advanced-usage)  Advanced usage
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#advanced-usage) Advanced usage
 
 The documentation below uses the command line SDK as an example, but can also be used with the TypeScript and Python SDKs.
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#multi-turn-conversations)  Multi-turn conversations
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#multi-turn-conversations) Multi-turn conversations
 
 For multi-turn conversations, you can resume conversations or continue from the most recent session:
 
@@ -189,7 +188,7 @@ $ claude -p --continue "Add error handling"
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#custom-system-prompts)  Custom system prompts
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#custom-system-prompts) Custom system prompts
 
 You can provide custom system prompts to guide Claude's behavior:
 
@@ -214,7 +213,7 @@ $ claude -p "Build a REST API" --append-system-prompt "After writing code, be su
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#mcp-configuration)  MCP Configuration
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#mcp-configuration) MCP Configuration
 
 The Model Context Protocol (MCP) allows you to extend Claude Code with additional tools and resources from external servers. Using the `--mcp-config` flag, you can load MCP servers that provide specialized capabilities like database access, API integrations, or custom tooling.
 
@@ -278,7 +277,7 @@ If you specify just the server name (i.e., `mcp__<serverName>`), all tools from 
 
 Glob patterns (e.g., `mcp__go*`) are not supported.
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#custom-permission-prompt-tool)  Custom permission prompt tool
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#custom-permission-prompt-tool) Custom permission prompt tool
 
 Optionally, use `--permission-prompt-tool` to pass in an MCP tool that we will use to check whether or not the user grants the model permissions to invoke a given tool. When the model invokes a tool the following happens:
 
@@ -361,32 +360,32 @@ Usage notes:
 - Use `updatedInput` to tell the model that the permission prompt mutated its input; otherwise, set `updatedInput` to the original input, as in the example above. For example, if the tool shows a file edit diff to the user and lets them edit the diff manually, the permission prompt tool should return that updated edit.
 - The payload must be JSON-stringified
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#available-cli-options)  Available CLI options
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#available-cli-options) Available CLI options
 
 The SDK leverages all the CLI options available in Claude Code. Here are the key ones for SDK usage:
 
-| Flag | Description | Example |
-| --- | --- | --- |
-| `--print`, `-p` | Run in non-interactive mode | `claude -p "query"` |
-| `--output-format` | Specify output format ( `text`, `json`, `stream-json`) | `claude -p --output-format json` |
-| `--resume`, `-r` | Resume a conversation by session ID | `claude --resume abc123` |
-| `--continue`, `-c` | Continue the most recent conversation | `claude --continue` |
-| `--verbose` | Enable verbose logging | `claude --verbose` |
-| `--max-turns` | Limit agentic turns in non-interactive mode | `claude --max-turns 3` |
-| `--system-prompt` | Override system prompt (only with `--print`) | `claude --system-prompt "Custom instruction"` |
-| `--append-system-prompt` | Append to system prompt (only with `--print`) | `claude --append-system-prompt "Custom instruction"` |
-| `--allowedTools` | Space-separated list of allowed tools, or <br> string of comma-separated list of allowed tools | `claude --allowedTools mcp__slack mcp__filesystem`<br>`claude --allowedTools "Bash(npm install),mcp__filesystem"` |
-| `--disallowedTools` | Space-separated list of denied tools, or <br> string of comma-separated list of denied tools | `claude --disallowedTools mcp__splunk mcp__github`<br>`claude --disallowedTools "Bash(git commit),mcp__github"` |
-| `--mcp-config` | Load MCP servers from a JSON file | `claude --mcp-config servers.json` |
-| `--permission-prompt-tool` | MCP tool for handling permission prompts (only with `--print`) | `claude --permission-prompt-tool mcp__auth__prompt` |
+| Flag                       | Description                                                                                    | Example                                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `--print`, `-p`            | Run in non-interactive mode                                                                    | `claude -p "query"`                                                                                               |
+| `--output-format`          | Specify output format ( `text`, `json`, `stream-json`)                                         | `claude -p --output-format json`                                                                                  |
+| `--resume`, `-r`           | Resume a conversation by session ID                                                            | `claude --resume abc123`                                                                                          |
+| `--continue`, `-c`         | Continue the most recent conversation                                                          | `claude --continue`                                                                                               |
+| `--verbose`                | Enable verbose logging                                                                         | `claude --verbose`                                                                                                |
+| `--max-turns`              | Limit agentic turns in non-interactive mode                                                    | `claude --max-turns 3`                                                                                            |
+| `--system-prompt`          | Override system prompt (only with `--print`)                                                   | `claude --system-prompt "Custom instruction"`                                                                     |
+| `--append-system-prompt`   | Append to system prompt (only with `--print`)                                                  | `claude --append-system-prompt "Custom instruction"`                                                              |
+| `--allowedTools`           | Space-separated list of allowed tools, or <br> string of comma-separated list of allowed tools | `claude --allowedTools mcp__slack mcp__filesystem`<br>`claude --allowedTools "Bash(npm install),mcp__filesystem"` |
+| `--disallowedTools`        | Space-separated list of denied tools, or <br> string of comma-separated list of denied tools   | `claude --disallowedTools mcp__splunk mcp__github`<br>`claude --disallowedTools "Bash(git commit),mcp__github"`   |
+| `--mcp-config`             | Load MCP servers from a JSON file                                                              | `claude --mcp-config servers.json`                                                                                |
+| `--permission-prompt-tool` | MCP tool for handling permission prompts (only with `--print`)                                 | `claude --permission-prompt-tool mcp__auth__prompt`                                                               |
 
 For a complete list of CLI options and features, see the [CLI reference](https://docs.anthropic.com/en/docs/claude-code/cli-reference) documentation.
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#output-formats)  Output formats
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#output-formats) Output formats
 
 The SDK supports multiple output formats:
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#text-output-default)  Text output (default)
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#text-output-default) Text output (default)
 
 Returns just the response text:
 
@@ -398,7 +397,7 @@ $ claude -p "Explain file src/components/Header.tsx"
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#json-output)  JSON output
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#json-output) JSON output
 
 Returns structured data including metadata:
 
@@ -425,10 +424,9 @@ Copy
   "result": "The response text here...",
   "session_id": "abc123"
 }
-
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#streaming-json-output)  Streaming JSON output
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#streaming-json-output) Streaming JSON output
 
 Streams each message as it is received:
 
@@ -441,7 +439,7 @@ $ claude -p "Build an application" --output-format stream-json
 
 Each conversation begins with an initial `init` system message, followed by a list of user and assistant messages, followed by a final `result` system message with stats. Each message is emitted as a separate JSON object.
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#message-schema)  Message schema
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#message-schema) Message schema
 
 Messages returned from the JSON API are strictly typed according to the following schema:
 
@@ -451,22 +449,22 @@ Copy
 type SDKMessage =
   // An assistant message
   | {
-      type: "assistant";
+      type: 'assistant';
       message: Message; // from Anthropic SDK
       session_id: string;
     }
 
   // A user message
   | {
-      type: "user";
+      type: 'user';
       message: MessageParam; // from Anthropic SDK
       session_id: string;
     }
 
   // Emitted as the last message
   | {
-      type: "result";
-      subtype: "success";
+      type: 'result';
+      subtype: 'success';
       duration_ms: float;
       duration_api_ms: float;
       is_error: boolean;
@@ -478,8 +476,8 @@ type SDKMessage =
 
   // Emitted as the last message, when we've reached the maximum number of turns
   | {
-      type: "result";
-      subtype: "error_max_turns" | "error_during_execution";
+      type: 'result';
+      subtype: 'error_max_turns' | 'error_during_execution';
       duration_ms: float;
       duration_api_ms: float;
       is_error: boolean;
@@ -490,8 +488,8 @@ type SDKMessage =
 
   // Emitted as the first message at the start of a conversation
   | {
-      type: "system";
-      subtype: "init";
+      type: 'system';
+      subtype: 'init';
       apiKeySource: string;
       cwd: string;
       session_id: string;
@@ -501,20 +499,19 @@ type SDKMessage =
         status: string;
       }[];
       model: string;
-      permissionMode: "default" | "acceptEdits" | "bypassPermissions" | "plan";
+      permissionMode: 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan';
     };
-
 ```
 
 We will soon publish these types in a JSONSchema-compatible format. We use semantic versioning for the main Claude Code package to communicate breaking changes to this format.
 
 `Message` and `MessageParam` types are available in Anthropic SDKs. For example, see the Anthropic [TypeScript](https://github.com/anthropics/anthropic-sdk-typescript) and [Python](https://github.com/anthropics/anthropic-sdk-python/) SDKs.
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#input-formats)  Input formats
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#input-formats) Input formats
 
 The SDK supports multiple input formats:
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#text-input-default)  Text input (default)
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#text-input-default) Text input (default)
 
 Input text can be provided as an argument:
 
@@ -534,7 +531,7 @@ $ echo "Explain this code" | claude -p
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#streaming-json-input)  Streaming JSON input
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#streaming-json-input) Streaming JSON input
 
 A stream of messages provided via `stdin` where each message represents a user turn. This allows multiple turns of a conversation without re-launching the `claude` binary and allows providing guidance to the model while it is processing a request.
 
@@ -549,9 +546,9 @@ $ echo '{"type":"user","message":{"role":"user","content":[{"type":"text","text"
 
 ```
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#examples)  Examples
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#examples) Examples
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#simple-script-integration)  Simple script integration
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#simple-script-integration) Simple script integration
 
 Copy
 
@@ -577,7 +574,7 @@ run_claude "Optimize this database query" "json"
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#processing-files-with-claude)  Processing files with Claude
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#processing-files-with-claude) Processing files with Claude
 
 Copy
 
@@ -598,7 +595,7 @@ done
 
 ```
 
-### [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#session-management)  Session management
+### [​](https://docs.anthropic.com/en/docs/claude-code/sdk#session-management) Session management
 
 Copy
 
@@ -611,23 +608,11 @@ $ claude -p --resume "$(cat session.txt)" "Add unit tests"
 
 ```
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#best-practices)  Best practices
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#best-practices) Best practices
 
 1. **Use JSON output format** for programmatic parsing of responses:
 
-
-
-
-
 Copy
-
-
-
-
-
-
-
-
 
 ```bash
 # Parse JSON response with jq
@@ -639,19 +624,7 @@ cost=$(echo "$result" | jq -r '.cost_usd')
 
 2. **Handle errors gracefully** \- check exit codes and stderr:
 
-
-
-
-
 Copy
-
-
-
-
-
-
-
-
 
 ```bash
 if ! claude -p "$prompt" 2>error.log; then
@@ -666,19 +639,7 @@ fi
 
 4. **Consider timeouts** for long-running operations:
 
-
-
-
-
 Copy
-
-
-
-
-
-
-
-
 
 ```bash
 timeout 300 claude -p "$complex_prompt" || echo "Timed out after 5 minutes"
@@ -687,12 +648,11 @@ timeout 300 claude -p "$complex_prompt" || echo "Timed out after 5 minutes"
 
 5. **Respect rate limits** when making multiple requests by adding delays between calls
 
-
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#real-world-applications)  Real-world applications
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#real-world-applications) Real-world applications
 
 The Claude Code SDK enables powerful integrations with your development workflow. One notable example is the [Claude Code GitHub Actions](https://docs.anthropic.com/en/docs/claude-code/github-actions), which uses the SDK to provide automated code review, PR creation, and issue triage capabilities directly in your GitHub workflow.
 
-## [​](https://docs.anthropic.com/en/docs/claude-code/sdk\#related-resources)  Related resources
+## [​](https://docs.anthropic.com/en/docs/claude-code/sdk#related-resources) Related resources
 
 - [CLI usage and controls](https://docs.anthropic.com/en/docs/claude-code/cli-reference) \- Complete CLI documentation
 - [GitHub Actions integration](https://docs.anthropic.com/en/docs/claude-code/github-actions) \- Automate your GitHub workflow with Claude

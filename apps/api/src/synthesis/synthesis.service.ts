@@ -1,6 +1,7 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { SignalsService } from '../signals/signals.service';
+import { LlmService } from '../llm/llm.service';
 import type {
   Signal,
   SignalDirection,
@@ -36,7 +37,10 @@ export class SynthesisService implements OnModuleInit {
   private readonly logger = new Logger(SynthesisService.name);
   private synthesisCache: Map<string, AggregatedSignal> = new Map();
 
-  constructor(private readonly signalsService: SignalsService) {}
+  constructor(
+    private readonly signalsService: SignalsService,
+    @Optional() private readonly llmService?: LlmService,
+  ) {}
 
   async onModuleInit(): Promise<void> {
     setTimeout(() => this.runSynthesis(), 8000);
@@ -49,7 +53,7 @@ export class SynthesisService implements OnModuleInit {
 
     for (const [key, groupSignals] of grouped) {
       const [asset, timeframe] = key.split(':');
-      const result = this.aggregateSignals(asset, groupSignals);
+      const result = await this.aggregateSignals(asset, groupSignals);
       result.timeframe = (timeframe as Timeframe) || undefined;
       results.push(result);
       this.synthesisCache.set(key, result);
@@ -117,27 +121,34 @@ export class SynthesisService implements OnModuleInit {
     return grouped;
   }
 
-  aggregateSignals(asset: string, signals: Signal[]): AggregatedSignal {
+  async aggregateSignals(
+    asset: string,
+    signals: Signal[],
+  ): Promise<AggregatedSignal> {
     const latest = this.getLatestPerSource(signals);
     const contributions = this.buildContributions(latest);
     const { direction, confidence } =
       this.calculateWeightedVerdict(contributions);
     const agreements = this.findAgreements(contributions);
     const disagreements = this.findDisagreements(contributions);
-    const reasoningChain = this.buildReasoningChain(
-      asset,
-      direction,
-      confidence,
-      contributions,
-      agreements,
-      disagreements,
-    );
 
     const assetClass = signals[0]?.assetClass ?? 'equity';
     const { conviction, convictionLabel } = this.calculateConviction(
       contributions,
       direction,
       latest,
+    );
+
+    const reasoning = await this.buildReasoningChain(
+      asset,
+      assetClass,
+      direction,
+      confidence,
+      conviction,
+      convictionLabel,
+      contributions,
+      agreements,
+      disagreements,
     );
 
     return {
@@ -151,7 +162,8 @@ export class SynthesisService implements OnModuleInit {
       contributions,
       agreements,
       disagreements,
-      reasoningChain,
+      reasoningChain: reasoning.text,
+      reasoningSource: reasoning.source,
       conviction,
       convictionLabel,
       lastUpdated: new Date().toISOString(),
@@ -308,7 +320,46 @@ export class SynthesisService implements OnModuleInit {
     return { conviction, convictionLabel };
   }
 
-  private buildReasoningChain(
+  private async buildReasoningChain(
+    asset: string,
+    assetClass: string,
+    direction: SignalDirection,
+    confidence: number,
+    conviction: number,
+    convictionLabel: string,
+    contributions: AgentContribution[],
+    agreements: string[],
+    disagreements: string[],
+  ): Promise<{ text: string; source: 'ai' | 'template' }> {
+    // Try LLM-powered reasoning first
+    if (this.llmService) {
+      const llmReasoning = await this.llmService.generateReasoning({
+        asset,
+        assetClass,
+        direction,
+        confidence,
+        conviction,
+        convictionLabel,
+        contributions,
+        agreements,
+        disagreements,
+      });
+      if (llmReasoning) return { text: llmReasoning, source: 'ai' };
+    }
+
+    // Fallback to template reasoning
+    const text = this.buildTemplateReasoning(
+      asset,
+      direction,
+      confidence,
+      contributions,
+      agreements,
+      disagreements,
+    );
+    return { text, source: 'template' };
+  }
+
+  private buildTemplateReasoning(
     asset: string,
     direction: SignalDirection,
     confidence: number,

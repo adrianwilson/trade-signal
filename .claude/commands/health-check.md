@@ -30,13 +30,13 @@ Run a comprehensive health check of the development environment. Validate each i
 
 Summarize results as a table:
 
-| Check | Status | Details |
-|-------|--------|---------|
-| Git Remote | pass/fail | repo URL |
+| Check      | Status    | Details              |
+| ---------- | --------- | -------------------- |
+| Git Remote | pass/fail | repo URL             |
 | GitHub CLI | pass/fail | version, auth status |
-| Node.js | pass/fail | version |
-| Nx | pass/fail | version |
-| Build | pass/fail | errors if any |
-| Tests | pass/fail | pass/fail counts |
+| Node.js    | pass/fail | version              |
+| Nx         | pass/fail | version              |
+| Build      | pass/fail | errors if any        |
+| Tests      | pass/fail | pass/fail counts     |
 
 End with overall status: HEALTHY or UNHEALTHY.

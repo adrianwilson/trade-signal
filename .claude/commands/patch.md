@@ -28,6 +28,7 @@ issue_screenshots: $5 if provided, otherwise leave it blank
 ## Patch Scope
 
 The patch should:
+
 - Address ONLY the `review_change_request` -- nothing else
 - Make the minimum number of file changes required
 - Not introduce new features, refactors, or unrelated fixes
@@ -36,6 +37,7 @@ The patch should:
 ## Relevant Files
 
 Focus on the following files:
+
 - `README.md` - Contains the project overview and instructions.
 - `apps/api/**` - Contains the NestJS backend API.
 - `apps/dashboard/**` - Contains the Angular frontend dashboard.
@@ -47,23 +49,28 @@ Focus on the following files:
 # Patch: <concise patch title>
 
 ## Metadata
+
 adw_id: `{adw_id}`
 review_change_request: `{review_change_request}`
 
 ## Issue Summary
+
 **Original Spec:** <spec_path or "N/A">
 **Issue:** <brief description of the review issue>
 **Solution:** <brief description of the solution approach>
 
 ## Files to Modify
+
 <list only the files that need changes with one-line descriptions>
 
 ## Step by Step Tasks
+
 IMPORTANT: Execute every step in order, top to bottom.
 
 <minimal steps to fix the issue. Keep it tight.>
 
 ## Validation Commands
+
 - `npx nx run-many -t build` - Build all projects
 - `npx nx run-many -t test` - Run all tests
 - `npx nx run-many -t lint` - Lint all projects
