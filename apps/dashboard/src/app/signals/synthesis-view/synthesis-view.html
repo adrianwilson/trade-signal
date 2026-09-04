@@ -135,8 +135,16 @@
       'HOLD') {
       <div class="follow-action">
         @if (followedAssets().has(s.asset)) {
-        <button mat-stroked-button disabled class="followed-btn">
-          <mat-icon>check</mat-icon> Following
+        <button
+          mat-stroked-button
+          color="warn"
+          (click)="closePosition(s)"
+          [disabled]="closingInProgress().has(s.asset)"
+          class="close-btn"
+        >
+          @if (closingInProgress().has(s.asset)) {
+          <mat-icon>hourglass_empty</mat-icon> Closing... } @else {
+          <mat-icon>close</mat-icon> Close Position }
         </button>
         } @else {
         <button

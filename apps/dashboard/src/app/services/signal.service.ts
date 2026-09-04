@@ -263,6 +263,13 @@ export class SignalService {
     );
   }
 
+  resetPaperAccount(accountId: string): Observable<PaperAccount> {
+    return this.http.post<PaperAccount>(
+      `${this.baseUrl}/paper/accounts/${accountId}/reset`,
+      {},
+    );
+  }
+
   closePaperPosition(
     accountId: string,
     asset: string,

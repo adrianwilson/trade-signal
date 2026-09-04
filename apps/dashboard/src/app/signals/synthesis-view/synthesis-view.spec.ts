@@ -72,6 +72,7 @@ describe('SynthesisViewComponent', () => {
     component.paperAccountId = signal<string | null>(null);
     component.followedAssets = signal(new Set<string>());
     component.followingInProgress = signal(new Set<string>());
+    component.closingInProgress = signal(new Set<string>());
     Object.assign(component, {
       signalService: mockSignalService,
       authService: { isAuthenticated: () => false },
@@ -123,6 +124,34 @@ describe('SynthesisViewComponent', () => {
       component.onTimeframeChange('swing');
       expect(component.selectedTimeframe()).toBe('swing');
       expect(mockSignalService.getSynthesis).toHaveBeenCalledWith('swing');
+    });
+  });
+
+  describe('closePosition', () => {
+    it('should remove asset from followedAssets on success', () => {
+      const mockClose = vi.fn().mockReturnValue(of([]));
+      Object.assign(component, {
+        signalService: { ...mockSignalService, closePaperPosition: mockClose },
+      });
+      component.paperAccountId.set('acc-1');
+      component.followedAssets.set(new Set(['AAPL']));
+
+      component.closePosition(mockSyntheses[0]);
+
+      expect(component.followedAssets().has('AAPL')).toBe(false);
+      expect(mockClose).toHaveBeenCalledWith('acc-1', 'AAPL');
+    });
+
+    it('should not call service without account', () => {
+      const mockClose = vi.fn().mockReturnValue(of([]));
+      Object.assign(component, {
+        signalService: { ...mockSignalService, closePaperPosition: mockClose },
+      });
+      component.paperAccountId.set(null);
+
+      component.closePosition(mockSyntheses[0]);
+
+      expect(mockClose).not.toHaveBeenCalled();
     });
   });
 

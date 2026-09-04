@@ -47,6 +47,7 @@ export class SynthesisViewComponent implements OnInit {
   paperAccountId = signal<string | null>(null);
   followedAssets = signal<Set<string>>(new Set());
   followingInProgress = signal<Set<string>>(new Set());
+  closingInProgress = signal<Set<string>>(new Set());
 
   syntheses = computed(() => {
     const filter = this.selectedClass();
@@ -98,6 +99,37 @@ export class SynthesisViewComponent implements OnInit {
     });
   }
 
+  closePosition(synthesis: AggregatedSignal): void {
+    const accountId = this.paperAccountId();
+    if (!accountId) return;
+
+    this.closingInProgress.update((s) => new Set(s).add(synthesis.asset));
+
+    this.signalService
+      .closePaperPosition(accountId, synthesis.asset)
+      .subscribe({
+        next: () => {
+          this.followedAssets.update((s) => {
+            const next = new Set(s);
+            next.delete(synthesis.asset);
+            return next;
+          });
+          this.closingInProgress.update((s) => {
+            const next = new Set(s);
+            next.delete(synthesis.asset);
+            return next;
+          });
+        },
+        error: () => {
+          this.closingInProgress.update((s) => {
+            const next = new Set(s);
+            next.delete(synthesis.asset);
+            return next;
+          });
+        },
+      });
+  }
+
   onTimeframeChange(timeframe: string): void {
     this.selectedTimeframe.set(timeframe);
     this.loading.set(true);
@@ -140,13 +172,23 @@ export class SynthesisViewComponent implements OnInit {
     this.signalService.getPaperAccounts().subscribe({
       next: (accounts) => {
         if (accounts.length > 0) {
-          this.paperAccountId.set(accounts[0].id);
+          const accountId = accounts[0].id;
+          this.paperAccountId.set(accountId);
+          this.loadOpenPositions(accountId);
         } else {
-          // Auto-create paper account
           this.signalService.createPaperAccount().subscribe({
             next: (account) => this.paperAccountId.set(account.id),
           });
         }
+      },
+    });
+  }
+
+  private loadOpenPositions(accountId: string): void {
+    this.signalService.getPaperAccountSummary(accountId).subscribe({
+      next: (account) => {
+        const openAssets = new Set(account.openPositions.map((p) => p.asset));
+        this.followedAssets.set(openAssets);
       },
     });
   }
