@@ -159,7 +159,11 @@ export class PaperTradingService {
     else sizePct = 0.01;
 
     const positionSize = account.cashBalance * sizePct;
-    const quantity = Math.floor(positionSize / quote.price);
+    const isCrypto = signal.assetClass === 'crypto';
+    const rawQuantity = positionSize / quote.price;
+    const quantity = isCrypto
+      ? Math.round(rawQuantity * 1e6) / 1e6 // 6 decimal places for crypto
+      : Math.floor(rawQuantity);
     if (quantity <= 0) throw new NotFoundException('Insufficient funds');
 
     const cost = quantity * quote.price;
