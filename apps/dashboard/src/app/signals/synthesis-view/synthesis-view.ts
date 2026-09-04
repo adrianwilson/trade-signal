@@ -172,13 +172,23 @@ export class SynthesisViewComponent implements OnInit {
     this.signalService.getPaperAccounts().subscribe({
       next: (accounts) => {
         if (accounts.length > 0) {
-          this.paperAccountId.set(accounts[0].id);
+          const accountId = accounts[0].id;
+          this.paperAccountId.set(accountId);
+          this.loadOpenPositions(accountId);
         } else {
-          // Auto-create paper account
           this.signalService.createPaperAccount().subscribe({
             next: (account) => this.paperAccountId.set(account.id),
           });
         }
+      },
+    });
+  }
+
+  private loadOpenPositions(accountId: string): void {
+    this.signalService.getPaperAccountSummary(accountId).subscribe({
+      next: (account) => {
+        const openAssets = new Set(account.openPositions.map((p) => p.asset));
+        this.followedAssets.set(openAssets);
       },
     });
   }
