@@ -55,6 +55,8 @@ export class PaperTradingComponent implements OnInit {
     'avgPrice',
     'currentPrice',
     'pnl',
+    'stopLoss',
+    'takeProfit',
     'actions',
   ];
   tradeColumns = [
@@ -64,6 +66,7 @@ export class PaperTradingComponent implements OnInit {
     'entryPrice',
     'exitPrice',
     'pnl',
+    'closeReason',
     'source',
     'date',
   ];

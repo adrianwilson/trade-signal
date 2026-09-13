@@ -85,6 +85,18 @@
       @else { — }
     </td>
   </ng-container>
+  <ng-container matColumnDef="stopLoss">
+    <th mat-header-cell *matHeaderCellDef>SL</th>
+    <td mat-cell *matCellDef="let pos" style="color: #f44336">
+      @if (pos.stopLoss) { {{ pos.stopLoss | currency }} } @else { — }
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="takeProfit">
+    <th mat-header-cell *matHeaderCellDef>TP</th>
+    <td mat-cell *matCellDef="let pos" style="color: #4caf50">
+      @if (pos.takeProfit) { {{ pos.takeProfit | currency }} } @else { — }
+    </td>
+  </ng-container>
   <ng-container matColumnDef="actions">
     <th mat-header-cell *matHeaderCellDef></th>
     <td mat-cell *matCellDef="let pos">
@@ -133,6 +145,24 @@
     <td mat-cell *matCellDef="let t" [style.color]="pnlColor(t.pnl)">
       @if (t.pnl !== null) { {{ t.pnl | currency }} ({{ t.pnlPercent | number :
       '1.1-1' }}%) } @else { open }
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="closeReason">
+    <th mat-header-cell *matHeaderCellDef>Closed By</th>
+    <td mat-cell *matCellDef="let t">
+      @if (t.closeReason === 'stop-loss') {
+      <mat-chip
+        style="background-color: #f44336; color: white"
+        class="small-chip"
+        >SL</mat-chip
+      >
+      } @else if (t.closeReason === 'take-profit') {
+      <mat-chip
+        style="background-color: #4caf50; color: white"
+        class="small-chip"
+        >TP</mat-chip
+      >
+      } @else { manual }
     </td>
   </ng-container>
   <ng-container matColumnDef="source">
