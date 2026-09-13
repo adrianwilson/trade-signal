@@ -58,9 +58,6 @@ describe('ResearchAgentService', () => {
       mapSymbol: jest.fn().mockImplementation((a: string) => a),
     };
     mockSignals = {
-      findAll: jest
-        .fn()
-        .mockResolvedValue([{ asset: 'AAPL', assetClass: 'equity' }]),
       create: jest.fn().mockResolvedValue({}),
     };
 

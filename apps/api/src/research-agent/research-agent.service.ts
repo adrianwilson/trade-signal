@@ -9,6 +9,7 @@ import { MarketDataService } from '../market-data/market-data.service';
 import type { QuoteResult } from '../market-data/market-data.service';
 import { SignalsService } from '../signals/signals.service';
 import type { SignalDirection, AssetClass } from '@org/signals';
+import { SCAN_UNIVERSE } from '../scanner/scan-universe';
 
 interface LlmSignalResponse {
   direction: string;
@@ -37,25 +38,17 @@ export class ResearchAgentService {
       return;
     }
 
-    this.logger.log('Running AI research agent...');
-    const signals = await this.signalsService.findAll();
-    const seen = new Set<string>();
+    this.logger.log(
+      `Running AI research agent on ${SCAN_UNIVERSE.length} assets...`,
+    );
     let created = 0;
 
-    for (const signal of signals) {
-      if (signal.assetClass !== 'equity') continue;
-      const key = signal.asset;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
+    for (const entry of SCAN_UNIVERSE) {
       try {
-        const result = await this.analyzeAsset(
-          signal.asset,
-          signal.assetClass as AssetClass,
-        );
+        const result = await this.analyzeAsset(entry.asset, entry.assetClass);
         if (result) created++;
       } catch (err) {
-        this.logger.warn(`Research failed for ${signal.asset}: ${err}`);
+        this.logger.warn(`Research failed for ${entry.asset}: ${err}`);
       }
     }
 
