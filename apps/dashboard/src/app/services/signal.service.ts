@@ -12,8 +12,8 @@ export interface NewsHeadline {
 
 export interface AssetSentiment {
   asset: string;
-  score: number;
-  signal: string;
+  score?: number;
+  signal?: string;
   headlineCount: number;
   headlines: NewsHeadline[];
 }

@@ -9,12 +9,12 @@ export class NewsSentimentController {
   async getAll() {
     const cached = this.newsSentimentService.getAllSentiment();
     if (cached.length > 0) return cached;
-    await this.newsSentimentService.runSentimentAnalysis();
+    await this.newsSentimentService.refreshHeadlines();
     return this.newsSentimentService.getAllSentiment();
   }
 
   @Get(':symbol')
   async analyze(@Param('symbol') symbol: string) {
-    return this.newsSentimentService.analyzeSentiment(symbol, symbol);
+    return this.newsSentimentService.getHeadlinesForAsset(symbol, symbol);
   }
 }

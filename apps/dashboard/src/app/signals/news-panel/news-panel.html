@@ -18,7 +18,7 @@
   <mat-card class="sentiment-card">
     <mat-card-header>
       <mat-card-title>
-        {{ s.asset }}
+        {{ s.asset }} @if (s.signal) {
         <mat-chip
           [style.background-color]="signalColor(s.signal)"
           style="color: white"
@@ -26,13 +26,15 @@
         >
           {{ s.signal }}
         </mat-chip>
+        }
       </mat-card-title>
       <mat-card-subtitle>
+        @if (s.score !== undefined) {
         <mat-icon [style.color]="sentimentColor(s.score)" class="trend-icon">
           {{ sentimentIcon(s.score) }}
         </mat-icon>
         Score: {{ s.score | number : '1.2-2' }} ({{ s.headlineCount }}
-        headlines)
+        headlines) } @else { {{ s.headlineCount }} headlines }
       </mat-card-subtitle>
     </mat-card-header>
 

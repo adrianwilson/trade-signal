@@ -97,6 +97,49 @@ export class LlmService {
     }
   }
 
+  async generate(prompt: string, maxTokens = 256): Promise<string | null> {
+    if (
+      this.available === false &&
+      Date.now() - this.lastCheck < LlmService.RETRY_INTERVAL_MS
+    ) {
+      return null;
+    }
+
+    if (this.available !== true) {
+      this.available = await this.checkOllama();
+      if (!this.available) return null;
+    }
+
+    try {
+      const response = await fetch(`${this.ollamaUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          prompt,
+          stream: false,
+          options: { num_predict: maxTokens },
+        }),
+        signal: AbortSignal.timeout(30000),
+      });
+
+      if (!response.ok) {
+        this.logger.warn(`Ollama returned ${response.status}`);
+        return null;
+      }
+
+      const result = (await response.json()) as { response?: string };
+      return result.response?.trim() || null;
+    } catch (err) {
+      this.logger.warn(`LLM generate failed: ${err}`);
+      return null;
+    }
+  }
+
+  isAvailable(): boolean {
+    return this.available === true;
+  }
+
   buildSynthesisPrompt(data: SynthesisPromptData): string {
     const contributions = data.contributions
       .map(
