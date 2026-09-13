@@ -27,6 +27,7 @@ import {
   PaperTradeEntity,
 } from '../paper-trading/paper-trading.entities';
 import { ScannerModule } from '../scanner/scanner.module';
+import { ResearchAgentModule } from '../research-agent/research-agent.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ScannerModule } from '../scanner/scanner.module';
     OutcomesModule,
     PaperTradingModule,
     ScannerModule,
+    ResearchAgentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
