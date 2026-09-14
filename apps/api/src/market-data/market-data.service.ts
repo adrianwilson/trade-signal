@@ -6,7 +6,9 @@ import { Cron } from '@nestjs/schedule';
 const YahooFinance =
   require('yahoo-finance2').default || require('yahoo-finance2');
 const yahooFinance =
-  typeof YahooFinance === 'function' ? new YahooFinance() : YahooFinance;
+  typeof YahooFinance === 'function'
+    ? new YahooFinance({ suppressNotices: ['yahooSurvey'] })
+    : YahooFinance;
 import { AssetPriceEntity } from './asset-price.entity';
 import { SignalsService } from '../signals/signals.service';
 import { CoinGeckoService } from './coingecko.service';
