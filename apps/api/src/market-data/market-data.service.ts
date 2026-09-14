@@ -7,7 +7,7 @@ const YahooFinance =
   require('yahoo-finance2').default || require('yahoo-finance2');
 const yahooFinance =
   typeof YahooFinance === 'function'
-    ? new YahooFinance({ suppressNotices: ['yahooSurvey'] })
+    ? new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] })
     : YahooFinance;
 import { AssetPriceEntity } from './asset-price.entity';
 import { SignalsService } from '../signals/signals.service';
