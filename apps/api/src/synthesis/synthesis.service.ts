@@ -370,7 +370,7 @@ export class SynthesisService implements OnModuleInit {
     const parts: string[] = [];
 
     parts.push(
-      `${asset}: ${direction} with ${confidence}% confidence based on ${contributions.length} agents.`,
+      `${asset}: ${direction} with ${confidence}% confidence based on ${contributions.length} sources.`,
     );
 
     for (const c of contributions) {

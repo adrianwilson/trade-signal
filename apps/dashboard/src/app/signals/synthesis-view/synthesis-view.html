@@ -63,7 +63,7 @@
         </mat-chip>
       </mat-card-title>
       <mat-card-subtitle>
-        {{ s.confidence }}% confidence from {{ s.contributions.length }} agents
+        {{ s.confidence }}% confidence from {{ s.contributions.length }} sources
         <span
           class="conviction-badge"
           [class]="'conviction-' + s.convictionLabel"
@@ -87,7 +87,7 @@
 
     <mat-card-content>
       <div class="contributions">
-        <div class="section-label">Agent Contributions</div>
+        <div class="section-label">Sources</div>
         @for (c of s.contributions; track c.source) {
         <div class="contribution-row">
           <span class="source-label">{{ c.source }}</span>
