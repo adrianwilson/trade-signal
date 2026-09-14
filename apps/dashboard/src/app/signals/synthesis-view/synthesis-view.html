@@ -13,6 +13,15 @@
       >
       }
     </mat-button-toggle-group>
+    <mat-button-toggle-group
+      [value]="selectedConviction()"
+      (change)="selectedConviction.set($event.value)"
+      class="conviction-toggle"
+    >
+      <mat-button-toggle value="all">All</mat-button-toggle>
+      <mat-button-toggle value="moderate">Moderate+</mat-button-toggle>
+      <mat-button-toggle value="strong">Strong</mat-button-toggle>
+    </mat-button-toggle-group>
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Asset Class</mat-label>
       <mat-select
