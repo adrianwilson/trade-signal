@@ -74,7 +74,7 @@
         <span class="timeframe-badge">
           {{ timeframeLabels[s.timeframe] || s.timeframe }}
         </span>
-        } @if (s.timeframeAlignment) {
+        } @if (s.timeframeAlignment && selectedTimeframe() === 'all') {
         <span
           class="alignment-badge"
           [class]="'alignment-' + s.timeframeAlignment"
@@ -87,7 +87,6 @@
 
     <mat-card-content>
       <div class="contributions">
-        <div class="section-label">Sources</div>
         @for (c of s.contributions; track c.source) {
         <div class="contribution-row">
           <span class="source-label">{{ c.source }}</span>
