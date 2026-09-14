@@ -127,7 +127,7 @@ export class SynthesisService implements OnModuleInit {
   ): Promise<AggregatedSignal> {
     const latest = this.getLatestPerSource(signals);
     const contributions = this.buildContributions(latest);
-    const { direction, confidence } =
+    const { direction, confidence, weightCoverage } =
       this.calculateWeightedVerdict(contributions);
     const agreements = this.findAgreements(contributions);
     const disagreements = this.findDisagreements(contributions);
@@ -158,6 +158,7 @@ export class SynthesisService implements OnModuleInit {
       priceChange: 0,
       direction,
       confidence,
+      weightCoverage,
       signals: latest,
       contributions,
       agreements,
@@ -191,47 +192,60 @@ export class SynthesisService implements OnModuleInit {
     }));
   }
 
+  private static readonly TOTAL_POSSIBLE_WEIGHT = Object.values(
+    SOURCE_WEIGHTS,
+  ).reduce((sum, w) => sum + w, 0);
+
   calculateWeightedVerdict(contributions: AgentContribution[]): {
     direction: SignalDirection;
     confidence: number;
+    weightCoverage: number;
   } {
     if (contributions.length === 0) {
-      return { direction: 'HOLD', confidence: 0 };
+      return { direction: 'HOLD', confidence: 0, weightCoverage: 0 };
     }
 
     let buyScore = 0;
     let sellScore = 0;
-    let totalWeight = 0;
+    let presentWeight = 0;
 
     for (const c of contributions) {
       const weight = SOURCE_WEIGHTS[c.source] ?? 1.0;
       const weighted = (c.confidence / 100) * weight;
-      totalWeight += weight;
+      presentWeight += weight;
 
       if (c.direction === 'BUY') buyScore += weighted;
       else if (c.direction === 'SELL') sellScore += weighted;
     }
 
-    if (totalWeight === 0) return { direction: 'HOLD', confidence: 0 };
+    if (presentWeight === 0) {
+      return { direction: 'HOLD', confidence: 0, weightCoverage: 0 };
+    }
 
-    const buyPct = (buyScore / totalWeight) * 100;
-    const sellPct = (sellScore / totalWeight) * 100;
+    const coverage = presentWeight / SynthesisService.TOTAL_POSSIBLE_WEIGHT;
+    const weightCoverage = Math.round(coverage * 100);
+
+    const buyPct = (buyScore / presentWeight) * 100;
+    const sellPct = (sellScore / presentWeight) * 100;
 
     let direction: SignalDirection;
-    let confidence: number;
+    let rawConfidence: number;
 
     if (buyPct > sellPct && buyPct > 30) {
       direction = 'BUY';
-      confidence = Math.round(buyPct);
+      rawConfidence = buyPct;
     } else if (sellPct > buyPct && sellPct > 30) {
       direction = 'SELL';
-      confidence = Math.round(sellPct);
+      rawConfidence = sellPct;
     } else {
       direction = 'HOLD';
-      confidence = Math.round(100 - buyPct - sellPct);
+      rawConfidence = 100 - buyPct - sellPct;
     }
 
-    return { direction, confidence: Math.min(confidence, 100) };
+    // Scale confidence by coverage — 1 source at 100% shouldn't show 100% confidence
+    const confidence = Math.min(Math.round(rawConfidence * coverage), 100);
+
+    return { direction, confidence, weightCoverage };
   }
 
   findAgreements(contributions: AgentContribution[]): string[] {

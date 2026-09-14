@@ -42,7 +42,8 @@ export interface AggregatedSignal {
   price: number;
   priceChange: number; // percentage
   direction: SignalDirection;
-  confidence: number; // weighted average, 0-100
+  confidence: number; // weighted average adjusted by coverage, 0-100
+  weightCoverage?: number; // percentage of total possible weight present, 0-100
   signals: Signal[];
   contributions: AgentContribution[];
   agreements: string[]; // e.g., ["RSI and MACD agree: BUY"]
