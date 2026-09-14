@@ -11,14 +11,14 @@ import type {
 } from '@org/signals';
 
 const SOURCE_WEIGHTS: Record<string, number> = {
+  agent: 1.5,
+  'sma-crossover': 1.2,
   rsi: 1.0,
   macd: 1.0,
-  'sma-crossover': 1.2,
   bollinger: 0.8,
-  'news-sentiment': 0.7,
   volume: 0.6,
-  agent: 1.0,
-  manual: 0.5,
+  'news-sentiment': 0.3,
+  manual: 0.3,
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -186,6 +186,7 @@ export class SynthesisService implements OnModuleInit {
       source: s.source,
       direction: s.direction,
       confidence: Math.min(s.confidence, 100),
+      weight: SOURCE_WEIGHTS[s.source] ?? 1.0,
       reasoning: s.reasoning,
     }));
   }

@@ -164,8 +164,14 @@ h2 {
 .confidence-value {
   font-size: 13px;
   color: rgba(0, 0, 0, 0.54);
-  min-width: 36px;
+  min-width: 60px;
   text-align: right;
+}
+
+.weight-indicator {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.38);
+  margin-left: 2px;
 }
 
 .consensus-section {

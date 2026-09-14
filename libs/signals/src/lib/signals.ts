@@ -32,6 +32,7 @@ export interface AgentContribution {
   source: SignalSource;
   direction: SignalDirection;
   confidence: number;
+  weight?: number;
   reasoning?: string;
 }
 
