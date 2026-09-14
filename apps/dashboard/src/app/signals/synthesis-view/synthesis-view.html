@@ -64,6 +64,11 @@
       </mat-card-title>
       <mat-card-subtitle>
         {{ s.confidence }}% confidence
+        <mat-icon
+          class="confidence-help"
+          title="Confidence = weighted source agreement × source coverage. Each source has a weight (e.g. AI agent ×1.5, RSI ×1.0). Confidence is scaled by how many sources are reporting — fewer sources = lower confidence."
+          >info_outline</mat-icon
+        >
         <span
           class="conviction-badge"
           [class]="'conviction-' + s.convictionLabel"
