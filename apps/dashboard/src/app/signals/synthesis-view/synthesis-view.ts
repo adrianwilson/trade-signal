@@ -37,9 +37,9 @@ export class SynthesisViewComponent implements OnInit {
   readonly timeframes = ['all', 'intraday', 'swing', 'long-term'];
   readonly timeframeLabels: Record<string, string> = {
     all: 'All',
-    intraday: 'Intraday (1H)',
-    swing: 'Swing (1D)',
-    'long-term': 'Long-term (1W)',
+    intraday: 'Day Trade',
+    swing: 'Swing',
+    'long-term': 'Trend',
   };
   loading = signal(true);
   refreshing = signal(false);

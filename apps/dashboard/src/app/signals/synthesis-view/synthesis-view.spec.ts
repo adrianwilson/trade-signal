@@ -65,9 +65,9 @@ describe('SynthesisViewComponent', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any)['timeframeLabels'] = {
       all: 'All',
-      intraday: 'Intraday (1H)',
-      swing: 'Swing (1D)',
-      'long-term': 'Long-term (1W)',
+      intraday: 'Day Trade',
+      swing: 'Swing',
+      'long-term': 'Trend',
     };
     component.paperAccountId = signal<string | null>(null);
     component.followedAssets = signal(new Set<string>());

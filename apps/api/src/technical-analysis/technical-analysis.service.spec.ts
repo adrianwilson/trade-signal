@@ -85,9 +85,9 @@ describe('TechnicalAnalysisService', () => {
       expect(result.symbol).toBe('AAPL');
       expect(mockMarketData.getHistory).toHaveBeenCalledWith(
         'AAPL',
-        5,
+        2,
         undefined,
-        '1h',
+        '15m',
       );
     });
 
