@@ -7,11 +7,12 @@ export class SynthesisController {
 
   @Get()
   async getAll(@Query('timeframe') timeframe?: string) {
-    const cached = this.synthesisService.getAll(timeframe);
-    if (cached.length > 0) return cached;
-    const results = await this.synthesisService.synthesize();
-    if (!timeframe || timeframe === 'all') return results;
-    return results.filter((s) => s.timeframe === timeframe);
+    // Only trigger full synthesis if cache is completely empty
+    const allCached = this.synthesisService.getAll();
+    if (allCached.length === 0) {
+      await this.synthesisService.synthesize();
+    }
+    return this.synthesisService.getAll(timeframe);
   }
 
   @Get(':asset')
