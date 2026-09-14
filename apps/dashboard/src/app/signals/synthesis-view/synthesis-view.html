@@ -154,8 +154,8 @@
           (click)="followSignal(s)"
           [disabled]="followingInProgress().has(s.asset)"
         >
-          @if (followingInProgress().has(s.asset)) { Following... } @else {
-          {{ s.direction }}
+          @if (followingInProgress().has(s.asset)) { Trading... } @else {
+          Paper Trade
           }
         </button>
         }
