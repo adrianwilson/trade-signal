@@ -178,9 +178,12 @@ export class SynthesisViewComponent implements OnInit {
         } else {
           this.signalService.createPaperAccount().subscribe({
             next: (account) => this.paperAccountId.set(account.id),
+            error: (err) =>
+              console.error('Failed to create paper account:', err),
           });
         }
       },
+      error: (err) => console.error('Failed to load paper accounts:', err),
     });
   }
 
