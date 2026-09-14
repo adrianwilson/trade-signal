@@ -144,7 +144,7 @@
         >
           @if (closingInProgress().has(s.asset)) {
           <mat-icon>hourglass_empty</mat-icon> Closing... } @else {
-          <mat-icon>close</mat-icon> Close Position }
+          <mat-icon>close</mat-icon> Close }
         </button>
         } @else {
         <button
@@ -155,10 +155,7 @@
           [disabled]="followingInProgress().has(s.asset)"
         >
           @if (followingInProgress().has(s.asset)) { Following... } @else {
-          <ng-container>
-            <mat-icon>trending_flat</mat-icon>
-            Follow {{ s.direction }} Signal
-          </ng-container>
+          {{ s.direction }}
           }
         </button>
         }
