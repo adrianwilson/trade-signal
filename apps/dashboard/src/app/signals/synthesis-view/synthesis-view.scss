@@ -236,6 +236,10 @@ h2 {
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   text-align: right;
+
+  button mat-icon {
+    vertical-align: middle;
+  }
 }
 
 .followed-btn {
