@@ -155,8 +155,11 @@
           [disabled]="followingInProgress().has(s.asset)"
         >
           @if (followingInProgress().has(s.asset)) { Following... } @else {
-          <mat-icon>trending_flat</mat-icon>
-          Follow {{ s.direction }} Signal }
+          <ng-container>
+            <mat-icon>trending_flat</mat-icon>
+            Follow {{ s.direction }} Signal
+          </ng-container>
+          }
         </button>
         }
       </div>
