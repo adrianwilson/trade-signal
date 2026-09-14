@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
@@ -39,7 +39,6 @@ type PositionRow = PortfolioPosition & {
     MatInputModule,
     DecimalPipe,
     CurrencyPipe,
-    DatePipe,
   ],
   templateUrl: './portfolio.html',
   styleUrl: './portfolio.scss',
