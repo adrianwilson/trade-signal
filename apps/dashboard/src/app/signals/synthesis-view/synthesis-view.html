@@ -146,7 +146,7 @@
           <mat-icon>hourglass_empty</mat-icon> Closing... } @else {
           <mat-icon>close</mat-icon> Close }
         </button>
-        } @else {
+        } @else if (s.direction === 'BUY') {
         <button
           mat-raised-button
           [style.background-color]="directionColor(s.direction)"
@@ -154,9 +154,8 @@
           (click)="followSignal(s)"
           [disabled]="followingInProgress().has(s.asset)"
         >
-          @if (followingInProgress().has(s.asset)) { Trading... } @else {
-          Paper Trade
-          }
+          @if (followingInProgress().has(s.asset)) { Trading... } @else { Paper
+          Trade }
         </button>
         }
       </div>
