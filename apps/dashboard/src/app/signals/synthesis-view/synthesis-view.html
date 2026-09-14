@@ -63,7 +63,12 @@
         </mat-chip>
       </mat-card-title>
       <mat-card-subtitle>
-        {{ s.confidence }}% confidence from {{ s.contributions.length }} sources
+        {{ s.confidence }}% confidence
+        <span
+          class="coverage-indicator"
+          title="Confidence = weighted agreement × source coverage. {{ s.weightCoverage }}% of total source weight is present."
+          >{{ s.weightCoverage }}% coverage</span
+        >
         <span
           class="conviction-badge"
           [class]="'conviction-' + s.convictionLabel"

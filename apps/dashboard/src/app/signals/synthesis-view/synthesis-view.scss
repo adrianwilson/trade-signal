@@ -36,6 +36,14 @@ h2 {
   font-size: 16px;
 }
 
+.coverage-indicator {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.38);
+  cursor: help;
+  border-bottom: 1px dotted rgba(0, 0, 0, 0.26);
+  margin-left: 4px;
+}
+
 .error-card {
   background-color: #fdecea;
   color: #611a15;
