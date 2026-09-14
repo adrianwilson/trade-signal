@@ -69,6 +69,9 @@ describe('SynthesisViewComponent', () => {
       swing: 'Swing',
       'long-term': 'Trend',
     };
+    component.selectedConviction = signal('all');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any)['convictionFilters'] = ['all', 'strong', 'moderate'];
     component.paperAccountId = signal<string | null>(null);
     component.followedAssets = signal(new Set<string>());
     component.followingInProgress = signal(new Set<string>());

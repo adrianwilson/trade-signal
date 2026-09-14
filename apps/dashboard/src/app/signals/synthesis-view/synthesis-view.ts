@@ -48,12 +48,28 @@ export class SynthesisViewComponent implements OnInit {
   followedAssets = signal<Set<string>>(new Set());
   followingInProgress = signal<Set<string>>(new Set());
   closingInProgress = signal<Set<string>>(new Set());
+  selectedConviction = signal('all');
+  readonly convictionFilters = ['all', 'strong', 'moderate'];
 
   syntheses = computed(() => {
-    const filter = this.selectedClass();
-    const all = this.allSyntheses();
-    if (filter === 'all') return all;
-    return all.filter((s) => s.assetClass === filter);
+    let results = this.allSyntheses();
+
+    const classFilter = this.selectedClass();
+    if (classFilter !== 'all') {
+      results = results.filter((s) => s.assetClass === classFilter);
+    }
+
+    const conviction = this.selectedConviction();
+    if (conviction === 'strong') {
+      results = results.filter((s) => s.convictionLabel === 'strong');
+    } else if (conviction === 'moderate') {
+      results = results.filter(
+        (s) =>
+          s.convictionLabel === 'strong' || s.convictionLabel === 'moderate',
+      );
+    }
+
+    return results.sort((a, b) => b.confidence - a.confidence);
   });
 
   assetClasses = computed(() => {
