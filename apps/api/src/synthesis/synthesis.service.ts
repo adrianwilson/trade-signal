@@ -183,13 +183,15 @@ export class SynthesisService implements OnModuleInit {
   }
 
   private buildContributions(signals: Signal[]): AgentContribution[] {
-    return signals.map((s) => ({
-      source: s.source,
-      direction: s.direction,
-      confidence: Math.min(s.confidence, 100),
-      weight: SOURCE_WEIGHTS[s.source] ?? 1.0,
-      reasoning: s.reasoning,
-    }));
+    return signals
+      .map((s) => ({
+        source: s.source,
+        direction: s.direction,
+        confidence: Math.min(s.confidence, 100),
+        weight: SOURCE_WEIGHTS[s.source] ?? 1.0,
+        reasoning: s.reasoning,
+      }))
+      .sort((a, b) => (b.weight ?? 1) - (a.weight ?? 1));
   }
 
   private static readonly TOTAL_POSSIBLE_WEIGHT = Object.values(
