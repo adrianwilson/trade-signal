@@ -121,7 +121,7 @@
           Reasoning Chain
           <span
             class="reasoning-source-badge"
-            [class]="'source-' + (s.reasoningSource ?? 'template')"
+            [class]="'source-' + s.reasoningSource"
           >
             @if (s.reasoningSource === 'ai') {
             <mat-icon class="source-icon">smart_toy</mat-icon> AI } @else {
@@ -142,9 +142,7 @@
           [disabled]="closingInProgress().has(s.asset)"
           class="close-btn"
         >
-          @if (closingInProgress().has(s.asset)) {
-          <mat-icon>hourglass_empty</mat-icon> Closing... } @else {
-          <mat-icon>close</mat-icon> Close }
+          @if (closingInProgress().has(s.asset)) { Closing... } @else { Close }
         </button>
         } @else if (s.direction === 'BUY') {
         <button
