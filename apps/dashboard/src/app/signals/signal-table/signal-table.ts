@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { Signal as TradeSignal } from '@org/signals';
 import { SignalService } from '../../services/signal.service';
 import {
@@ -25,6 +26,7 @@ import {
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
+    MatPaginatorModule,
     DatePipe,
     DecimalPipe,
     CurrencyPipe,
@@ -32,7 +34,8 @@ import {
   templateUrl: './signal-table.html',
   styleUrl: './signal-table.scss',
 })
-export class SignalTableComponent implements OnInit {
+export class SignalTableComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   private readonly signalService = inject(SignalService);
   private readonly dialog = inject(MatDialog);
 
@@ -58,6 +61,10 @@ export class SignalTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  ngAfterViewInit(): void {
+    this.signals.paginator = this.paginator;
   }
 
   refresh(): void {
