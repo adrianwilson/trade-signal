@@ -32,7 +32,8 @@ export class LlmService {
   private readonly model: string;
   private available: boolean | null = null;
   private lastCheck = 0;
-  private static readonly RETRY_INTERVAL_MS = 60_000; // re-check every 60s
+  private static readonly RETRY_INTERVAL_MS = 60_000;
+  private queue: Promise<unknown> = Promise.resolve();
 
   constructor() {
     this.ollamaUrl = process.env['OLLAMA_URL'] || DEFAULT_OLLAMA_URL;
@@ -61,40 +62,16 @@ export class LlmService {
     }
 
     const prompt = this.buildSynthesisPrompt(data);
+    const text = await this.generate(prompt, 256);
 
-    try {
-      const response = await fetch(`${this.ollamaUrl}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: this.model,
-          prompt,
-          stream: false,
-          options: { num_predict: 256 },
-        }),
-        signal: AbortSignal.timeout(60000),
+    if (text) {
+      this.cache.set(cacheKey, {
+        text,
+        expiresAt: Date.now() + CACHE_TTL_MS,
       });
-
-      if (!response.ok) {
-        this.logger.warn(`Ollama returned ${response.status}`);
-        return null;
-      }
-
-      const result = (await response.json()) as { response?: string };
-      const text = result.response?.trim() || null;
-
-      if (text) {
-        this.cache.set(cacheKey, {
-          text,
-          expiresAt: Date.now() + CACHE_TTL_MS,
-        });
-      }
-
-      return text;
-    } catch (err) {
-      this.logger.warn(`LLM reasoning failed for ${data.asset}: ${err}`);
-      return null;
     }
+
+    return text;
   }
 
   async generate(prompt: string, maxTokens = 256): Promise<string | null> {
@@ -110,6 +87,16 @@ export class LlmService {
       if (!this.available) return null;
     }
 
+    // Serialize requests — Ollama handles one at a time
+    const result = this.queue.then(() => this.doGenerate(prompt, maxTokens));
+    this.queue = result.catch(() => null);
+    return result;
+  }
+
+  private async doGenerate(
+    prompt: string,
+    maxTokens: number,
+  ): Promise<string | null> {
     try {
       const response = await fetch(`${this.ollamaUrl}/api/generate`, {
         method: 'POST',
@@ -120,7 +107,7 @@ export class LlmService {
           stream: false,
           options: { num_predict: maxTokens },
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(120000),
       });
 
       if (!response.ok) {

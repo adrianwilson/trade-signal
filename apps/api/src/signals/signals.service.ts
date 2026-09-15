@@ -85,7 +85,9 @@ export class SignalsService implements OnModuleInit {
   }
 
   async findAll(): Promise<Signal[]> {
-    return this.repository.find() as Promise<Signal[]>;
+    return this.repository.find({
+      order: { timestamp: 'DESC' },
+    }) as Promise<Signal[]>;
   }
 
   async findOne(id: string): Promise<Signal | null> {
