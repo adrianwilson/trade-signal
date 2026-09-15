@@ -84,6 +84,12 @@
     class="clickable-row"
   ></tr>
 </table>
+<mat-paginator
+  [hidden]="loading() || error() || signals.data.length === 0"
+  [pageSize]="25"
+  [pageSizeOptions]="[10, 25, 50, 100]"
+  showFirstLastButtons
+></mat-paginator>
 
 <div
   class="table-footer"
