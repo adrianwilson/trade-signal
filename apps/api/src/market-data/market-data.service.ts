@@ -147,14 +147,16 @@ export class MarketDataService {
         },
       );
 
-      return result.map((row: Record<string, unknown>) => ({
-        date: (row['date'] as Date).toISOString().split('T')[0],
-        open: row['open'] as number,
-        high: row['high'] as number,
-        low: row['low'] as number,
-        close: row['close'] as number,
-        volume: row['volume'] as number,
-      }));
+      return result
+        .filter((row: Record<string, unknown>) => row['close'] != null)
+        .map((row: Record<string, unknown>) => ({
+          date: (row['date'] as Date).toISOString().split('T')[0],
+          open: row['open'] as number,
+          high: row['high'] as number,
+          low: row['low'] as number,
+          close: row['close'] as number,
+          volume: row['volume'] as number,
+        }));
     } catch (err) {
       this.logger.warn(`Failed to fetch history for ${yahooSymbol}: ${err}`);
       return [];

@@ -72,7 +72,7 @@ export class LlmService {
           stream: false,
           options: { num_predict: 256 },
         }),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(60000),
       });
 
       if (!response.ok) {
@@ -120,7 +120,7 @@ export class LlmService {
           stream: false,
           options: { num_predict: maxTokens },
         }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(60000),
       });
 
       if (!response.ok) {
