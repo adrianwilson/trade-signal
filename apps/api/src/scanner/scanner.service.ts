@@ -20,7 +20,7 @@ export interface Opportunity {
 }
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
-const MIN_CONFIDENCE = 60;
+const MIN_CONFIDENCE = 50;
 
 @Injectable()
 export class ScannerService {
