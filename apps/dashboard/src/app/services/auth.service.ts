@@ -26,9 +26,13 @@ export class AuthService {
   readonly user = this._user.asReadonly();
   readonly token = this._token.asReadonly();
 
-  register(email: string, password: string) {
+  register(email: string, password: string, inviteCode?: string) {
     return this.http
-      .post<AuthResponse>(`${this.baseUrl}/register`, { email, password })
+      .post<AuthResponse>(`${this.baseUrl}/register`, {
+        email,
+        password,
+        inviteCode,
+      })
       .pipe(tap((res) => this.setSession(res)));
   }
 

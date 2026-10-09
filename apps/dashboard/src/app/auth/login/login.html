@@ -40,7 +40,17 @@
           <mat-icon matPrefix>lock</mat-icon>
         </mat-form-field>
 
-        @if (error()) {
+        @if (activeTab() === 1) {
+        <mat-form-field appearance="outline">
+          <mat-label>Invite Code</mat-label>
+          <input
+            matInput
+            [value]="inviteCode()"
+            (input)="inviteCode.set($any($event.target).value)"
+          />
+          <mat-icon matPrefix>vpn_key</mat-icon>
+        </mat-form-field>
+        } @if (error()) {
         <div class="error-message">{{ error() }}</div>
         }
 

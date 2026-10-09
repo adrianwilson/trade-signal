@@ -28,6 +28,7 @@ export class LoginComponent {
 
   email = signal('');
   password = signal('');
+  inviteCode = signal('');
   error = signal('');
   loading = signal(false);
   activeTab = signal(0);
@@ -39,7 +40,11 @@ export class LoginComponent {
     const action =
       this.activeTab() === 0
         ? this.authService.login(this.email(), this.password())
-        : this.authService.register(this.email(), this.password());
+        : this.authService.register(
+            this.email(),
+            this.password(),
+            this.inviteCode(),
+          );
 
     action.subscribe({
       next: () => {

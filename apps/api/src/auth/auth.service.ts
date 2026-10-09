@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,7 +24,16 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string): Promise<AuthResult> {
+  async register(
+    email: string,
+    password: string,
+    inviteCode?: string,
+  ): Promise<AuthResult> {
+    const expectedCode = process.env['INVITE_CODE'];
+    if (expectedCode && inviteCode !== expectedCode) {
+      throw new ForbiddenException('Invalid invite code');
+    }
+
     const existing = await this.userRepository.findOneBy({ email });
     if (existing) {
       throw new ConflictException('Email already registered');
