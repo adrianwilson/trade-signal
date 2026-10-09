@@ -20,30 +20,46 @@ interface CacheEntry {
   expiresAt: number;
 }
 
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
-const DEFAULT_MODEL = 'llama3.2';
+const DEFAULT_OLLAMA_MODEL = 'llama3.2';
+const GEMINI_API_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models';
+const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
+
+type LlmProvider = 'gemini' | 'ollama' | 'none';
+
+const GEMINI_DELAY_MS = 6500; // ~9 req/min, safely under free tier limit
 
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
   private readonly cache = new Map<string, CacheEntry>();
   private readonly ollamaUrl: string;
-  private readonly model: string;
-  private available: boolean | null = null;
+  private readonly ollamaModel: string;
+  private readonly geminiApiKey: string | undefined;
+  private readonly geminiModel: string;
+  private provider: LlmProvider = 'none';
+  private providerChecked = false;
   private lastCheck = 0;
   private static readonly RETRY_INTERVAL_MS = 60_000;
   private queue: Promise<unknown> = Promise.resolve();
+  private lastGeminiCall = 0;
 
   constructor() {
     this.ollamaUrl = process.env['OLLAMA_URL'] || DEFAULT_OLLAMA_URL;
-    this.model = process.env['OLLAMA_MODEL'] || DEFAULT_MODEL;
+    this.ollamaModel = process.env['OLLAMA_MODEL'] || DEFAULT_OLLAMA_MODEL;
+    this.geminiApiKey = process.env['GEMINI_API_KEY'];
+    this.geminiModel = process.env['GEMINI_MODEL'] || DEFAULT_GEMINI_MODEL;
   }
 
   async generateReasoning(data: SynthesisPromptData): Promise<string | null> {
-    // Re-check availability periodically instead of giving up permanently
+    if (!this.providerChecked) {
+      await this.detectProvider();
+    }
+
     if (
-      this.available === false &&
+      this.provider === 'none' &&
       Date.now() - this.lastCheck < LlmService.RETRY_INTERVAL_MS
     ) {
       return null;
@@ -55,10 +71,9 @@ export class LlmService {
       return cached.text;
     }
 
-    // Check availability on first call or retry after interval
-    if (this.available !== true) {
-      this.available = await this.checkOllama();
-      if (!this.available) return null;
+    if (this.provider === 'none') {
+      await this.detectProvider();
+      if (this.provider === 'none') return null;
     }
 
     const prompt = this.buildSynthesisPrompt(data);
@@ -75,25 +90,84 @@ export class LlmService {
   }
 
   async generate(prompt: string, maxTokens = 256): Promise<string | null> {
+    if (!this.providerChecked) {
+      await this.detectProvider();
+    }
+
     if (
-      this.available === false &&
+      this.provider === 'none' &&
       Date.now() - this.lastCheck < LlmService.RETRY_INTERVAL_MS
     ) {
       return null;
     }
 
-    if (this.available !== true) {
-      this.available = await this.checkOllama();
-      if (!this.available) return null;
+    if (this.provider === 'none') {
+      await this.detectProvider();
+      if (this.provider === 'none') return null;
     }
 
-    // Serialize requests — Ollama handles one at a time
-    const result = this.queue.then(() => this.doGenerate(prompt, maxTokens));
+    if (this.provider === 'gemini') {
+      // Serialize Gemini requests with rate limiting
+      const result = this.queue.then(() =>
+        this.generateGeminiThrottled(prompt, maxTokens),
+      );
+      this.queue = result.catch(() => null);
+      return result;
+    }
+
+    // Serialize Ollama requests
+    const result = this.queue.then(() =>
+      this.generateOllama(prompt, maxTokens),
+    );
     this.queue = result.catch(() => null);
     return result;
   }
 
-  private async doGenerate(
+  private async generateGeminiThrottled(
+    prompt: string,
+    maxTokens: number,
+  ): Promise<string | null> {
+    const now = Date.now();
+    const elapsed = now - this.lastGeminiCall;
+    if (elapsed < GEMINI_DELAY_MS) {
+      await new Promise((r) => setTimeout(r, GEMINI_DELAY_MS - elapsed));
+    }
+    this.lastGeminiCall = Date.now();
+    return this.generateGemini(prompt, maxTokens);
+  }
+
+  private async generateGemini(
+    prompt: string,
+    maxTokens: number,
+  ): Promise<string | null> {
+    try {
+      const url = `${GEMINI_API_URL}/${this.geminiModel}:generateContent?key=${this.geminiApiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: maxTokens },
+        }),
+        signal: AbortSignal.timeout(30000),
+      });
+
+      if (!response.ok) {
+        this.logger.warn(`Gemini returned ${response.status}`);
+        return null;
+      }
+
+      const result = (await response.json()) as {
+        candidates?: { content?: { parts?: { text?: string }[] } }[];
+      };
+      return result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    } catch (err) {
+      this.logger.warn(`Gemini generate failed: ${err}`);
+      return null;
+    }
+  }
+
+  private async generateOllama(
     prompt: string,
     maxTokens: number,
   ): Promise<string | null> {
@@ -102,7 +176,7 @@ export class LlmService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: this.model,
+          model: this.ollamaModel,
           prompt,
           stream: false,
           options: { num_predict: maxTokens },
@@ -124,7 +198,7 @@ export class LlmService {
   }
 
   isAvailable(): boolean {
-    return this.available === true;
+    return this.provider !== 'none';
   }
 
   buildSynthesisPrompt(data: SynthesisPromptData): string {
@@ -165,23 +239,45 @@ export class LlmService {
     return parts.join('\n');
   }
 
-  private async checkOllama(): Promise<boolean> {
+  private async detectProvider(): Promise<void> {
     this.lastCheck = Date.now();
+    this.providerChecked = true;
+
+    // Prefer Gemini if API key is set
+    if (this.geminiApiKey) {
+      try {
+        const url = `${GEMINI_API_URL}?key=${this.geminiApiKey}`;
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (response.ok) {
+          this.provider = 'gemini';
+          this.logger.log(`Gemini available, using model: ${this.geminiModel}`);
+          return;
+        }
+      } catch {
+        this.logger.debug('Gemini not reachable');
+      }
+    }
+
+    // Fallback to Ollama
     try {
       const response = await fetch(`${this.ollamaUrl}/api/tags`, {
         signal: AbortSignal.timeout(3000),
       });
       if (response.ok) {
+        this.provider = 'ollama';
         this.logger.log(
-          `Ollama available at ${this.ollamaUrl}, using model: ${this.model}`,
+          `Ollama available at ${this.ollamaUrl}, using model: ${this.ollamaModel}`,
         );
-        return true;
+        return;
       }
-      return false;
     } catch {
-      this.logger.debug('Ollama not available — using template reasoning');
-      return false;
+      // not available
     }
+
+    this.provider = 'none';
+    this.logger.debug('No LLM provider available — using template reasoning');
   }
 
   private buildCacheKey(data: SynthesisPromptData): string {
@@ -192,8 +288,8 @@ export class LlmService {
     this.cache.clear();
   }
 
-  /** Reset availability check (for testing or reconnection) */
   resetAvailability(): void {
-    this.available = null;
+    this.provider = 'none';
+    this.providerChecked = false;
   }
 }
