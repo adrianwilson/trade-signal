@@ -1,5 +1,6 @@
 import { Injectable, signal, OnDestroy } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
+import { environment } from '../../environments/environment';
 
 export interface PriceUpdate {
   asset: string;
@@ -20,7 +21,7 @@ export class WebSocketService implements OnDestroy {
   connect(): void {
     if (this.socket?.connected) return;
 
-    this.socket = io('http://localhost:3000', {
+    this.socket = io(environment.wsUrl || window.location.origin, {
       transports: ['websocket'],
     });
 

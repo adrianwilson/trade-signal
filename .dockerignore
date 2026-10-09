@@ -1,0 +1,15 @@
+node_modules
+dist
+data
+.git
+.claude
+.gstack
+.github
+agents
+coverage
+specs
+app_docs
+docs
+*.md
+!package.json
+!pnpm-workspace.yaml

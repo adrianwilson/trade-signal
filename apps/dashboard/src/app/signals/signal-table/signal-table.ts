@@ -1,4 +1,11 @@
-import { Component, OnInit, AfterViewInit, ViewChild, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
 import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';

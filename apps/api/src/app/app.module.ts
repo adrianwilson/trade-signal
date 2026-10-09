@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EventsModule } from '../events/events.module';
@@ -29,25 +30,50 @@ import {
 import { ScannerModule } from '../scanner/scanner.module';
 import { ResearchAgentModule } from '../research-agent/research-agent.module';
 
+const entities = [
+  SignalEntity,
+  AssetPriceEntity,
+  UserEntity,
+  WatchlistEntity,
+  AlertEntity,
+  PortfolioEntity,
+  OutcomeEntity,
+  PaperAccountEntity,
+  PaperTradeEntity,
+];
+
+function buildDbConfig(): TypeOrmModuleOptions {
+  if (process.env['NODE_ENV'] === 'test') {
+    return {
+      type: 'better-sqlite3',
+      database: ':memory:',
+      entities,
+      synchronize: true,
+    };
+  }
+
+  const databaseUrl = process.env['DATABASE_URL'];
+  if (databaseUrl) {
+    return {
+      type: 'postgres',
+      url: databaseUrl,
+      ssl: { rejectUnauthorized: false },
+      entities,
+      synchronize: true,
+    };
+  }
+
+  return {
+    type: 'better-sqlite3',
+    database: 'data/signals.sqlite',
+    entities,
+    synchronize: true,
+  };
+}
+
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'better-sqlite3',
-      database:
-        process.env['NODE_ENV'] === 'test' ? ':memory:' : 'data/signals.sqlite',
-      entities: [
-        SignalEntity,
-        AssetPriceEntity,
-        UserEntity,
-        WatchlistEntity,
-        AlertEntity,
-        PortfolioEntity,
-        OutcomeEntity,
-        PaperAccountEntity,
-        PaperTradeEntity,
-      ],
-      synchronize: true,
-    }),
+    TypeOrmModule.forRoot(buildDbConfig()),
     ScheduleModule.forRoot(),
     EventsModule,
     SignalsModule,

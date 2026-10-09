@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Signal, ManualSignalInput, AggregatedSignal } from '@org/signals';
+import { environment } from '../../environments/environment';
 
 export interface NewsHeadline {
   title: string;
@@ -147,7 +148,7 @@ export interface WatchlistItem {
 @Injectable({ providedIn: 'root' })
 export class SignalService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3000/api';
+  private readonly baseUrl = environment.apiUrl;
 
   getSignals(): Observable<Signal[]> {
     return this.http.get<Signal[]>(`${this.baseUrl}/signals`);

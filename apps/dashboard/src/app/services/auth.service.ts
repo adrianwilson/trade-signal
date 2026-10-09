@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 interface AuthResponse {
   access_token: string;
@@ -12,7 +13,7 @@ interface AuthResponse {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly baseUrl = 'http://localhost:3000/api/auth';
+  private readonly baseUrl = `${environment.apiUrl}/auth`;
 
   private readonly _token = signal<string | null>(
     localStorage.getItem('auth_token'),
