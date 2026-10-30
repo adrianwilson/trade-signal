@@ -339,6 +339,7 @@ export class HealthWatcherService {
       `${result.severity.toUpperCase()}: ${checkName}`,
       `${result.message}${urgencyLabel}`,
       result.severity,
+      'ops',
     );
   }
 }

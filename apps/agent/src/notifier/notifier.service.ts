@@ -6,19 +6,25 @@ const SEVERITY_EMOJI: Record<string, string> = {
   info: '🟢',
 };
 
+export type NotifyChannel = 'ops' | 'alerts';
+
 @Injectable()
 export class NotifierService {
   private readonly logger = new Logger(NotifierService.name);
-  private readonly slackWebhookUrl: string | undefined;
+  private readonly webhooks: Record<NotifyChannel, string | undefined>;
 
   constructor() {
-    this.slackWebhookUrl = process.env['SLACK_WEBHOOK_URL'];
+    this.webhooks = {
+      alerts: process.env['SLACK_WEBHOOK_ALERTS'],
+      ops: process.env['SLACK_WEBHOOK_OPS'],
+    };
   }
 
   async notify(
     title: string,
     message: string,
     severity: string = 'critical',
+    channel: NotifyChannel = 'ops',
   ): Promise<void> {
     // macOS notification
     try {
@@ -35,21 +41,23 @@ export class NotifierService {
     }
 
     // Slack
-    if (this.slackWebhookUrl) {
-      await this.sendSlack(title, message, severity);
+    const webhookUrl = this.webhooks[channel];
+    if (webhookUrl) {
+      await this.sendSlack(webhookUrl, title, message, severity);
     }
 
-    this.logger.log(`Notification: ${title} — ${message}`);
+    this.logger.log(`Notification [${channel}]: ${title} — ${message}`);
   }
 
   private async sendSlack(
+    webhookUrl: string,
     title: string,
     message: string,
     severity: string,
   ): Promise<void> {
     const emoji = SEVERITY_EMOJI[severity] || '⚪';
     try {
-      await fetch(this.slackWebhookUrl!, {
+      await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,7 +74,7 @@ export class NotifierService {
               elements: [
                 {
                   type: 'mrkdwn',
-                  text: `_Trade Signal Sysops Agent • ${new Date().toLocaleString()}_`,
+                  text: `_Trade Signal Agent • ${new Date().toLocaleString()}_`,
                 },
               ],
             },

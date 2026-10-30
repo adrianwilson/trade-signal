@@ -4,6 +4,7 @@ import { JevService } from './jev/jev.service';
 import { MemoryService } from './memory/memory.service';
 import { NotifierService } from './notifier/notifier.service';
 import { HealthWatcherService } from './health/health-watcher.service';
+import { SignalWatcherService } from './signal-watcher/signal-watcher.service';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
@@ -12,6 +13,7 @@ import { HealthWatcherService } from './health/health-watcher.service';
     MemoryService,
     NotifierService,
     HealthWatcherService,
+    SignalWatcherService,
   ],
 })
 export class AgentModule {}
