@@ -137,21 +137,24 @@ export class HealthWatcherService {
     ].join('\n');
 
     const answers = await this.jev.decide(state, {
-      alert: choice(
-        'Should the user be alerted about this issue?',
-        ['yes', 'no'],
-      ),
-      urgency: score(
-        'How urgent is this?',
-        '1=can wait hours, 3=check within 30 min, 5=act now',
-      ),
+      alert: choice('Should the user be alerted about this issue?', {
+        yes: 'The issue is real and needs attention',
+        no: 'This is transient or expected behavior',
+      }),
+      urgency: score('How urgent is this issue?', [
+        'Can wait hours',
+        'Check within an hour',
+        'Check within 30 minutes',
+        'Check within 10 minutes',
+        'Act immediately',
+      ]),
     });
 
     if (!answers) return null;
 
     return {
-      alert: answers['alert']?.value as string,
-      urgency: answers['urgency']?.value as number,
+      alert: answers['alert']?.choice ?? 'no',
+      urgency: answers['urgency']?.score ?? 0,
     };
   }
 
@@ -179,6 +182,7 @@ export class HealthWatcherService {
     await this.notifier.notify(
       `${result.severity.toUpperCase()}: ${checkName}`,
       `${result.message}${urgencyLabel}`,
+      result.severity,
     );
   }
 }

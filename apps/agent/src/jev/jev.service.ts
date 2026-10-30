@@ -1,41 +1,50 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-const JEV_API_URL = 'https://api.typesafe.ai/v1/system-one';
+const JEV_API_URL = 'https://api.typesafe.ai/v1/systemone';
 
-export interface JevChoice {
+export interface JevChoiceQuestion {
   type: 'choice';
-  question: string;
-  options: string[];
+  instructions: string;
+  criteria: Record<string, string>;
 }
 
-export interface JevScore {
+export interface JevScoreQuestion {
   type: 'score';
-  question: string;
-  scale: string;
+  instructions: string;
+  criteria: string[];
 }
 
-export interface JevNoul {
+export interface JevNoulQuestion {
   type: 'noul';
-  question: string;
+  instructions: string;
 }
 
-export type JevQuestion = JevChoice | JevScore | JevNoul;
+export type JevQuestion = JevChoiceQuestion | JevScoreQuestion | JevNoulQuestion;
 
 export interface JevAnswer {
-  value: string | number | boolean;
+  type: string;
+  choice?: string;
+  score?: number;
+  noul?: boolean;
   confidence: number;
 }
 
-export function choice(question: string, options: string[]): JevChoice {
-  return { type: 'choice', question, options };
+export function choice(
+  instructions: string,
+  criteria: Record<string, string>,
+): JevChoiceQuestion {
+  return { type: 'choice', instructions, criteria };
 }
 
-export function score(question: string, scale: string): JevScore {
-  return { type: 'score', question, scale };
+export function score(
+  instructions: string,
+  criteria: string[],
+): JevScoreQuestion {
+  return { type: 'score', instructions, criteria };
 }
 
-export function noul(question: string): JevNoul {
-  return { type: 'noul', question };
+export function noul(instructions: string): JevNoulQuestion {
+  return { type: 'noul', instructions };
 }
 
 @Injectable()
