@@ -20,6 +20,8 @@ export class HealthWatcherService {
   private consecutiveFailures = new Map<string, number>();
   private lastSynthesisCount: number | null = null;
   private lastCheckLatency = new Map<string, number>();
+  private lastAlertTime = new Map<string, number>();
+  private static readonly ALERT_COOLDOWN_MS = 30 * 60 * 1000; // 30 min
 
   constructor(
     private readonly jev: JevService,
@@ -30,10 +32,25 @@ export class HealthWatcherService {
   @Cron('0 */5 * * * *')
   async runChecks(): Promise<void> {
     this.logger.debug('Running health checks...');
+
+    // Run API health first to detect full sleep/shutdown
+    const apiResult = await this.checkApiHealth();
+    if (!apiResult.result.ok) {
+      // If API is completely down, alert once then suppress repeats
+      const failures =
+        (this.consecutiveFailures.get('api-health') ?? 0) + 1;
+      this.consecutiveFailures.set('api-health', failures);
+      if (failures === 2) {
+        await this.raiseAlert('api-health', apiResult.result, null);
+      }
+      // Skip all other checks — everything will fail if API is down
+      return;
+    }
+    this.consecutiveFailures.set('api-health', 0);
+
     const dismissed = this.memory.getDismissedPatterns();
 
     const checks = [
-      () => this.checkApiHealth(),
       () => this.checkSynthesis(),
       () => this.checkScanner(),
       () => this.checkSynthesisDrop(),
@@ -319,6 +336,14 @@ export class HealthWatcherService {
     result: CheckResult,
     jevVerdict: { alert: string; urgency: number } | null,
   ): Promise<void> {
+    // Cooldown: don't re-alert for same check within 30 min
+    const lastAlert = this.lastAlertTime.get(checkName) ?? 0;
+    if (Date.now() - lastAlert < HealthWatcherService.ALERT_COOLDOWN_MS) {
+      this.logger.debug(`Cooldown: suppressing repeat alert for ${checkName}`);
+      return;
+    }
+    this.lastAlertTime.set(checkName, Date.now());
+
     const event = {
       id: randomUUID(),
       type: result.severity,
