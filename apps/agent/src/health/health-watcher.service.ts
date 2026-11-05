@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { JevService, choice, score } from '../jev/jev.service';
 import { MemoryService } from '../memory/memory.service';
 import { NotifierService } from '../notifier/notifier.service';
+import { InvestigatorService } from '../investigator/investigator.service';
 import { randomUUID } from 'crypto';
 
 const API_URL = process.env['AGENT_API_URL'] || 'http://localhost:3000/api';
@@ -27,6 +28,7 @@ export class HealthWatcherService {
     private readonly jev: JevService,
     private readonly memory: MemoryService,
     private readonly notifier: NotifierService,
+    private readonly investigator: InvestigatorService,
   ) {}
 
   @Cron('0 */5 * * * *')
@@ -366,5 +368,23 @@ export class HealthWatcherService {
       result.severity,
       'ops',
     );
+
+    // Trigger investigation for code-fixable issues (not infra/sleep)
+    if (
+      jevVerdict &&
+      jevVerdict.urgency >= 2 &&
+      result.severity === 'warning'
+    ) {
+      this.investigator
+        .investigate({
+          checkName,
+          message: result.message,
+          severity: result.severity,
+          jevUrgency: jevVerdict.urgency,
+        })
+        .catch((err) =>
+          this.logger.warn(`Investigation trigger failed: ${err}`),
+        );
+    }
   }
 }
