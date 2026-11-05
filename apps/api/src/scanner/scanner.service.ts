@@ -39,7 +39,11 @@ export class ScannerService {
       return this.cache;
     }
     if (!this.scanning) {
-      await this.scan();
+      try {
+        await this.scan();
+      } catch (err) {
+        this.logger.error(`Scanner failed: ${err}`);
+      }
     }
     return this.cache;
   }
@@ -52,75 +56,78 @@ export class ScannerService {
       `Scanning ${SCAN_UNIVERSE.length} assets for opportunities...`,
     );
 
-    const opportunities: Opportunity[] = [];
+    try {
+      const opportunities: Opportunity[] = [];
 
-    for (const entry of SCAN_UNIVERSE) {
-      try {
-        const result = await this.taService.analyze(
-          entry.yahooSymbol,
-          entry.asset,
-          entry.assetClass,
-        );
-
-        const signals = [
-          result.rsiSignal,
-          result.macdSignal,
-          result.smaSignal,
-          result.bollingerSignal,
-        ];
-
-        const buys = signals.filter((s) => s === 'BUY').length;
-        const sells = signals.filter((s) => s === 'SELL').length;
-        const active = buys + sells;
-
-        if (active === 0) continue;
-
-        const direction: SignalDirection = buys > sells ? 'BUY' : 'SELL';
-        const agreeing = direction === 'BUY' ? buys : sells;
-        const confidence = Math.round((agreeing / signals.length) * 100);
-
-        if (confidence < MIN_CONFIDENCE) continue;
-
-        let price: number | null = null;
-        let changePercent: number | null = null;
+      for (const entry of SCAN_UNIVERSE) {
         try {
-          const quote = await this.marketDataService.getQuote(
+          const result = await this.taService.analyze(
             entry.yahooSymbol,
             entry.asset,
+            entry.assetClass,
           );
-          if (quote) {
-            price = quote.price;
-            changePercent = quote.changePercent;
+
+          const signals = [
+            result.rsiSignal,
+            result.macdSignal,
+            result.smaSignal,
+            result.bollingerSignal,
+          ];
+
+          const buys = signals.filter((s) => s === 'BUY').length;
+          const sells = signals.filter((s) => s === 'SELL').length;
+          const active = buys + sells;
+
+          if (active === 0) continue;
+
+          const direction: SignalDirection = buys > sells ? 'BUY' : 'SELL';
+          const agreeing = direction === 'BUY' ? buys : sells;
+          const confidence = Math.round((agreeing / signals.length) * 100);
+
+          if (confidence < MIN_CONFIDENCE) continue;
+
+          let price: number | null = null;
+          let changePercent: number | null = null;
+          try {
+            const quote = await this.marketDataService.getQuote(
+              entry.yahooSymbol,
+              entry.asset,
+            );
+            if (quote) {
+              price = quote.price;
+              changePercent = quote.changePercent;
+            }
+          } catch {
+            // price is optional
           }
-        } catch {
-          // price is optional
+
+          opportunities.push({
+            asset: entry.asset,
+            assetClass: entry.assetClass,
+            direction,
+            confidence,
+            rsi: result.rsi,
+            macdSignal: result.macdSignal,
+            smaSignal: result.smaSignal,
+            bollingerSignal: result.bollingerSignal,
+            price,
+            changePercent,
+            scannedAt: new Date().toISOString(),
+          });
+        } catch (err) {
+          this.logger.warn(`Scan failed for ${entry.asset}: ${err}`);
         }
-
-        opportunities.push({
-          asset: entry.asset,
-          assetClass: entry.assetClass,
-          direction,
-          confidence,
-          rsi: result.rsi,
-          macdSignal: result.macdSignal,
-          smaSignal: result.smaSignal,
-          bollingerSignal: result.bollingerSignal,
-          price,
-          changePercent,
-          scannedAt: new Date().toISOString(),
-        });
-      } catch (err) {
-        this.logger.warn(`Scan failed for ${entry.asset}: ${err}`);
       }
+
+      opportunities.sort((a, b) => b.confidence - a.confidence);
+      this.cache = opportunities;
+      this.cacheExpiry = Date.now() + CACHE_TTL_MS;
+
+      this.logger.log(
+        `Scan complete: ${opportunities.length} opportunities found`,
+      );
+    } finally {
+      this.scanning = false;
     }
-
-    opportunities.sort((a, b) => b.confidence - a.confidence);
-    this.cache = opportunities;
-    this.cacheExpiry = Date.now() + CACHE_TTL_MS;
-    this.scanning = false;
-
-    this.logger.log(
-      `Scan complete: ${opportunities.length} opportunities found`,
-    );
   }
 }
