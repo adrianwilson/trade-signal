@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 
 const REPO_DIR =
   process.env['REPO_DIR'] || '/Users/adrian/Documents/git/trade-signal';
-const MIN_URGENCY = 2; // Only investigate if Jev urgency >= 2
+const MIN_URGENCY = 1.5; // Only investigate if Jev urgency >= 1.5
 
 interface InvestigationRequest {
   checkName: string;

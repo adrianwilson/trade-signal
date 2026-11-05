@@ -372,7 +372,7 @@ export class HealthWatcherService {
     // Trigger investigation for code-fixable issues (not infra/sleep)
     if (
       jevVerdict &&
-      jevVerdict.urgency >= 2 &&
+      jevVerdict.urgency >= 1.5 &&
       result.severity === 'warning'
     ) {
       this.investigator
