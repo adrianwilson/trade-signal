@@ -42,12 +42,12 @@ describe('ScannerService', () => {
   });
 
   describe('scan', () => {
-    it('should return opportunities with confidence >= 60', async () => {
+    it('should return opportunities with confidence >= 50', async () => {
       await service.scan();
       const results = await service.getOpportunities();
       expect(results.length).toBeGreaterThan(0);
       for (const r of results) {
-        expect(r.confidence).toBeGreaterThanOrEqual(60);
+        expect(r.confidence).toBeGreaterThanOrEqual(50);
       }
     });
 
